@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!--  Grid View For Grid Product...  -->
+<!--    <GridView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="@color/colorRecyclerBack"-->
+<!--        android:id="@+id/home_cat_grid_view"-->
+<!--        android:overScrollMode="never"-->
+<!--        android:layout_margin="1dp"-->
+<!--        android:horizontalSpacing="1dp"-->
+<!--        android:numColumns="auto_fit"-->
+<!--        android:verticalSpacing="1dp" >-->
+<!--    </GridView>-->
+
+    <wackycodes.ecom.eanmart.wgridview.MyGridView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/home_cat_grid_view"
+        android:overScrollMode="never"
+        android:layout_margin="1dp"
+        android:horizontalSpacing="1dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="1dp"/>
+
+</LinearLayout>

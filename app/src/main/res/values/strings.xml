@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">eAN Mart</string>
+
+    <string name="sample_heading">sample heading</string>
+    <string name="sample_name">Sample Mobile Name</string>
+    <string name="sample_price">Rs.599/-</string>
+    <string name="sample_off">15% Off</string>
+
+    <string name="sample_user_name">WackyCodes</string>
+    <string name="sample_email">wackycodes@gmail.com</string>
+    <string name="sample_mobile">+917999597410</string>
+
+
+    <string name="navigation_Drawer_Open">Open Navigation Bar</string>
+    <string name="navigation_Drawer_close">Close Navigation Bar</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
 </resources>
