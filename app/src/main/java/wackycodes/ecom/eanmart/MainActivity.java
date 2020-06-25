@@ -1,6 +1,7 @@
 package wackycodes.ecom.eanmart;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -11,12 +12,14 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.webkit.WebBackForwardList;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -30,22 +33,29 @@ import com.google.android.material.navigation.NavigationView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wackycodes.ecom.eanmart.apphome.HomeFragment;
 import wackycodes.ecom.eanmart.category.ShopsViewFragment;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.DialogsClass;
+import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.shophome.ShopHomeFragment;
 
 import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
+import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentContext;
+import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentFrameLayout;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopsViewFragment;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_SHOPS_VIEW;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_NULL;
+import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SHOP_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.MAIN_ACTIVITY;
+import static wackycodes.ecom.eanmart.shophome.ShopHomeFragment.shopHomeFragmentContext;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static AppCompatActivity mainActivity;
 
     public static int wCurrentFragment = FRAGMENT_NULL;
     public static int wPreviousFragment = FRAGMENT_NULL;
-    public static boolean isFragmentIsMyCart = false;
 
     public static FrameLayout mainHomeContentFrame;
     private Toolbar toolbar;
@@ -90,8 +100,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener( toggle );
         toggle.syncState();
 
-
-
         // Assigning and Set fragment...
         if (homeFragment!=null){
             setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
@@ -103,42 +111,78 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if ( currentUser != null && StaticValues.USER_DATA_MODEL.isLoadData()){
+            Glide.with( this ).load( StaticValues.USER_DATA_MODEL.getUserProfilePhoto() ).
+                    apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp) ).into( drawerImage );
+            drawerName.setText( StaticValues.USER_DATA_MODEL.getUserFullName() );
+            drawerEmail.setText( StaticValues.USER_DATA_MODEL.getUserEmail() );
+            if (wCurrentFragment != FRAGMENT_MAIN_HOME && wPreviousFragment == FRAGMENT_MAIN_HOME){
+                wPreviousFragment = FRAGMENT_NULL;
+                if (homeFragment!=null){
+                    setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
+                }else{
+                    homeFragment = new HomeFragment();
+                    setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
+                }
+            }
+        }
+    }
+
+    @Override
     public void onBackPressed() {
 
         if (drawer.isDrawerOpen( GravityCompat.START )){
             drawer.closeDrawer( GravityCompat.START );
         }else{
-            switch (wPreviousFragment){
-                case FRAGMENT_NULL:
-                    // No Previous fragment : Current Fragment is Main Home Fragment...
-                    wCurrentFragment = FRAGMENT_NULL;
+            switch (wCurrentFragment){
+                case FRAGMENT_MAIN_HOME:
                     super.onBackPressed();
                     finish();
                     break;
-                case FRAGMENT_MAIN_HOME:
-                    wPreviousFragment = FRAGMENT_NULL;
-                    wCurrentFragment = FRAGMENT_MAIN_HOME;
-                    if (homeFragment!=null){
-                        setFragment( homeFragment );
-                    }else{
-                        homeFragment = new HomeFragment();
-                        setFragment( homeFragment );
-                    }
-                    break;
                 case FRAGMENT_MAIN_SHOPS_VIEW:
-                    wPreviousFragment = FRAGMENT_MAIN_HOME;
-                    wCurrentFragment = FRAGMENT_MAIN_SHOPS_VIEW;
-                    if (shopsViewFragment!=null){
-                        setFragment( shopsViewFragment );
-                    }else{
-                        shopsViewFragment = new ShopsViewFragment();
-                        setFragment( shopsViewFragment );
+                    wPreviousFragment = FRAGMENT_NULL;
+                    if (homeFragment==null){
+                        homeFragment = new HomeFragment();
                     }
+                    setBckFragment( homeFragment );
                     break;
                 default:
                     super.onBackPressed();
                     break;
             }
+            /**
+//            switch (wPreviousFragment){
+//                case FRAGMENT_NULL:
+//                    // No Previous fragment : Current Fragment is Main Home Fragment...
+//                    wCurrentFragment = FRAGMENT_NULL;
+//                    super.onBackPressed();
+//                    finish();
+//                    break;
+//                case FRAGMENT_MAIN_HOME:
+//                    wPreviousFragment = FRAGMENT_NULL;
+//                    if (homeFragment==null){
+//                        homeFragment = new HomeFragment();
+//                    }
+//                    setBckFragment( homeFragment );
+//                    break;
+//                case FRAGMENT_MAIN_SHOPS_VIEW:
+//                    wPreviousFragment = FRAGMENT_MAIN_HOME;
+//                    wCurrentFragment = FRAGMENT_MAIN_SHOPS_VIEW;
+//                    if (shopsViewFragment == null){
+//                        shopsViewFragment = new ShopsViewFragment();
+//                    }
+//                    FragmentTransaction fragmentTransaction = shopHomeFragmentContext.getSupportFragmentManager().beginTransaction();
+//                    fragmentTransaction.setCustomAnimations( R.anim.slide_from_left, R.anim.slide_out_from_right );
+//                    fragmentTransaction.replace( ShopHomeFragment.shopHomeFrameLayout.getId(),shopsViewFragment );
+//                    fragmentTransaction.commit();
+//                    break;
+//                default:
+//                    super.onBackPressed();
+//                    break;
+//            }
+             */
 
         }
 
@@ -149,47 +193,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        if (wCurrentFragment == M_HOME_FRAGMENT){
-//            getMenuInflater().inflate( R.menu.menu_cart_item,menu);
-//
-//            // Check First whether any item in cart or not...
-//            // if any item has in cart...
-//            MenuItem cartItem = menu.findItem( R.id.menu_cart_main );
-//            cartItem.setActionView( R.layout.badge_cart_layout );
-//            badgeCartCount = cartItem.getActionView().findViewById( R.id.badge_count_text );
-//            if (DBquery.myCartCheckList.size() > 0){
-//                badgeCartCount.setVisibility( View.VISIBLE );
-//                badgeCartCount.setText( String.valueOf( DBquery.myCartCheckList.size() ) );
-//            }
-//            cartItem.getActionView().setOnClickListener( new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    // GOTO : My cart
-//                    if (currentUser == null){
-//                        dialogsClass.signInUpDialog( MAIN_ACTIVITY );
-//                    }else{
-//                        myCart();
-//                    }
-//                }
-//            } );
-//
-//            // notification badge...
-//            MenuItem notificationItem = menu.findItem( R.id.menu_notification_main );
-//            notificationItem.setActionView( R.layout.badge_notification_layout );
-//            badgeNotifyCount = notificationItem.getActionView().findViewById( R.id.badge_count );
-//            if (currentUser != null){
-//                // Run user Notification Query to update...
-//                DBquery.updateNotificationQuery( MainActivity.this,false );
-//            }
-//            notificationItem.getActionView().setOnClickListener( new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
+            getMenuInflater().inflate( R.menu.menu_main_home_header,menu);
+
+            // Check First whether any item in cart or not...
+            // if any item has in cart...
+            MenuItem cartItem = menu.findItem( R.id.menu_cart_main );
+            cartItem.setActionView( R.layout.badge_cart_layout );
+            badgeCartCount = cartItem.getActionView().findViewById( R.id.badge_count_text );
+            if (UserDataQuery.cartItemModelList.size() > 0){
+                badgeCartCount.setVisibility( View.VISIBLE );
+                badgeCartCount.setText( String.valueOf( UserDataQuery.cartItemModelList.size() ) );
+            }
+            cartItem.getActionView().setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // GOTO : My cart
+                    if (currentUser == null){
+                        DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
+                    }else{
+//                        myCart();// TODO : Open My Cart Activity....
+                    }
+                }
+            } );
+
+            // notification badge...
+            MenuItem notificationItem = menu.findItem( R.id.menu_notification_main );
+            notificationItem.setActionView( R.layout.badge_notification_layout );
+            badgeNotifyCount = notificationItem.getActionView().findViewById( R.id.badge_count );
+            if (currentUser != null){
+                // Run user Notification Query to update...
+                UserDataQuery.loadNotificationsQuery( MainActivity.this );
+            }
+            notificationItem.getActionView().setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 //                    Intent catIntent = new Intent( MainActivity.this, NotificationActivity.class);
 //                    startActivity( catIntent );
-//                }
-//            } );
-//
-//        }
+                    showToast("Code Not found.!");
+                }
+            } );
 
         return true;
     }
@@ -308,21 +350,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // --------  Menu And Navigation !....
 
+    private void showToast(String msg){
+        Toast.makeText( mainActivity, msg, Toast.LENGTH_SHORT ).show();
+    }
 
     // Fragment Transaction...
     public void setNextFragment(Fragment fragment, int nextFragment){
         wPreviousFragment = wCurrentFragment;
         wCurrentFragment = nextFragment;
-        setFragment(fragment);
-    }
-    public void setFragment( Fragment fragment ){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations( R.anim.fade_in, R.anim.fade_out );
         fragmentTransaction.replace( mainHomeContentFrame.getId(),fragment );
         fragmentTransaction.commit();
     }
+    public void setBckFragment( Fragment showFragment ){
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations( R.anim.slide_from_left, R.anim.slide_out_from_right );
+        fragmentTransaction.replace( mainHomeContentFrame.getId(),showFragment );
+        fragmentTransaction.commit();
+//        FragmentTransaction fragmentTransaction =  shopViewFragmentContext.getSupportFragmentManager().beginTransaction();
+//        fragmentTransaction.setCustomAnimations( R.anim.slide_from_left, R.anim.slide_out_from_right );
+//        fragmentTransaction.replace( ShopsViewFragment.shopViewFragmentFrameLayout.getId(),showFragment );
+//        fragmentTransaction.commit();
+        wCurrentFragment = FRAGMENT_MAIN_HOME;
 
-
+    }
 
 
 

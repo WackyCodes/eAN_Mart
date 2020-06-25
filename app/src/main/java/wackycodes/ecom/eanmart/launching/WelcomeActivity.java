@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
@@ -27,69 +28,65 @@ import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.other.StaticValues.STORAGE_PERMISSION;
 
 public class WelcomeActivity extends AppCompatActivity {
+    public static AppCompatActivity welcomeActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_welcome );
+        welcomeActivity = this;
         startActivity( new Intent( WelcomeActivity.this, MainActivity.class ) );
-//        if( isInternetConnect() ){
-//            firebaseFirestore.collection( "PERMISSION" ).document( "APP_USE_PERMISSION" )
-//                    .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
-//                @Override
-//                public void onComplete(@NonNull Task <DocumentSnapshot> task) {
-//                    if (task.isSuccessful()){
-//                        boolean isAllowed = task.getResult().getBoolean( StaticValues.APP_VERSION );
-//                        if ( isAllowed ){
-//                            askStoragePermission();
-//                        }else{
-//                            DialogsClass.getMessageDialog( WelcomeActivity.this
-//                                    , "Sorry, Permission denied..!"
-//                                    , "You Don't have permission to use this App. If you have any query, Please contact App founder..!\\n Thank You!" );
-//                            finish();
-//                        }
-//                    }else {
-//                        finish();
-//                    }
-//                }
-//            } );
-//        }
+        if( isInternetConnect() ){
+        firebaseFirestore.collection( "PERMISSION" ).document( "APP_USE_PERMISSION" )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    boolean isAllowed = task.getResult().getBoolean( StaticValues.APP_VERSION );
+                    if ( isAllowed ){
+                        askStoragePermission();
+                    }else{
+                        DialogsClass.getMessageDialog( WelcomeActivity.this
+                                , "Sorry, Permission denied..!"
+                                , "You Don't have permission to use this App. If you have any query, Please contact App founder..!\\n Thank You!" );
+                        finish();
+                    }
+                }else {
+                    finish();
+                }
+            }
+        } );
+    }
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
 
     private void checkCurrentUser(){
 
         if (currentUser != null && isInternetConnect()){
             // Load User Data...
-//            loadUserData();
+            loadUserData();
 
         }else{
             // TODO: use Default Data to load Product and goto MainActivity...
-
+            startActivity( new Intent( WelcomeActivity.this, MainActivity.class ) );
         }
 
-
-        finish();
-
     }
-
 
     // Methods...
     private void loadUserData(){
-      // TODO : Load User Data and set
+      //  Load User Data and set
+        UserDataQuery.loadUserDataQuery( null, null );
       // TODO : forward to MainActivity
+        startActivity( new Intent( WelcomeActivity.this, MainActivity.class ) );
 
     }
-
-
-
-
-
-
-
-
-
 
     private boolean isInternetConnect() {
         return CheckInternetConnection.isInternetConnected( this );

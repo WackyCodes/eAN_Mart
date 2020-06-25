@@ -1,5 +1,7 @@
 package wackycodes.ecom.eanmart.userprofile;
 
+import wackycodes.ecom.eanmart.userprofile.addresses.UserAddressDataModel;
+
 public class UserDataModel {
 
     private boolean isLoadData;

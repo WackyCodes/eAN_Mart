@@ -2,12 +2,12 @@ package wackycodes.ecom.eanmart.apphome;
 
 import java.util.List;
 
-public class HomeFragmentModel {
+public class MainHomeFragmentModel {
 
 
     private int layoutType;
 
-    public HomeFragmentModel(int layoutType) {
+    public MainHomeFragmentModel(int layoutType) {
         this.layoutType = layoutType;
     }
 
@@ -27,7 +27,7 @@ public class HomeFragmentModel {
 
     private List<CategoryTypeModel> categoryTypeModelList;
 
-    public HomeFragmentModel(int layoutType, List <CategoryTypeModel> categoryTypeModelList) {
+    public MainHomeFragmentModel(int layoutType, List <CategoryTypeModel> categoryTypeModelList) {
         this.layoutType = layoutType;
         this.categoryTypeModelList = categoryTypeModelList;
     }
@@ -47,7 +47,7 @@ public class HomeFragmentModel {
     private String shopNameOrColor;
     private int bannerViewFragmentType;
 
-    public HomeFragmentModel(int layoutType, String shopID, String shopImage, String shopNameOrColor, int bannerViewFragmentType) {
+    public MainHomeFragmentModel(int layoutType, String shopID, String shopImage, String shopNameOrColor, int bannerViewFragmentType) {
         this.layoutType = layoutType;
         this.shopID = shopID;
         this.shopImage = shopImage;

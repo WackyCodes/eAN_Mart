@@ -1,5 +1,8 @@
 package wackycodes.ecom.eanmart.other;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import wackycodes.ecom.eanmart.userprofile.UserDataModel;
 
 public class StaticValues {
@@ -7,6 +10,8 @@ public class StaticValues {
     public static String APP_VERSION = "em-1-01";
 
     public static String DEFAULT_CITY_NAME = "BHOPAL";
+    public static String CURRENT_CITY_NAME = "BHOPAL";
+    public static String CURRENT_CITY_CODE = "BHOPAL";
 
     // User Data Model...
     public static final UserDataModel USER_DATA_MODEL = new UserDataModel();
@@ -15,7 +20,7 @@ public class StaticValues {
     public static final int STORAGE_PERMISSION = 1;
 
 
-    public static final int FRAGMENT_NULL = 0; // No Privious fragment
+    public static final int FRAGMENT_NULL = 0; // No Previous fragment
     public static final int FRAGMENT_MAIN_HOME = 1;
     public static final int FRAGMENT_MAIN_MY_ACCOUNT_ = 2;
     public static final int FRAGMENT_MAIN_MY_ORDER = 3;
@@ -47,6 +52,46 @@ public class StaticValues {
     public static final int TYPE_BANNER_SHOPS_VIEW = 28;
     public static final int TYPE_BANNER_SHOP_HOME = 29;
 
+
+    // Common Main Home Container...
+    public static final int BANNER_SLIDER_LAYOUT_CONTAINER = 0;
+    public static final int STRIP_AD_LAYOUT_CONTAINER = 1;
+    public static final int HORIZONTAL_ITEM_LAYOUT_CONTAINER = 2;
+    public static final int GRID_ITEM_LAYOUT_CONTAINER = 3;
+    public static final int BANNER_AD_LAYOUT_CONTAINER = 4;
+    public static final int CAT_ITEM_LAYOUT_CONTAINER = 5;
+    public static final int BANNER_SLIDER_CONTAINER_ITEM = 6;
+    public static final int ADD_NEW_PRODUCT_ITEM = 7;
+
+
+    public static final int VIEW_ALL_ACTIVITY = 13;
+    public static final int RECYCLER_PRODUCT_LAYOUT = 11;
+    public static final int GRID_PRODUCT_LAYOUT = 12;
+
+    public static final int CATEGORIES_ITEMS_VIEW_ACTIVITY = 16;
+
+    public static final int PRODUCT_DETAILS_ACTIVITY = 10;
+    public static final int BUY_NOW_ACTIVITY = 19;
+
+
+
+    // Product Details... Temp List.
+    public static List <String> productDetailTempList = new ArrayList <>();
+
+    /*
+    Index 0 - Product ID
+    Index 1 - Product Image
+    Index 2 - Product Name or Full Name
+    Index 3 - Product Price
+    Index 4 - Product Cut Price
+    Index 5 - Product COD or NO_COD info
+    index 6 - Product IN_STOCK or OUT_OF_STOCK info
+    index 7 - product qty_Type ... product_qty_type
+
+    // add Quantity
+    index 7 - product Quantity
+
+     */
 
 
 }

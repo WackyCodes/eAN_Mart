@@ -2,6 +2,7 @@ package wackycodes.ecom.eanmart.apphome;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,15 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
 import java.util.List;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.category.ShopsViewFragment;
-import wackycodes.ecom.eanmart.shophome.ShopHomeFragment;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.wgridview.MyGridView;
 
 import static wackycodes.ecom.eanmart.MainActivity.mainActivity;
@@ -29,30 +33,26 @@ import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopsViewFragme
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_SHOPS_VIEW;
-import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SHOP_HOME;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_MAIN_HOME;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_SHOPS_VIEW;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_CATEGORY_LAYOUT;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_BANNER_AD;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_BANNER_SLIDER;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_STRIP_AD;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_LIST_MAIN_HOME_CATEGORY;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_LIST_SHOPS_VIEW_NAME;
-import static wackycodes.ecom.eanmart.shophome.ShopHomeFragment.shopHomeFragment;
 
-public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
+public class MainHomeFragmentAdaptor extends RecyclerView.Adapter {
 
-    private List <HomeFragmentModel> homeFragmentModelList;
+    private List <MainHomeFragmentModel> mainHomeFragmentModelList;
     private RecyclerView.RecycledViewPool recycledViewPool;
 
-    public HomeFragmentAdaptor(List <HomeFragmentModel> homeFragmentModelList) {
-        this.homeFragmentModelList = homeFragmentModelList;
+    public MainHomeFragmentAdaptor(List <MainHomeFragmentModel> mainHomeFragmentModelList) {
+        this.mainHomeFragmentModelList = mainHomeFragmentModelList;
         recycledViewPool = new RecyclerView.RecycledViewPool();
     }
 
     @Override
     public int getItemViewType(int position) {
-        switch (homeFragmentModelList.get( position ).getLayoutType()) {
+        switch (mainHomeFragmentModelList.get( position ).getLayoutType()) {
             case TYPE_HOME_SHOP_BANNER_SLIDER:
                 return TYPE_HOME_SHOP_BANNER_SLIDER;
             case TYPE_HOME_CATEGORY_LAYOUT:
@@ -91,19 +91,19 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        switch (homeFragmentModelList.get( position ).getLayoutType()) {
+        switch (mainHomeFragmentModelList.get( position ).getLayoutType()) {
             case TYPE_HOME_SHOP_BANNER_SLIDER:
                 // TODO: Slider...
                 break;
             case TYPE_HOME_CATEGORY_LAYOUT:
-                ((GridLayoutViewHolder)holder).setDataGridLayout( homeFragmentModelList.get( position ).getCategoryTypeModelList() );
+                ((GridLayoutViewHolder)holder).setDataGridLayout( mainHomeFragmentModelList.get( position ).getCategoryTypeModelList() );
                 break;
             case TYPE_HOME_SHOP_STRIP_AD:
             case TYPE_HOME_SHOP_BANNER_AD:
-                String imgLink = homeFragmentModelList.get( position ).getShopImage();
-                String nameOrColor = homeFragmentModelList.get( position ).getShopNameOrColor();
-                String id = homeFragmentModelList.get( position ).getShopID();
-                int bannerViewFragmentType = homeFragmentModelList.get( position ).getBannerViewFragmentType();
+                String imgLink = mainHomeFragmentModelList.get( position ).getShopImage();
+                String nameOrColor = mainHomeFragmentModelList.get( position ).getShopNameOrColor();
+                String id = mainHomeFragmentModelList.get( position ).getShopID();
+                int bannerViewFragmentType = mainHomeFragmentModelList.get( position ).getBannerViewFragmentType();
                 ((ShopAdBannerViewHolder)holder).setBannerAd( id, imgLink, nameOrColor, bannerViewFragmentType );
                 break;
             default:
@@ -114,7 +114,7 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return homeFragmentModelList.size();
+        return mainHomeFragmentModelList.size();
     }
 
     //============  Banner Slider View Holder ============
@@ -131,36 +131,40 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
             bannerAdContainer = itemView.findViewById(R.id.strip_ad_container);
             bannerAdImage = itemView.findViewById( R.id.strip_ad_image );
         }
-        private void setBannerAd(String shopId, String imgLink, String colorCode, final int bannerViewFragmentType){
+        private void setBannerAd(final String shopId, String imgLink, String colorCode, final int bannerViewFragmentType){
 //            bannerAdContainer.setBackgroundColor( Color.parseColor( colorCode ) );
             // set Image Resource from database..
-//            Glide.with( itemView.getContext() ).load( imgLink )
-//                    .apply( new RequestOptions().placeholder( R.drawable.ic_strip_black_24dp ) ).into( bannerAdImage );
+            Glide.with( itemView.getContext() ).load( imgLink )
+                    .apply( new RequestOptions().placeholder( R.drawable.ic_strip_black_24dp ) ).into( bannerAdImage );
 
-            bannerAdImage.setImageResource( R.drawable.strip_ad_a );
+//            bannerAdImage.setImageResource( R.drawable.strip_ad_a );
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    switch (bannerViewFragmentType){
-                        case TYPE_BANNER_MAIN_HOME:
-                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_HOME;
-                            if (shopHomeFragment == null){
-                                shopHomeFragment = new ShopHomeFragment();
-                            }
-                            setFromHomeFragment( shopHomeFragment, FRAGMENT_SHOP_HOME );
-                            break;
-                        case TYPE_BANNER_SHOPS_VIEW:
-                            if (shopHomeFragment == null){
-                                shopHomeFragment = new ShopHomeFragment();
-                            }
-                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
-                            MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;
-                            setFromShopViewFragment( shopHomeFragment );
-                            break;
-                        default:
-                            showToast(itemView.getContext(), "Code Not Found.!");
-                            break;
-                    }
+
+                    Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
+                    intent.putExtra( "SHOP_ID", shopId );
+                    itemView.getContext().startActivity( intent );
+//                    switch (bannerViewFragmentType){
+//                        case TYPE_BANNER_MAIN_HOME:
+//                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_HOME;
+//                            if (shopHomeFragment == null){
+//                                shopHomeFragment = new ShopHomeFragment();
+//                            }
+//                            setFromHomeFragment( shopHomeFragment, FRAGMENT_SHOP_HOME );
+//                            break;
+//                        case TYPE_BANNER_SHOPS_VIEW:
+//                            if (shopHomeFragment == null){
+//                                shopHomeFragment = new ShopHomeFragment();
+//                            }
+//                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
+//                            MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;
+//                            setFromShopViewFragment( shopHomeFragment );
+//                            break;
+//                        default:
+//                            showToast(itemView.getContext(), "Code Not Found.!");
+//                            break;
+//                    }
 
                 }
             } );
@@ -211,9 +215,9 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
 
                 ImageView itemImage = view.findViewById( R.id.sq_image_view );
                 TextView itemName =  view.findViewById( R.id.sq_text_view );
-                itemImage.setImageResource( Integer.parseInt( categoryTypeModelList.get( position ).getCatImage() ) );
-//                Glide.with( itemView.getContext() ).load( categoryTypeModelList.get( position ).getCatImage() )
-//                        .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( itemImage );
+//                itemImage.setImageResource( Integer.parseInt( categoryTypeModelList.get( position ).getCatImage() ) );
+                Glide.with( itemView.getContext() ).load( categoryTypeModelList.get( position ).getCatImage() )
+                        .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( itemImage );
                 itemName.setText( categoryTypeModelList.get( position ).getCatName() );
 
                 view.setOnClickListener( new View.OnClickListener() {
@@ -230,23 +234,23 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
                 switch (type){
                     case TYPE_LIST_MAIN_HOME_CATEGORY:
                         MainActivity.wPreviousFragment = FRAGMENT_MAIN_HOME;
-                        if (shopsViewFragment == null){
-                            shopsViewFragment = new ShopsViewFragment();
+                        if (shopsViewFragment == null || !ShopsViewFragment.catID.equals( docID )){
+                            shopsViewFragment = new ShopsViewFragment(docID);
                         }
                         setFromHomeFragment(shopsViewFragment , FRAGMENT_MAIN_SHOPS_VIEW );
                         break;
                     case TYPE_LIST_SHOPS_VIEW_NAME:
+                        Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
+                        intent.putExtra( "SHOP_ID", docID );
+                        itemView.getContext().startActivity( intent );
 
-                        MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
-                        MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;
-                        if (shopsViewFragment == null){
-                            shopsViewFragment = new ShopsViewFragment();
-                        }
-                        setFromShopViewFragment( shopsViewFragment );
-//                        Intent shopIntent = new Intent(context, ProductDetails.class);
-//                        shopIntent.putExtra( "PRODUCT_ID", docID );
-//                        context.startActivity( shopIntent );
-//                        showToast( context, "Code not found.!" );
+//                        MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
+//                        MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;
+//                        if (shopHomeFragment == null){
+//                            shopHomeFragment = new ShopHomeFragment();
+//                        }
+//                        setFromShopViewFragment( shopHomeFragment );
+
                         break;
                     default:
                         showToast( context, "Something went wrong.!" );
@@ -258,14 +262,12 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
     }
     //==============  GridProduct Grid Layout View Holder =================
 
-
 //    private void gotoShopActivity(Context context, String shopId){
 //        Intent shopIntent = new Intent(context, ProductDetails.class);
 //        shopIntent.putExtra( "SHOP_ID", shopId );
 //        context.startActivity( shopIntent );
 //
 //    }
-
 
     // Fragment Transaction...
     private void setFromShopViewFragment(Fragment showFragment){
@@ -277,17 +279,15 @@ public class HomeFragmentAdaptor  extends RecyclerView.Adapter {
         fragmentTransaction.replace( ShopsViewFragment.shopViewFragmentFrameLayout.getId(),showFragment );
         fragmentTransaction.commit();
     }
-
     private void setFromHomeFragment(Fragment showFragment, int nextFragment){
 //        MainActivity.wPreviousFragment = currentFragment;
         MainActivity.wCurrentFragment = nextFragment;
         FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations( R.anim.slide_from_right, R.anim.slide_out_from_left );
-//        onDestroyView();
         fragmentTransaction.replace( MainActivity.mainHomeContentFrame.getId(),showFragment );
         fragmentTransaction.commit();
-
     }
+
 
 
 }

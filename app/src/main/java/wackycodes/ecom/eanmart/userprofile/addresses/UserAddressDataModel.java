@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.userprofile;
+package wackycodes.ecom.eanmart.userprofile.addresses;
 
 public class UserAddressDataModel {
 

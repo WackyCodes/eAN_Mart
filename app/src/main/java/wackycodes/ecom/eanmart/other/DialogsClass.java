@@ -2,6 +2,7 @@ package wackycodes.ecom.eanmart.other;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,27 +16,42 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.launching.AuthActivity;
+import wackycodes.ecom.eanmart.launching.SignInFragment;
+
+import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SIGN_IN;
+import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SIGN_UP;
+import static wackycodes.ecom.eanmart.other.StaticValues.MAIN_ACTIVITY;
 
 public class DialogsClass {
 
 
 
-    public static Dialog progressDialog(Context context){
+    public static Dialog getDialog(Context context){
         // ---- Progress Dialog...
         Dialog progressDialog = new Dialog( context );
         progressDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
         progressDialog.setContentView( R.layout.dialog_circle_process );
         progressDialog.setCancelable( false );
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            progressDialog.getWindow().setBackgroundDrawable( context.getDrawable( R.drawable.x_ractangle_layout ) );
+//            getDialog.getWindow().setBackgroundDrawable( context.getDrawable( R.drawable.x_ractangle_layout ) );
         }
         progressDialog.getWindow().setLayout( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT );
-//        progressDialog.show();
+//        getDialog.show();
         return progressDialog;
         // ---- Progress Dialog...
     }
 
+    public static ProgressDialog getProgressDialog(Context context,@Nullable String message){
+        ProgressDialog progressDialog = new ProgressDialog( context );
+        if (message!=null){
+            progressDialog.setMessage(message);
+        }
+        progressDialog.setCancelable( false );
+        return progressDialog;
+    }
 
     public static AlertDialog.Builder alertDialog(Context c, @Nullable String title, @NonNull String body) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(c);
@@ -73,6 +89,50 @@ public class DialogsClass {
     }
 
 
+    public static void signInUpDialog(final Context context, final int comeFrom) {
+
+        /// Sample Button click...
+        final Dialog signInUpDialog = new Dialog( context );
+        signInUpDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
+        signInUpDialog.setContentView( R.layout.dialog_signin_signup );
+        signInUpDialog.getWindow().setLayout( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+        signInUpDialog.setCancelable( false );
+        Button signInBtn = signInUpDialog.findViewById( R.id.dialog_sign_in_btn );
+        Button signUpBtn = signInUpDialog.findViewById( R.id.dialog_sign_up_btn );
+        TextView cancelBtn = signInUpDialog.findViewById( R.id.cancelTextBtn );
+
+        signInBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signInUpDialog.dismiss();
+                // TODO : Sign In...
+                AuthActivity.setFragmentRequest = FRAGMENT_SIGN_IN;
+                AuthActivity.comeFromActivity = comeFrom;
+                context.startActivity( new Intent( context, AuthActivity.class ) );
+
+            }
+        } );
+        signUpBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signInUpDialog.dismiss();
+                // TODO : Sign up...
+                AuthActivity.setFragmentRequest = FRAGMENT_SIGN_UP;
+                AuthActivity.comeFromActivity = comeFrom;
+                context.startActivity( new Intent( context, AuthActivity.class ) );
+
+            }
+        } );
+        cancelBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signInUpDialog.dismiss();
+                // TODO : cancel...
+            }
+        } );
+        signInUpDialog.show();
+
+    }
 
 
 }

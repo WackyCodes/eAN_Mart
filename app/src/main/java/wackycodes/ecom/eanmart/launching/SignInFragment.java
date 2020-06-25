@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticMethods;
@@ -61,7 +62,7 @@ public class SignInFragment extends Fragment {
         final View view = inflater.inflate( R.layout.fragment_sign_in, container, false );
 
         parentFrameLayout = view.findViewById( R.id.sign_in_frameLayout);
-        dialog = DialogsClass.progressDialog( getContext() );
+        dialog = DialogsClass.getDialog( getContext() );
 
         dontHaveAccount = view.findViewById( R.id.sign_in_dont_have_account );
         signInForgetPassword = view.findViewById( R.id.sign_in_forget_password );
@@ -172,6 +173,7 @@ public class SignInFragment extends Fragment {
 //            DBquery.cartListQuery( getActivity(), false, new Dialog( getActivity() ), AuthActivity.comeFromActivity );
 //        }
 
+        UserDataQuery.loadUserDataQuery( null, null );
         getActivity().finish();
     }
 

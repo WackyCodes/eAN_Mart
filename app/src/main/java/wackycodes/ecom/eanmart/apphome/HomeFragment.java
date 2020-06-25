@@ -19,12 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_MAIN_HOME;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_CATEGORY_LAYOUT;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_STRIP_AD;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_LIST_MAIN_HOME_CATEGORY;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 
 public class HomeFragment extends Fragment {
 
@@ -41,7 +39,7 @@ public class HomeFragment extends Fragment {
     public static SwipeRefreshLayout homeSwipeRefreshLayout;
     // Home Recycler view...
     private RecyclerView homeRecyclerView;
-    private HomeFragmentAdaptor homeFragmentAdaptor;
+    public static MainHomeFragmentAdaptor mainHomeFragmentAdaptor;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -68,11 +66,15 @@ public class HomeFragment extends Fragment {
         homeRecyclerView.setLayoutManager( homeLinearLayoutManager );
 
         // Set Adaptor...
-        homeFragmentAdaptor = new HomeFragmentAdaptor( homePageCategoryList );
-        homeRecyclerView.setAdapter( homeFragmentAdaptor );
-        homeFragmentAdaptor.notifyDataSetChanged();
+        mainHomeFragmentAdaptor = new MainHomeFragmentAdaptor( homePageCategoryList );
+        homeRecyclerView.setAdapter( mainHomeFragmentAdaptor );
+        mainHomeFragmentAdaptor.notifyDataSetChanged();
 
+        if (homePageCategoryList.size()==0){
+            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_NAME );
+        }
 
+/*
         if(categoryTypeModelList.size() == 0){
             // Sample Data..
             categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_MAIN_HOME_CATEGORY," ", "Man Fashion", String.valueOf( R.drawable.product2 ) ) );
@@ -82,12 +84,12 @@ public class HomeFragment extends Fragment {
 
         }
         if (homePageCategoryList.size()==0){
-            homePageCategoryList.add( new HomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList  ) );
-            homePageCategoryList.add( new HomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.banner_c ), "Name", TYPE_BANNER_MAIN_HOME  ) );
-            homePageCategoryList.add( new HomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.stip_ad_b ), "Name", TYPE_BANNER_MAIN_HOME  ) );
-            homeFragmentAdaptor.notifyDataSetChanged();
+            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList  ) );
+            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.banner_c ), "Name", TYPE_BANNER_MAIN_HOME  ) );
+            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.stip_ad_b ), "Name", TYPE_BANNER_MAIN_HOME  ) );
+            mainHomeFragmentAdaptor.notifyDataSetChanged();
         }
-
+*/
         return view;
     }
 

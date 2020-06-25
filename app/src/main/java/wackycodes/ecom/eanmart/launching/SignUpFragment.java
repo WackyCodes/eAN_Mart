@@ -1,5 +1,6 @@
 package wackycodes.ecom.eanmart.launching;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,9 +31,12 @@ import java.util.regex.Pattern;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
+import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SIGN_IN;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SIGN_UP;
 
@@ -41,7 +45,7 @@ public class SignUpFragment extends Fragment {
     private FrameLayout parentFrameLayout;
     //---------
     private TextView alreadyHaveAccount;
-    private ProgressDialog progressDialog;
+    private Dialog dialog;
 
     private EditText signUpUserName;
     private EditText signUpUserEmail;
@@ -65,7 +69,7 @@ public class SignUpFragment extends Fragment {
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
-        progressDialog = new ProgressDialog( getActivity() );
+        dialog = DialogsClass.getDialog( view.getContext() );
         parentFrameLayout = view.findViewById( R.id.sign_up_frameLayout);
 
         alreadyHaveAccount = view.findViewById( R.id.sign_up_UserAlready );
@@ -84,9 +88,7 @@ public class SignUpFragment extends Fragment {
             public void onClick(View v) {
 
                 if (isEmailValid( signUpUserEmail ) && isValidDetails( ) && w_isInternetConnect() ){
-                    progressDialog.setMessage("Please wait...");
-                    progressDialog.setCancelable( false );
-                    progressDialog.show();
+                    dialog.show();
                     userRegistration();
                 }
             }
@@ -102,8 +104,6 @@ public class SignUpFragment extends Fragment {
 
         return view;
     }
-
-
 
     @Override
     public void onDestroyView() {
@@ -135,16 +135,27 @@ public class SignUpFragment extends Fragment {
 //                                StaticValues.writeFileInLocal( getActivity(),"city", StaticValues.userCityName );
 //                                StaticValues.writeFileInLocal( getActivity(),"documentId", StaticValues.userAreaCode );
 
+                    currentUser = firebaseAuth.getCurrentUser();
+                    String authId = task.getResult().getUser().getUid();
                     // Create a Map ... to store our data on firebase...
                     Map <String, Object> userData = new HashMap <>();
+
+                    userData.put( "user_first_name", "" );
+                    userData.put( "user_last_name", "" );
+                    userData.put( "user_full_name", signUpUserName.getText().toString().trim() );
                     userData.put( "user_email", signUpUserEmail.getText().toString().trim() );
-                    userData.put( "user_name", signUpUserName.getText().toString().trim() );
-                    userData.put( "user_phone", signUpUserPhone.getText().toString().trim() );
-                    userData.put( "user_image", "" );
+                    userData.put( "user_mobile", signUpUserPhone.getText().toString().trim()  );
+                    userData.put( "user_profile_image", "" );
+                    userData.put( "user_auth_id", authId );
+                    userData.put( "user_city_name", "" );
+                    userData.put( "user_city_code", "" );
+                    userData.put( "user_area_pincode", "" );
+                    userData.put( "is_mobile_verify", false );
+                    userData.put( "is_email_verify", false );
                     userData.put( "app_version", StaticValues.APP_VERSION );
 
                     // TODO : Q02 Crate a Collection USER and make a document for new user using by Uid on fireStore...
-                    firebaseFirestore.collection( "USERS" ).document( firebaseAuth.getUid() )
+                    firebaseFirestore.collection( "USERS" ).document( authId )
                             .set( userData ).addOnCompleteListener( new OnCompleteListener <Void>() {
                         @Override
                         public void onComplete(@NonNull Task <Void> task) {
@@ -158,7 +169,7 @@ public class SignUpFragment extends Fragment {
                             }else{
                                 String error = task.getException().getMessage();
                                 showToast(error);
-                                progressDialog.dismiss();
+                                dialog.dismiss();
                             }
                         }
                     } );
@@ -166,7 +177,7 @@ public class SignUpFragment extends Fragment {
                 }else{
                     String error = task.getException().getMessage();
                     showToast(error);
-                    progressDialog.dismiss();
+                    dialog.dismiss();
                 }
 
             }
@@ -182,7 +193,7 @@ public class SignUpFragment extends Fragment {
         if (AuthActivity.setFragmentRequest == FRAGMENT_SIGN_IN ||
                 AuthActivity.setFragmentRequest == FRAGMENT_SIGN_UP){
             // if Come from request...
-
+            UserDataQuery.loadUserDataQuery( null, null );
             AuthActivity.setFragmentRequest = -1;
             AuthActivity.comeFromActivity = -1;
             getActivity().finish();
