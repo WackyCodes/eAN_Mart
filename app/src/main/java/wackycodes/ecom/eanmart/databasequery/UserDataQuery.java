@@ -26,6 +26,7 @@ import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartItemModel;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
@@ -75,6 +76,8 @@ public class UserDataQuery {
                     String user_area_pincode = task.getResult().get( "user_area_pincode" ).toString();
 
 //                    String app_version = task.getResult().get( "app_version" ).toString();
+                    StaticValues.CURRENT_CITY_NAME = user_city_name;
+                    StaticValues.CURRENT_CITY_CODE = user_city_code;
 
                     boolean is_mobile_verify = false;
                     boolean is_email_verify = false;
@@ -155,12 +158,37 @@ public class UserDataQuery {
 
                                 }
 
+                                if(cartCount>0){
+                                    setCartBadge(String.valueOf( cartCount ));
+                                }else{
+                                    // set Invisible cart
+                                }
+
                             }
 
                         }
                     } );
         }
 
+
+    }
+    // Set Cart badge...
+    public static void setCartBadge(String cartCount){
+        // Main Activity Badge
+        if (MainActivity.badgeCartCount!=null){
+            MainActivity.badgeCartCount.setVisibility( View.VISIBLE );
+            MainActivity.badgeCartCount.setText( cartCount );
+        }
+        // Shop Home Activity badge
+        if (ShopHomeActivity.badgeCartCount!=null){
+            ShopHomeActivity.badgeCartCount.setVisibility( View.VISIBLE );
+            ShopHomeActivity.badgeCartCount.setText( cartCount );
+        }
+        // Product Details Activity...
+        if (ProductDetails.badgeCartCount!=null){
+            ProductDetails.badgeCartCount.setVisibility( View.VISIBLE );
+            ProductDetails.badgeCartCount.setText( cartCount );
+        }
 
     }
 

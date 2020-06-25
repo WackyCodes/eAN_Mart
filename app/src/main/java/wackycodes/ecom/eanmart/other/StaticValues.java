@@ -9,9 +9,9 @@ public class StaticValues {
 
     public static String APP_VERSION = "em-1-01";
 
-    public static String DEFAULT_CITY_NAME = "BHOPAL";
-    public static String CURRENT_CITY_NAME = "BHOPAL";
-    public static String CURRENT_CITY_CODE = "BHOPAL";
+    public static final String DEFAULT_CITY_NAME = "BHOPAL";
+    public static String CURRENT_CITY_NAME ;
+    public static String CURRENT_CITY_CODE ;
 
     // User Data Model...
     public static final UserDataModel USER_DATA_MODEL = new UserDataModel();
@@ -72,6 +72,7 @@ public class StaticValues {
 
     public static final int PRODUCT_DETAILS_ACTIVITY = 10;
     public static final int BUY_NOW_ACTIVITY = 19;
+    public static final int SHOP_HOME_ACTIVITY = 20;
 
 
 

@@ -25,6 +25,7 @@ import wackycodes.ecom.eanmart.other.StaticValues;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
+import static wackycodes.ecom.eanmart.other.StaticValues.DEFAULT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.STORAGE_PERMISSION;
 
 public class WelcomeActivity extends AppCompatActivity {
@@ -74,6 +75,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
         }else{
             // TODO: use Default Data to load Product and goto MainActivity...
+            StaticValues.CURRENT_CITY_CODE = DEFAULT_CITY_NAME;
+            StaticValues.CURRENT_CITY_NAME = DEFAULT_CITY_NAME;
             startActivity( new Intent( WelcomeActivity.this, MainActivity.class ) );
         }
 

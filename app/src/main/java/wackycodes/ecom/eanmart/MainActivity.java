@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.DialogCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -14,15 +15,20 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebBackForwardList;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +39,11 @@ import com.google.android.material.navigation.NavigationView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wackycodes.ecom.eanmart.apphome.HomeFragment;
 import wackycodes.ecom.eanmart.category.ShopsViewFragment;
+import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
+import wackycodes.ecom.eanmart.cityareacode.SelectAreaCityAdaptor;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.launching.AuthActivity;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.shophome.ShopHomeFragment;
@@ -42,8 +52,11 @@ import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentContext;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentFrameLayout;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopsViewFragment;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.areaCodeCityModelList;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_SHOPS_VIEW;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_NULL;
@@ -54,6 +67,7 @@ import static wackycodes.ecom.eanmart.shophome.ShopHomeFragment.shopHomeFragment
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static AppCompatActivity mainActivity;
 
+    public static SelectAreaCityAdaptor selectAreaCityAdaptor;
     public static int wCurrentFragment = FRAGMENT_NULL;
     public static int wPreviousFragment = FRAGMENT_NULL;
 
@@ -67,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static CircleImageView drawerImage;
     public static TextView drawerName;
     public static TextView drawerEmail;
+    public static LinearLayout drawerCityLayout;
+    public static TextView drawerCityTitle;
+    public static TextView drawerCityName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,15 +98,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById( R.id.drawer_layout );
         navigationView = findViewById( R.id.nav_view );
         setSupportActionBar( toolbar );
+        try {
+            getSupportActionBar().setDisplayShowTitleEnabled( true );
+        }catch (NullPointerException ignored){ }
 
         // Nav Header...
         drawerImage = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_Image );
         drawerName = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_UserName );
         drawerEmail = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_userEmail );
+        drawerCityLayout = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_user_city_layout );
+        drawerCityTitle = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_title_text );
+        drawerCityName = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_user_city );
 
-        try {
-            getSupportActionBar().setDisplayShowTitleEnabled( true );
-        }catch (NullPointerException ignored){ }
+        // Set Drawer City Click listener...
+        drawerCityLayout.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (drawer.isDrawerOpen( GravityCompat.START )){
+                    drawer.closeDrawer( GravityCompat.START );
+                }
+                // select city Dialog...
+                selectCityDialog();
+            }
+        } );
 
         // setNavigationItemSelectedListener()...
         navigationView.setNavigationItemSelectedListener( MainActivity.this );
@@ -113,6 +144,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStart() {
         super.onStart();
+        if (homePageCategoryList.size() == 0 && CURRENT_CITY_CODE !=null){
+            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, false );
+        }
         if ( currentUser != null && StaticValues.USER_DATA_MODEL.isLoadData()){
             Glide.with( this ).load( StaticValues.USER_DATA_MODEL.getUserProfilePhoto() ).
                     apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp) ).into( drawerImage );
@@ -251,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.menu_cart_main){
             // GOTO : My cart
             if (currentUser == null){
-//                dialogsClass.signInUpDialog( MAIN_ACTIVITY );
+                DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
                 return false;
             }else{
 //                myCart();
@@ -376,6 +410,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    // Select City Dialog...
+    private AreaCodeCityModel tempAreaCodeCityModel = null;
+    private void selectCityDialog(){
+        // TODO :
+        tempAreaCodeCityModel=null;
+        /// Sample Button click...
+        final Dialog cityDialog = new Dialog( this );
+        cityDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
+        cityDialog.setContentView( R.layout.dialog_select_city_dialog );
+        cityDialog.getWindow().setLayout( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+        cityDialog.setCancelable( false );
+        Button cancelBtn = cityDialog.findViewById( R.id.dialog_cancel_btn );
+        Button selectBtn = cityDialog.findViewById( R.id.dialog_select_btn );
+        final AutoCompleteTextView cityText = cityDialog.findViewById( R.id.dialogEditText );
+
+        if (DBQuery.areaCodeCityModelList.size() == 0){
+            DBQuery.getCityListQuery();
+        }
+        selectAreaCityAdaptor =
+                new SelectAreaCityAdaptor(MainActivity.this, R.layout.area_select_list_item, DBQuery.areaCodeCityModelList);
+
+        cityText.setThreshold(1);
+        cityText.setAdapter(selectAreaCityAdaptor);
+
+        // handle click event and set desc on textView
+        cityText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AreaCodeCityModel areaCodeCityModel = (AreaCodeCityModel) adapterView.getItemAtPosition(i);
+                cityText.setText(areaCodeCityModel.getAreaCode() + ", " + areaCodeCityModel.getAreaName() );
+                tempAreaCodeCityModel = areaCodeCityModel;
+            }
+        });
+
+        selectBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Check
+                if (tempAreaCodeCityModel!=null){
+                    cityDialog.dismiss();
+                    drawerCityTitle.setText( "Your City" );
+                    drawerCityName.setText( tempAreaCodeCityModel.getCityName() );
+                    showToast( "CityName : " +tempAreaCodeCityModel.getCityName() + " Code : " + tempAreaCodeCityModel.getAreaCode() );
+                    // TODO : Reload Product...
+//                     loadMainHomePageAgain(tempAreaCodeCityModel.getCityCode());
+                }else{
+                    cityText.setError( "pin code / City not found!" );
+                }
+
+            }
+        } );
+        cancelBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cityDialog.dismiss();
+            }
+        } );
+
+        cityDialog.show();
+
+    }
+
+    // load Main Home again...
+    public void loadMainHomePageAgain( String cityCode ){
+        DBQuery.getHomePageCategoryListQuery( cityCode, true );
+        finishAllActivity();
+        if (wCurrentFragment == FRAGMENT_MAIN_SHOPS_VIEW){
+            wPreviousFragment = FRAGMENT_NULL;
+            homeFragment = new HomeFragment();
+            setBckFragment( homeFragment );
+        }
+    }
+
+    public void finishAllActivity(){
+        // TODO : Finishing upper activities...
+    }
 
 
 }

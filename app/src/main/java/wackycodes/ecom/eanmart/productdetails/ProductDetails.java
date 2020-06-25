@@ -554,7 +554,6 @@ public class ProductDetails extends AppCompatActivity {
         // Check First whether any item in cart or not...
         // if any item has in cart...
         cartItem.setActionView( R.layout.badge_cart_layout );
-//            ImageView badgeCartIcon = cartItem.getActionView().findViewById( R.id.badge_cart_icon );
         badgeCartCount = cartItem.getActionView().findViewById( R.id.badge_count_text );
         if (UserDataQuery.cartItemModelList.size() > 0){
             badgeCartCount.setVisibility( View.VISIBLE );
@@ -585,7 +584,7 @@ public class ProductDetails extends AppCompatActivity {
         if (id == R.id.menu_cart){
             // GOTO : Goto Cart
             if (currentUser == null){
-                badgeCartCount.setText( String.valueOf( UserDataQuery.cartItemModelList.size() ) );
+                DialogsClass.signInUpDialog( ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
             }else{
 //                startActivity( new Intent(this, MainActivity.class) );
 //                MainActivity.isFragmentIsMyCart = true;

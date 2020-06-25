@@ -17,11 +17,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
 import wackycodes.ecom.eanmart.apphome.HomeFragment;
 import wackycodes.ecom.eanmart.apphome.MainHomeFragmentModel;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
 import wackycodes.ecom.eanmart.category.ShopsViewFragment;
+import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
 import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentAdaptor;
 import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentModel;
 import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
@@ -53,6 +55,7 @@ public class DBQuery {
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
 
+    public static ArrayList<AreaCodeCityModel> areaCodeCityModelList = new ArrayList <>();
     // Home : Main Recycler view List...
     public static List <MainHomeFragmentModel> homePageCategoryList = new ArrayList <>();
     // Shops View List : For Same category Multiple shops...
@@ -74,9 +77,9 @@ public class DBQuery {
     }
 
 
-    public static void getHomePageCategoryListQuery(String cityName){
+    public static void getHomePageCategoryListQuery(String cityCode, boolean reloadRequest ){
 
-        firebaseFirestore.collection( "HOME_PAGE" ).document( cityName.toUpperCase() )
+        firebaseFirestore.collection( "HOME_PAGE" ).document( cityCode.toUpperCase() )
                 .collection( "HOME" ).orderBy( "index" )
                 .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
             @Override
@@ -129,6 +132,9 @@ public class DBQuery {
 
                         if(HomeFragment.mainHomeFragmentAdaptor != null){
                             HomeFragment.mainHomeFragmentAdaptor.notifyDataSetChanged();
+                        }
+                        if (HomeFragment.homeSwipeRefreshLayout!=null){
+                            HomeFragment.homeSwipeRefreshLayout.setRefreshing(false);
                         }
 
                     }
@@ -376,6 +382,31 @@ public class DBQuery {
     }
 
 
+    public static void getCityListQuery(){
+        firebaseFirestore.collection( "AREA_CODE" ).orderBy( "area_code" )
+                .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                if (task.isSuccessful()){
+                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        String areaCode = String.valueOf( (long)documentSnapshot.get( "area_code" ) );
+                        String areaName = documentSnapshot.get( "area_name" ).toString();
+                        String cityName = documentSnapshot.get( "area_city" ).toString();
+                        String cityCode = documentSnapshot.get( "area_city_code" ).toString();
+
+                        areaCodeCityModelList.add( new AreaCodeCityModel( areaCode, areaName, cityName, cityCode ) );
+                    }
+                    if (MainActivity.selectAreaCityAdaptor != null){
+                        MainActivity.selectAreaCityAdaptor.notifyDataSetChanged();
+                    }
+
+                }else{
+
+                }
+            }
+        } );
+
+    }
 
 
 }

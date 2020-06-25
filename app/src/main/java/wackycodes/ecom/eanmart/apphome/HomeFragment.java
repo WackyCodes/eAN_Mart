@@ -20,8 +20,11 @@ import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 
 public class HomeFragment extends Fragment {
@@ -71,8 +74,25 @@ public class HomeFragment extends Fragment {
         mainHomeFragmentAdaptor.notifyDataSetChanged();
 
         if (homePageCategoryList.size()==0){
-            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_NAME );
+            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, false );
         }
+
+        // Swipe Refresh...
+        if (homeSwipeRefreshLayout != null)
+            homeSwipeRefreshLayout.setOnRefreshListener( new SwipeRefreshLayout.OnRefreshListener(){
+
+                @Override
+                public void onRefresh() {
+                    homeSwipeRefreshLayout.setRefreshing( true );
+                    if (CheckInternetConnection.isInternetConnected( getContext() )){
+                        // Refreshing...
+                        DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, true );
+                    }else{
+                        homeSwipeRefreshLayout.setRefreshing( false );
+                    }
+
+                }
+            });
 
 /*
         if(categoryTypeModelList.size() == 0){

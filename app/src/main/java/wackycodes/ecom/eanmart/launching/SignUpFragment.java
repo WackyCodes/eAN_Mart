@@ -147,8 +147,8 @@ public class SignUpFragment extends Fragment {
                     userData.put( "user_mobile", signUpUserPhone.getText().toString().trim()  );
                     userData.put( "user_profile_image", "" );
                     userData.put( "user_auth_id", authId );
-                    userData.put( "user_city_name", "" );
-                    userData.put( "user_city_code", "" );
+                    userData.put( "user_city_name", StaticValues.CURRENT_CITY_NAME );
+                    userData.put( "user_city_code", StaticValues.CURRENT_CITY_CODE );
                     userData.put( "user_area_pincode", "" );
                     userData.put( "is_mobile_verify", false );
                     userData.put( "is_email_verify", false );
