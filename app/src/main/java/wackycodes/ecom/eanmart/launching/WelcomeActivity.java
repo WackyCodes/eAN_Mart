@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
@@ -36,28 +37,29 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_welcome );
         welcomeActivity = this;
-        startActivity( new Intent( WelcomeActivity.this, MainActivity.class ) );
-        if( isInternetConnect() ){
-        firebaseFirestore.collection( "PERMISSION" ).document( "APP_USE_PERMISSION" )
-                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                    boolean isAllowed = task.getResult().getBoolean( StaticValues.APP_VERSION );
-                    if ( isAllowed ){
-                        askStoragePermission();
-                    }else{
-                        DialogsClass.getMessageDialog( WelcomeActivity.this
-                                , "Sorry, Permission denied..!"
-                                , "You Don't have permission to use this App. If you have any query, Please contact App founder..!\\n Thank You!" );
+        if( true ){ // CheckInternetConnection.isInternetConnected( this )
+            firebaseFirestore.collection( "PERMISSION" ).document( "APP_USE_PERMISSION" )
+                    .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                    if (task.isSuccessful()){
+                        boolean isAllowed = task.getResult().getBoolean( StaticValues.APP_VERSION );
+                        if ( isAllowed ){
+//                            askStoragePermission();
+                            checkCurrentUser();
+                        }else{
+                            DialogsClass.getMessageDialog( WelcomeActivity.this
+                                    , "Sorry, Permission denied..!"
+                                    , "You Don't have permission to use this App. If you have any query, Please contact App founder..!\\n Thank You!" );
+                            finish();
+                        }
+                    }else {
+                        showToast( "Failed..!" );
                         finish();
                     }
-                }else {
-                    finish();
                 }
-            }
-        } );
-    }
+            } );
+        }
 
     }
 
@@ -69,8 +71,13 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void checkCurrentUser(){
 
-        if (currentUser != null && isInternetConnect()){
+        // Load Area List...
+        DBQuery.getCityListQuery();
+
+        if (currentUser != null){
             // Load User Data...
+            StaticValues.CURRENT_CITY_CODE = DEFAULT_CITY_NAME;
+            StaticValues.CURRENT_CITY_NAME = DEFAULT_CITY_NAME;
             loadUserData();
 
         }else{

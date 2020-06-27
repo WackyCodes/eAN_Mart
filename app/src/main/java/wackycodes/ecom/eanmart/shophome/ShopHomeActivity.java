@@ -17,16 +17,13 @@ import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
-import wackycodes.ecom.eanmart.category.ShopsViewFragment;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
-import wackycodes.ecom.eanmart.productdetails.ProductDetails;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
-import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryListName;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_ACTIVITY;
 import static wackycodes.ecom.eanmart.shophome.HorizontalItemViewModel.hrViewType;
 

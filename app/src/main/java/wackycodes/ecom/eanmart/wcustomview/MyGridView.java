@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.wgridview;
+package wackycodes.ecom.eanmart.wcustomview;
 
 import android.content.Context;
 import android.util.AttributeSet;

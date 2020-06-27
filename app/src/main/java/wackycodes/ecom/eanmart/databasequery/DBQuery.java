@@ -54,13 +54,11 @@ public class DBQuery {
 
     public static FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
-
-    public static ArrayList<AreaCodeCityModel> areaCodeCityModelList = new ArrayList <>();
+    public static final ArrayList<AreaCodeCityModel> areaCodeCityModelList = new ArrayList <>();
     // Home : Main Recycler view List...
     public static List <MainHomeFragmentModel> homePageCategoryList = new ArrayList <>();
     // Shops View List : For Same category Multiple shops...
     public static List <MainHomeFragmentModel> shopsViewFragmentList = new ArrayList <>();
-
 
     public static List <String> shopHomeCategoryListName = new ArrayList <>();
     public static List <List <ShopHomeFragmentModel>> shopHomeCategoryList = new ArrayList <>();
@@ -75,7 +73,6 @@ public class DBQuery {
         return collectionReference;
 
     }
-
 
     public static void getHomePageCategoryListQuery(String cityCode, boolean reloadRequest ){
 
@@ -231,7 +228,6 @@ public class DBQuery {
 
     }
 
-
     // Query to Load Fragment Data like homepage items etc...
     public static void getQuerySetFragmentData(final Context context, final RecyclerView homeLayoutContainerRecycler, final int index, String catID) {
 
@@ -380,7 +376,6 @@ public class DBQuery {
         }
 
     }
-
 
     public static void getCityListQuery(){
         firebaseFirestore.collection( "AREA_CODE" ).orderBy( "area_code" )

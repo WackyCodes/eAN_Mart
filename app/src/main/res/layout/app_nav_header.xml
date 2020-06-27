@@ -39,5 +39,53 @@
         android:text="@string/sample_email"/>
 
 <!--    Location Add... -->
+    <LinearLayout
+        android:id="@+id/drawer_user_city_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/back_rectangle_4dp_layout"
+        android:layout_marginTop="4dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_person_pin_circle_black_24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/drawer_title_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="2dp"
+                android:textColor="@color/colorDarkGray"
+                android:text="Default city"/>
+            <TextView
+                android:id="@+id/drawer_user_city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorDarkViolet"
+                android:textStyle="bold"
+                android:padding="2dp"
+                android:text="Bhopal, M.P."/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_navigate_next_black_24dp"
+            />
+
+    </LinearLayout>
+
 
 </LinearLayout>

@@ -1,31 +1,30 @@
 package wackycodes.ecom.eanmart;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.DialogCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.webkit.WebBackForwardList;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,35 +33,41 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import wackycodes.ecom.eanmart.apphome.HomeFragment;
-import wackycodes.ecom.eanmart.category.ShopsViewFragment;
+import wackycodes.ecom.eanmart.category.ShopItemModel;
+import wackycodes.ecom.eanmart.category.ShopListAdaptor;
 import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
 import wackycodes.ecom.eanmart.cityareacode.SelectAreaCityAdaptor;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
-import wackycodes.ecom.eanmart.launching.AuthActivity;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
-import wackycodes.ecom.eanmart.shophome.ShopHomeFragment;
+import wackycodes.ecom.eanmart.userprofile.UserProfileActivity;
 
 import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
-import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentContext;
-import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentFrameLayout;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopsViewFragment;
-import static wackycodes.ecom.eanmart.databasequery.DBQuery.areaCodeCityModelList;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopsViewFragmentList;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_SHOPS_VIEW;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_NULL;
-import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_SHOP_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.MAIN_ACTIVITY;
-import static wackycodes.ecom.eanmart.shophome.ShopHomeFragment.shopHomeFragmentContext;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static AppCompatActivity mainActivity;
@@ -85,12 +90,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static TextView drawerCityTitle;
     public static TextView drawerCityName;
 
+    // Search Variables...
+    private SearchView homeMainSearchView;
+    private RecyclerView homeSearchItemRecycler;
+    private TextView searchPlease;
+    private static List <ShopItemModel> searchShopItemList = new ArrayList <>();
+    private List<String> searchShopTags = new ArrayList <>();
+    private SearchAdapter searchAdaptor;
+    // Search Variables...
+
+    private Dialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
         mainActivity = this;
-
+        dialog = DialogsClass.getDialog( this );
         // assign..
         mainHomeContentFrame = findViewById( R.id.main_content_frame_layout );
 
@@ -131,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener( toggle );
         toggle.syncState();
 
+        // CurrentUser Check...
+        if(currentUser != null){
+            drawerCityTitle.setText("Your City");
+            drawerCityName.setText( CURRENT_CITY_NAME );
+        }
+
         // Assigning and Set fragment...
         if (homeFragment!=null){
             setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
@@ -139,6 +161,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
         }
 
+        // SearchView...
+        homeMainSearchView = findViewById( R.id.home_shop_search_view );
+        homeSearchItemRecycler = findViewById( R.id.home_search_recycler_view );
+
+        LinearLayoutManager searchLinearLManager = new LinearLayoutManager( this );
+        searchLinearLManager.setOrientation( RecyclerView.VERTICAL );
+        homeSearchItemRecycler.setLayoutManager( searchLinearLManager );
+        searchAdaptor = new SearchAdapter( searchShopItemList );
+        homeSearchItemRecycler.setAdapter( searchAdaptor );
+        getShopSearchItems();
     }
 
     @Override
@@ -152,14 +184,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp) ).into( drawerImage );
             drawerName.setText( StaticValues.USER_DATA_MODEL.getUserFullName() );
             drawerEmail.setText( StaticValues.USER_DATA_MODEL.getUserEmail() );
-            if (wCurrentFragment != FRAGMENT_MAIN_HOME && wPreviousFragment == FRAGMENT_MAIN_HOME){
-                wPreviousFragment = FRAGMENT_NULL;
-                if (homeFragment!=null){
-                    setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
-                }else{
-                    homeFragment = new HomeFragment();
-                    setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
-                }
+        }
+        if (wCurrentFragment == FRAGMENT_MAIN_HOME ){ // && wPreviousFragment == FRAGMENT_MAIN_HOME
+            wPreviousFragment = FRAGMENT_NULL;
+            if (homeFragment!=null){
+                setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
+            }else{
+                homeFragment = new HomeFragment();
+                setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
             }
         }
     }
@@ -169,7 +201,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (drawer.isDrawerOpen( GravityCompat.START )){
             drawer.closeDrawer( GravityCompat.START );
-        }else{
+        }
+        else if (homeSearchItemRecycler.getVisibility() == View.VISIBLE){
+            setFrameVisibility(true);
+        }
+        else {
             switch (wCurrentFragment){
                 case FRAGMENT_MAIN_HOME:
                     super.onBackPressed();
@@ -181,6 +217,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         homeFragment = new HomeFragment();
                     }
                     setBckFragment( homeFragment );
+//                    boolean handle = shopsViewFragment.onBackPressed();
+//                    if (handle){
+//                        break;
+//                    }else{
+//                        wPreviousFragment = FRAGMENT_NULL;
+//                        if (homeFragment==null){
+//                            homeFragment = new HomeFragment();
+//                        }
+//                        setBckFragment( homeFragment );
+//                    }
                     break;
                 default:
                     super.onBackPressed();
@@ -217,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                    break;
 //            }
              */
-
         }
 
     }
@@ -317,6 +362,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setNextFragment( homeFragment, FRAGMENT_MAIN_HOME );
             return true;
         }else
+            if (mainNavItemId == R.id.menu_my_account){
+                startActivity( new Intent( MainActivity.this, UserProfileActivity.class ) );
+            }else
             // Bottom Options...
             if ( mainNavItemId == R.id.menu_log_out ){
                 // index - 5
@@ -383,7 +431,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // --------  Menu And Navigation !....
-
     private void showToast(String msg){
         Toast.makeText( mainActivity, msg, Toast.LENGTH_SHORT ).show();
     }
@@ -424,12 +471,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Button cancelBtn = cityDialog.findViewById( R.id.dialog_cancel_btn );
         Button selectBtn = cityDialog.findViewById( R.id.dialog_select_btn );
         final AutoCompleteTextView cityText = cityDialog.findViewById( R.id.dialogEditText );
-
-        if (DBQuery.areaCodeCityModelList.size() == 0){
-            DBQuery.getCityListQuery();
-        }
+        ArrayList<AreaCodeCityModel> areaCodeCityModelArrayList = new ArrayList <>();
+        areaCodeCityModelArrayList.addAll( DBQuery.areaCodeCityModelList );
+//        showToast( "Size : "+ areaCodeCityModelArrayList.size() );
         selectAreaCityAdaptor =
-                new SelectAreaCityAdaptor(MainActivity.this, R.layout.area_select_list_item, DBQuery.areaCodeCityModelList);
+                new SelectAreaCityAdaptor(MainActivity.this, R.layout.area_select_list_item, areaCodeCityModelArrayList);
 
         cityText.setThreshold(1);
         cityText.setAdapter(selectAreaCityAdaptor);
@@ -439,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 AreaCodeCityModel areaCodeCityModel = (AreaCodeCityModel) adapterView.getItemAtPosition(i);
-                cityText.setText(areaCodeCityModel.getAreaCode() + ", " + areaCodeCityModel.getAreaName() );
+                cityText.setText( areaCodeCityModel.getAreaCode() );
                 tempAreaCodeCityModel = areaCodeCityModel;
             }
         });
@@ -451,8 +497,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (tempAreaCodeCityModel!=null){
                     cityDialog.dismiss();
                     drawerCityTitle.setText( "Your City" );
-                    drawerCityName.setText( tempAreaCodeCityModel.getCityName() );
-                    showToast( "CityName : " +tempAreaCodeCityModel.getCityName() + " Code : " + tempAreaCodeCityModel.getAreaCode() );
+                    drawerCityName.setText( tempAreaCodeCityModel.getAreaCode() + ", " + tempAreaCodeCityModel.getCityName() );
+//                    showToast( "CityName : " +tempAreaCodeCityModel.getCityName() + " Code : " + tempAreaCodeCityModel.getAreaCode() );
                     // TODO : Reload Product...
 //                     loadMainHomePageAgain(tempAreaCodeCityModel.getCityCode());
                 }else{
@@ -486,6 +532,117 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void finishAllActivity(){
         // TODO : Finishing upper activities...
     }
+
+    private void getShopSearchItems(){
+        // Search Methods...
+        homeMainSearchView.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(final String query) {
+                dialog.show();
+                searchShopItemList.clear();
+                searchShopTags.clear();
+                final String [] tags = query.toLowerCase().split( " " );
+                for ( final String tag : tags ){
+                    firebaseFirestore
+                            .collection( "HOME_PAGE" )
+                            .document( CURRENT_CITY_CODE.toUpperCase() )
+                            .collection( "SHOPS" )
+                            .whereArrayContainsAny( "tags", Arrays.asList( tags ) )
+//                            .whereArrayContains( "tags", tag.trim() )
+                            .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                            if (task.isSuccessful()){
+                                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+                                    ShopItemModel model = new ShopItemModel(
+                                            documentSnapshot.getId(),
+                                            documentSnapshot.get( "shop_name" ).toString(),
+                                            documentSnapshot.get( "shop_image" ).toString(),
+                                            documentSnapshot.get( "shop_rating" ).toString(),
+                                            documentSnapshot.get( "shop_category" ).toString(),
+                                            Integer.parseInt(
+                                                    String.valueOf((long)documentSnapshot.get( "shop_veg_type" ) )
+                                            )
+                                    );
+                                    searchShopItemList.add( model );
+                                    if ( !searchShopTags.contains( model.getShopID() )){
+                                        searchShopItemList.add( model );
+                                        searchShopTags.add( model.getShopID() );
+                                    }
+
+                                }
+                                if (searchShopItemList.size()>0){
+                                    setFrameVisibility(false);
+                                }else{
+                                    setFrameVisibility(true);
+                                }
+                                if (tag.equals(tags[tags.length - 1])){
+                                    if (searchShopTags.isEmpty()){
+                                        DialogsClass.alertDialog( MainActivity.this, null, "No Shop found.!" ).show();
+                                        setFrameVisibility(true);
+                                    }else{
+                                        searchAdaptor.getFilter().filter( query );
+                                    }
+                                    dialog.dismiss();
+                                }
+                                dialog.dismiss();
+                            }else{
+                                // error...
+                                dialog.dismiss();
+                                showToast(  "Failed ! Product Not found.!" );
+                                setFrameVisibility(true);
+                            }
+                        }
+                    } );
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        } );
+        homeMainSearchView.setOnCloseListener( new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                setFrameVisibility(true);
+                return false;
+            }
+        } );
+
+    }
+    private void setFrameVisibility(boolean isVisible){
+        if (isVisible){
+            mainHomeContentFrame.setVisibility( View.VISIBLE );
+            homeSearchItemRecycler.setVisibility( View.GONE );
+        }else{
+            mainHomeContentFrame.setVisibility( View.GONE );
+            homeSearchItemRecycler.setVisibility( View.VISIBLE );
+        }
+    }
+
+    class SearchAdapter extends ShopListAdaptor implements Filterable {
+
+        public SearchAdapter(List <ShopItemModel> shopItemModelList) {
+            super( shopItemModelList );
+        }
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    return null;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    notifyDataSetChanged();
+                }
+            };
+        }
+    }
+
 
 
 }

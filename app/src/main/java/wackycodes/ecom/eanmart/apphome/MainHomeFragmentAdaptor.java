@@ -25,7 +25,8 @@ import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.category.ShopsViewFragment;
 import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
-import wackycodes.ecom.eanmart.wgridview.MyGridView;
+import wackycodes.ecom.eanmart.wcustomview.MyGridView;
+import wackycodes.ecom.eanmart.wcustomview.MyImageView;
 
 import static wackycodes.ecom.eanmart.MainActivity.mainActivity;
 import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopViewFragmentContext;
@@ -123,7 +124,7 @@ public class MainHomeFragmentAdaptor extends RecyclerView.Adapter {
 
     //============ Strip and Banner Banner ad  View Holder ============
     public class ShopAdBannerViewHolder extends RecyclerView.ViewHolder{
-        private ImageView bannerAdImage;
+        private MyImageView bannerAdImage;
         private ConstraintLayout bannerAdContainer;
 
         public ShopAdBannerViewHolder(@NonNull View itemView) {

@@ -4,12 +4,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 
-import androidx.annotation.ContentView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -17,31 +17,42 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
 import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
-import wackycodes.ecom.eanmart.userprofile.cart.CartItemModel;
+import wackycodes.ecom.eanmart.userprofile.addresses.AddAddressActivity;
+import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
+import wackycodes.ecom.eanmart.userprofile.addresses.UserAddressDataModel;
+import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
+import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_ITEMS;
+import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_ADD_ADDRESS;
+import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_REMOVE_ADDRESS;
+import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_UPDATE_ADDRESS;
 import static wackycodes.ecom.eanmart.other.StaticValues.USER_DATA_MODEL;
 
 public class UserDataQuery {
 
-
     public static ListenerRegistration userCartLR;
 
     // List Variables.....
-    public static List <CartItemModel> cartItemModelList = new ArrayList <>();
+    public static List <CartOrderSubItemModel> cartItemModelList = new ArrayList <>();
 
+    public static List<UserAddressDataModel> userAddressList = new ArrayList <>();
 
     // Reference...
     private static CollectionReference getCollection( String collectionName){
@@ -143,7 +154,8 @@ public class UserDataQuery {
                                     DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get( x );
                                     // Load RealTime Data...
 
-                                    CartItemModel cartItemModel = new CartItemModel(
+                                    CartOrderSubItemModel cartOrderSubItemModel = new CartOrderSubItemModel(
+                                            CART_TYPE_ITEMS,
                                             documentSnapshot.get( "p_shop_id" ).toString(),
                                             documentSnapshot.get( "p_id" ).toString(),
                                             documentSnapshot.get( "p_name" ).toString(),
@@ -153,15 +165,18 @@ public class UserDataQuery {
                                             documentSnapshot.get( "p_qty" ).toString()
                                     );
 
-                                    cartItemModelList.add( cartItemModel );
+                                    cartItemModelList.add( cartOrderSubItemModel );
                                     cartCount = cartCount+1;
 
                                 }
 
                                 if(cartCount>0){
                                     setCartBadge(String.valueOf( cartCount ));
+                                    // Set Cart
+                                    CartActivity.isCartEmpty = false;
                                 }else{
                                     // set Invisible cart
+                                    CartActivity.isCartEmpty = true;
                                 }
 
                             }
@@ -223,6 +238,120 @@ public class UserDataQuery {
     public static void loadNotificationsQuery(Context context){
 
 
+    }
+
+    // Query To Get All Address...
+    public static void getAllAddressesQuery(){
+        userAddressList.clear();
+
+        getCollection("ADDRESSES").orderBy( "add_id" ).get()
+                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            UserAddressDataModel userAddressDataModel;
+                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                                String add_id = documentSnapshot.get( "add_id" ).toString();
+                                String add_user_name = documentSnapshot.get( "add_user_name" ).toString();
+                                String add_h_no = documentSnapshot.get( "add_h_no" ).toString();
+                                String add_colony = documentSnapshot.get( "add_colony" ).toString();
+                                String add_city = documentSnapshot.get( "add_city" ).toString();
+                                String add_pin_code = documentSnapshot.get( "add_pin_code" ).toString();
+                                String add_landmark = documentSnapshot.get( "add_landmark" ).toString();
+                                Boolean is_selected = documentSnapshot.getBoolean( "is_selected" );
+                                userAddressDataModel = new UserAddressDataModel(
+                                        add_id,
+                                        add_user_name,
+                                        "Mobile",
+                                        add_h_no,
+                                        add_colony,
+                                        add_city,
+                                        " ",
+                                        add_pin_code,
+                                        add_landmark,
+                                        is_selected
+                                );
+                                userAddressList.add( userAddressDataModel );
+                            }
+
+                            if (MyAddressesActivity.myAddressRecyclerAdaptor!=null){
+                                MyAddressesActivity.myAddressRecyclerAdaptor.notifyDataSetChanged();
+                            }
+
+                        }else{
+                            // Failed...
+                        }
+                    }
+                } );
+    }
+
+    // Query To Remove and update address from database...
+    public static void addUpdateRemoveAddressQuery(final Context context
+            , final Dialog dialog, final int queryType, @NonNull String addressID,
+                                                   final int index,@Nullable final UserAddressDataModel userAddressDataModel ){
+        if (queryType == QUERY_TO_ADD_ADDRESS || queryType == QUERY_TO_UPDATE_ADDRESS ){
+            Map <String, Object> addNewAddress = new HashMap <>();
+            addNewAddress.put( "add_id", addressID );
+            addNewAddress.put( "add_user_name", userAddressDataModel.getAddUserName() );
+            addNewAddress.put( "add_h_no", userAddressDataModel.getAddHouseNoWard() );
+            addNewAddress.put( "add_colony", userAddressDataModel.getAddColonyVillage() );
+            addNewAddress.put( "add_city", userAddressDataModel.getAddCityName() );
+            addNewAddress.put( "add_pin_code", userAddressDataModel.getAddAreaPinCode() );
+            addNewAddress.put( "add_landmark", userAddressDataModel.getAddLandmark() );
+            addNewAddress.put( "is_selected", userAddressDataModel.getSelectedAddress() );
+
+            getCollection("ADDRESSES").document( addressID )
+                    .set( addNewAddress )
+                    .addOnCompleteListener( new OnCompleteListener <Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task <Void> task) {
+                            if (task.isSuccessful()){
+                                // Start activity and finishing..
+                                userAddressList.add(index, userAddressDataModel );
+                                MyAddressesActivity.myAddressRecyclerAdaptor.notifyDataSetChanged();
+                                dialog.dismiss();
+                                switch (queryType){
+                                    case QUERY_TO_ADD_ADDRESS:
+                                        showToast( context, "Address Added Successfully..!" );
+                                        AddAddressActivity.addAddressActivity.finish();
+                                        break;
+                                    case QUERY_TO_UPDATE_ADDRESS:
+                                        showToast( context, "Update address Successfully..!" );
+                                        AddAddressActivity.addAddressActivity.finish();
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            else{
+                                dialog.dismiss();
+                                MyAddressesActivity.myAddressRecyclerAdaptor.notifyDataSetChanged();
+                                String error = "Failed..! Error : " + task.getException().getMessage();
+                                showToast( context, error );
+                            }
+                        }
+                    } );
+
+        }else{
+            getCollection("ADDRESSES").document( addressID )
+                    .delete()
+                    .addOnCompleteListener( new OnCompleteListener <Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task <Void> task) {
+                            if (task.isSuccessful()){
+                                dialog.dismiss();
+                                userAddressList.remove( index );
+                                MyAddressesActivity.myAddressRecyclerAdaptor.notifyDataSetChanged();
+                                showToast( context, "Remove Address Successfully..!" );
+                                AddAddressActivity.addAddressActivity.finish();
+                            }else{
+                                dialog.dismiss();
+                                String error = "Failed..! Error : " + task.getException().getMessage();
+                            }
+                        }
+                    } );
+
+        }
 
     }
 

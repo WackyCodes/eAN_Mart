@@ -17,7 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".shophome.ShopHomeActivity"></activity>
+        <activity android:name=".userprofile.AccountSettingActivity"></activity>
+        <activity android:name=".userprofile.UserProfileActivity" />
+        <activity android:name=".userprofile.addresses.AddAddressActivity" />
+        <activity android:name=".userprofile.addresses.MyAddressesActivity" />
+        <activity android:name=".userprofile.cart.CartActivity" />
+        <activity android:name=".shophome.ShopHomeActivity" />
         <activity android:name=".launching.AuthActivity" />
         <activity android:name=".launching.WelcomeActivity">
             <intent-filter>

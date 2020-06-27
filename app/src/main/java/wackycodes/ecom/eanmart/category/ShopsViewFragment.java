@@ -108,7 +108,9 @@ public class ShopsViewFragment extends Fragment {
         return view;
     }
 
-
+    public boolean onBackPressed(){
+        return false;
+    }
 
 
 }

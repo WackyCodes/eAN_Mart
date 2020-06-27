@@ -2,6 +2,8 @@ package wackycodes.ecom.eanmart.userprofile.addresses;
 
 public class UserAddressDataModel {
 
+    private String addressID;
+
     // new Address...
     private String addUserName;
     private String addUserMobile;
@@ -12,6 +14,17 @@ public class UserAddressDataModel {
     private String addState;
     private String addAreaPinCode;
     private String addLandmark;
+
+    private Boolean isSelectedAddress = false;
+
+    public Boolean getSelectedAddress() {
+        return isSelectedAddress;
+    }
+
+    public void setSelectedAddress(Boolean selectedAddress) {
+        isSelectedAddress = selectedAddress;
+    }
+
 
     public UserAddressDataModel() {
     }
@@ -25,7 +38,8 @@ public class UserAddressDataModel {
         this.addLandmark = addLandmark;
     }
 
-    public UserAddressDataModel(String addUserName, String addUserMobile, String addHouseNoWard, String addColonyVillage, String addCityName, String addState, String addAreaPinCode, String addLandmark) {
+    public UserAddressDataModel(String addressID, String addUserName, String addUserMobile, String addHouseNoWard, String addColonyVillage, String addCityName, String addState, String addAreaPinCode, String addLandmark,Boolean isSelectedAddress) {
+        this.addressID = addressID;
         this.addUserName = addUserName;
         this.addUserMobile = addUserMobile;
         this.addHouseNoWard = addHouseNoWard;
@@ -34,8 +48,16 @@ public class UserAddressDataModel {
         this.addState = addState;
         this.addAreaPinCode = addAreaPinCode;
         this.addLandmark = addLandmark;
+        this.isSelectedAddress = isSelectedAddress;
     }
 
+    public String getAddressID() {
+        return addressID;
+    }
+
+    public void setAddressID(String addressID) {
+        this.addressID = addressID;
+    }
 
     public String getAddUserName() {
         return addUserName;

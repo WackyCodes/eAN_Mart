@@ -1,9 +1,6 @@
 package wackycodes.ecom.eanmart.productdetails;
 
 import android.app.Dialog;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,16 +23,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
-import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
-import wackycodes.ecom.eanmart.other.StaticValues;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.other.StaticValues.PRODUCT_DETAILS_ACTIVITY;

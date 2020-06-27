@@ -8,11 +8,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
+    <wackycodes.ecom.eanmart.wcustomview.MyImageView
         android:id="@+id/strip_ad_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_strip_black_24dp"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/ic_strip_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

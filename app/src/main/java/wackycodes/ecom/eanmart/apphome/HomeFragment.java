@@ -33,12 +33,6 @@ public class HomeFragment extends Fragment {
 
     private FrameLayout frameLayout;
 
-    // Search Variables...
-    private SearchView searchView;
-    private RecyclerView searchItemRecycler;
-    private TextView searchPlease;
-    // Search Variables...
-
     public static SwipeRefreshLayout homeSwipeRefreshLayout;
     // Home Recycler view...
     private RecyclerView homeRecyclerView;
@@ -73,7 +67,7 @@ public class HomeFragment extends Fragment {
         homeRecyclerView.setAdapter( mainHomeFragmentAdaptor );
         mainHomeFragmentAdaptor.notifyDataSetChanged();
 
-        if (homePageCategoryList.size()==0){
+        if (homePageCategoryList.size()==0&&CURRENT_CITY_CODE !=null){
             DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, false );
         }
 

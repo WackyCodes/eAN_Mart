@@ -13,6 +13,22 @@ public class StaticValues {
     public static String CURRENT_CITY_NAME ;
     public static String CURRENT_CITY_CODE ;
 
+    // User Cart...
+    public static final int CART_TYPE_ITEMS = 0;
+    public static final int CART_TYPE_TOTAL_PRICE = 1;
+    public static int TOTAL_BILL_AMOUNT;
+    public static int DELIVERY_AMOUNT;
+
+    // address..
+    public static final int EDIT_ADDRESS_MODE = 2;
+    public static final int MANAGE_ADDRESS = 1;
+    public static final int SELECT_ADDRESS = 0;
+    public static boolean isVerifiedMobile = false;
+
+    public static final int QUERY_TO_ADD_ADDRESS = 20;
+    public static final int QUERY_TO_REMOVE_ADDRESS = 21;
+    public static final int QUERY_TO_UPDATE_ADDRESS = 22;
+
     // User Data Model...
     public static final UserDataModel USER_DATA_MODEL = new UserDataModel();
 
@@ -74,6 +90,9 @@ public class StaticValues {
     public static final int BUY_NOW_ACTIVITY = 19;
     public static final int SHOP_HOME_ACTIVITY = 20;
 
+    public static final int SHOP_TYPE_VEG = 1;
+    public static final int SHOP_TYPE_NON_VEG = 2;
+    public static final int SHOP_TYPE_NO_SHOW = 3;
 
 
     // Product Details... Temp List.

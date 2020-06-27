@@ -16,7 +16,7 @@
 <!--        android:verticalSpacing="1dp" >-->
 <!--    </GridView>-->
 
-    <wackycodes.ecom.eanmart.wgridview.MyGridView
+    <wackycodes.ecom.eanmart.wcustomview.MyGridView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/home_cat_grid_view"
