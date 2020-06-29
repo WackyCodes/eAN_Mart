@@ -25,13 +25,12 @@
             app:elevation="4dp"
             android:theme="@style/ToolTheme"
             app:titleMarginStart="40dp"
-            app:titleTextColor="#ffffff">
+            app:titleTextColor="@color/colorWhite">
 
         </androidx.appcompat.widget.Toolbar>
 
 
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/activity_product_detail_constLayout"
@@ -45,7 +44,6 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="40dp"
             app:layout_constraintBottom_toBottomOf="@+id/cartlinearlayour"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -69,48 +67,114 @@
         <LinearLayout
             android:id="@+id/cartlinearlayour"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#858484"
+            android:layout_height="42dp"
+            android:layout_margin="4dp"
+            android:layout_gravity="center_vertical"
             android:orientation="horizontal"
+            android:backgroundTint="@color/colorPrimary"
+            android:background="@drawable/back_rectangle_4dp_layout"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <Button
-                android:id="@+id/add_to_cart_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:id="@+id/add_to_cart_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/colorPrimary"
-                android:text="Add To Cart"
-                android:textAlignment="center"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:gravity="center"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:tint="@color/colorWhite"
+                    android:layout_marginRight="10dp"
+                    app:srcCompat="@drawable/ic_shopping_cart_black_24dp" />
 
-            <Button
-                android:id="@+id/buy_now_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                <TextView
+                    android:id="@+id/add_to_cart_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="Add To Cart"
+                    android:textColor="@color/colorWhite"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/add_more_cart_layout"
+                android:visibility="gone"
                 android:layout_weight="1"
-                android:background="@color/colorDarkViolet"
-                android:text="Buy Now"
-                android:textAlignment="center"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/remove_item_from_cart_imgBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/colorNoColor"
+                        android:tint="@color/colorWhite"
+                        android:padding="4dp"
+                        app:srcCompat="@drawable/ic_remove_circle_outline_black_24dp" />
+
+                    <TextView
+                        android:id="@+id/cart_item_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="2"
+                        android:padding="4dp"
+                        android:layout_marginLeft="6dp"
+                        android:layout_marginRight="6dp"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/add_item_to_cart_imgBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/colorNoColor"
+                        android:padding="4dp"
+                        android:tint="@color/colorWhite"
+                        app:srcCompat="@drawable/ic_add_circle_outline_black_24dp"/>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/check_out_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:backgroundTint="@color/colorWhite"
+                    android:background="@drawable/back_rectangle_4dp_layout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:text="Check Out"
+                        android:drawableRight="@drawable/ic_navigate_next_black_24dp"
+                        android:drawablePadding="6dp"
+                        android:drawableTint="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <FrameLayout
-        android:visibility="gone"
-        android:id="@+id/goto_my_cart_frame"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

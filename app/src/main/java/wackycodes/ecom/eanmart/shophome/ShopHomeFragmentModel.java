@@ -2,7 +2,10 @@ package wackycodes.ecom.eanmart.shophome;
 
 import java.util.List;
 
+import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
+import wackycodes.ecom.eanmart.category.ShopItemModel;
+import wackycodes.ecom.eanmart.productdetails.ProductModel;
 
 public class ShopHomeFragmentModel {
 
@@ -14,6 +17,32 @@ public class ShopHomeFragmentModel {
     }
     public void setLayoutType(int layoutType) {
         this.layoutType = layoutType;
+    }
+
+    //--- Category Layout...
+    private List<CategoryTypeModel> categoryTypeModelList;
+    private boolean isVisible;
+
+    public ShopHomeFragmentModel(int layoutType, List <CategoryTypeModel> categoryTypeModelList, boolean isVisible ) {
+        this.layoutType = layoutType;
+        this.categoryTypeModelList = categoryTypeModelList;
+        this.isVisible = isVisible;
+    }
+
+    public List <CategoryTypeModel> getCategoryTypeModelList() {
+        return categoryTypeModelList;
+    }
+
+    public void setCategoryTypeModelList(List <CategoryTypeModel> categoryTypeModelList) {
+        this.categoryTypeModelList = categoryTypeModelList;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
     }
 
     //------ Layout for Banner Slider...
@@ -53,22 +82,25 @@ public class ShopHomeFragmentModel {
     //------ Layout for Strip ad....
 
     // ------- Horizontal Item View ..----------------
-    private  List<HorizontalItemViewModel> horizontalItemViewModelList;
+    private List<ProductModel> productModelList;
     private List<String> HrAndGridProductIdList;
     private String horizontalLayoutTitle;
 
-    public ShopHomeFragmentModel(int layoutType, List<String> HrAndGridProductIdList, List <HorizontalItemViewModel> horizontalItemViewModelList, String horizontalLayoutTitle) {
+    public ShopHomeFragmentModel(int layoutType, List<String> HrAndGridProductIdList, List <ProductModel> productModelList, String horizontalLayoutTitle) {
         this.layoutType = layoutType;
-        this.horizontalItemViewModelList = horizontalItemViewModelList;
+        this.productModelList = productModelList;
         this.horizontalLayoutTitle = horizontalLayoutTitle;
         this.HrAndGridProductIdList = HrAndGridProductIdList;
     }
-    public List <HorizontalItemViewModel> getHorizontalItemViewModelList() {
-        return horizontalItemViewModelList;
+
+    public List <ProductModel> getProductModelList() {
+        return productModelList;
     }
-    public void setHorizontalItemViewModelList(List <HorizontalItemViewModel> horizontalItemViewModelList) {
-        this.horizontalItemViewModelList = horizontalItemViewModelList;
+
+    public void setProductModelList(List <ProductModel> productModelList) {
+        this.productModelList = productModelList;
     }
+
     public String getHorizontalLayoutTitle() {
         return horizontalLayoutTitle;
     }

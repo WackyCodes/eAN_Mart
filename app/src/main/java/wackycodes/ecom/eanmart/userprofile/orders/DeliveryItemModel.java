@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.userprofile.cart;
+package wackycodes.ecom.eanmart.userprofile.orders;
 
 public class DeliveryItemModel {
 

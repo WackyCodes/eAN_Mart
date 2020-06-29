@@ -54,14 +54,13 @@ import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.userprofile.UserProfileActivity;
+import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
-import static wackycodes.ecom.eanmart.category.ShopsViewFragment.shopsViewFragment;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
-import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopsViewFragmentList;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
@@ -177,7 +176,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
         if (homePageCategoryList.size() == 0 && CURRENT_CITY_CODE !=null){
-            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, false );
+            dialog.show();
+            DBQuery.getHomePageCategoryListQuery( dialog, null, CURRENT_CITY_CODE, false );
         }
         if ( currentUser != null && StaticValues.USER_DATA_MODEL.isLoadData()){
             Glide.with( this ).load( StaticValues.USER_DATA_MODEL.getUserProfilePhoto() ).
@@ -268,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // --------  Menu And Navigation....
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -290,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (currentUser == null){
                         DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
                     }else{
-//                        myCart();// TODO : Open My Cart Activity....
+                        gotoCart();
                     }
                 }
             } );
@@ -333,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
                 return false;
             }else{
-//                myCart();
+                gotoCart();
                 return true;
             }
         } else
@@ -363,7 +362,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }else
             if (mainNavItemId == R.id.menu_my_account){
-                startActivity( new Intent( MainActivity.this, UserProfileActivity.class ) );
+                if (currentUser!=null){
+                    startActivity( new Intent( MainActivity.this, UserProfileActivity.class ) );
+                }else{
+                    DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
+                }
+            }else
+            if (mainNavItemId == R.id.menu_my_cart){
+                if (currentUser!=null){
+                    gotoCart();
+                }else{
+                    DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
+                }
             }else
             // Bottom Options...
             if ( mainNavItemId == R.id.menu_log_out ){
@@ -431,6 +441,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // --------  Menu And Navigation !....
+    private void gotoCart(){
+        startActivity( new Intent( MainActivity.this, CartActivity.class ) );
+    }
     private void showToast(String msg){
         Toast.makeText( mainActivity, msg, Toast.LENGTH_SHORT ).show();
     }
@@ -500,7 +513,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     drawerCityName.setText( tempAreaCodeCityModel.getAreaCode() + ", " + tempAreaCodeCityModel.getCityName() );
 //                    showToast( "CityName : " +tempAreaCodeCityModel.getCityName() + " Code : " + tempAreaCodeCityModel.getAreaCode() );
                     // TODO : Reload Product...
-//                     loadMainHomePageAgain(tempAreaCodeCityModel.getCityCode());
+                    if (tempAreaCodeCityModel.getCityCode()!=CURRENT_CITY_CODE){
+                        loadMainHomePageAgain(tempAreaCodeCityModel.getCityCode());
+                        CURRENT_CITY_CODE = tempAreaCodeCityModel.getCityCode();
+                    }
+
                 }else{
                     cityText.setError( "pin code / City not found!" );
                 }
@@ -520,7 +537,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // load Main Home again...
     public void loadMainHomePageAgain( String cityCode ){
-        DBQuery.getHomePageCategoryListQuery( cityCode, true );
+        dialog.show();
+        DBQuery.getHomePageCategoryListQuery( dialog, null, cityCode, true );
         finishAllActivity();
         if (wCurrentFragment == FRAGMENT_MAIN_SHOPS_VIEW){
             wPreviousFragment = FRAGMENT_NULL;

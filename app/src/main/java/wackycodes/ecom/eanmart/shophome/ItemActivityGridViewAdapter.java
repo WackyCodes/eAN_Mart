@@ -15,13 +15,15 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
+import wackycodes.ecom.eanmart.productdetails.ProductModel;
 
 public class ItemActivityGridViewAdapter extends BaseAdapter {
 
-    private List <HorizontalItemViewModel> gridProductList;
+    private List <ProductModel> gridProductList;
 
-    public ItemActivityGridViewAdapter(List <HorizontalItemViewModel> gridProductList) {
+    public ItemActivityGridViewAdapter(List <ProductModel> gridProductList) {
         this.gridProductList = gridProductList;
     }
 
@@ -44,7 +46,7 @@ public class ItemActivityGridViewAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
 
-        final HorizontalItemViewModel horizontalItemViewModel = gridProductList.get( position );
+        final ProductModel horizontalItemViewModel = gridProductList.get( position );
         View view = LayoutInflater.from( parent.getContext() ).inflate( R.layout.horizontal_itemview_item, null );
 
         ImageView itemImage = view.findViewById( R.id.hr_product_image );
@@ -55,16 +57,19 @@ public class ItemActivityGridViewAdapter extends BaseAdapter {
 
 //            TextView itemStock =  view.findViewById( R.id.hr_product );
 
-        itemName.setText( horizontalItemViewModel.getHrProductName() );
-        itemPrice.setText( "Rs."+ horizontalItemViewModel.getHrProductPrice() + "/-" );
-        itemCutPrice.setText( "Rs."+ horizontalItemViewModel.getHrProductCutPrice() + "/-" );
+        String sellingPrice = horizontalItemViewModel.getProductSubModelList().get( 0 ).getpSellingPrice();
+        String mrpPrice = horizontalItemViewModel.getProductSubModelList().get( 0 ).getpMrpPrice();
+        itemName.setText( horizontalItemViewModel.getProductSubModelList().get( 0 ).getpName() );
+        itemPrice.setText( "Rs."+ sellingPrice + "/-" );
+        itemCutPrice.setText( "Rs."+ mrpPrice + "/-" );
 
-        Glide.with( view.getContext() ).load( horizontalItemViewModel.getHrProductImage() )
+        String[] imageLinks = horizontalItemViewModel.getProductSubModelList().get( 0 ).getpImage();
+        Glide.with( view.getContext() ).load( imageLinks[0] )
                 .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( itemImage );
 
-        int perOff = ((Integer.parseInt( horizontalItemViewModel.getHrProductCutPrice() )
-                - Integer.parseInt( horizontalItemViewModel.getHrProductPrice() )) * 100) /
-                Integer.parseInt(  horizontalItemViewModel.getHrProductCutPrice() );
+        int perOff = ((Integer.parseInt( mrpPrice )
+                - Integer.parseInt( sellingPrice )) * 100) /
+                Integer.parseInt( mrpPrice );
         itemOffPer.setText( perOff + "% Off" );
 
 
@@ -72,11 +77,16 @@ public class ItemActivityGridViewAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 Intent gotoProductDetailIntent = new Intent(parent.getContext(), ProductDetails.class);
-                gotoProductDetailIntent.putExtra( "PRODUCT_ID", gridProductList.get( position ).getHrProductId() );
+                gotoProductDetailIntent.putExtra( "PRODUCT_ID", gridProductList.get( position ).getpProductID() );
+
+                int shopHomeCategoryIndex;
+                int layoutIndex;
+                int productIndex;
+
+                DBQuery.shopHomeCategoryList.get( 0 ).get( 0 ).getProductModelList().get( 0 );
                 parent.getContext().startActivity( gotoProductDetailIntent );
             }
         } );
-
 
 //        if(convertView == null){
         // add Products....

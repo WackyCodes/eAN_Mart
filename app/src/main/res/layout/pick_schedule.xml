@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/back_round_white_layout"
+    android:layout_margin="4dp"
+    android:padding="4dp"
+    android:layout_width="wrap_content"
+    android:gravity="center"
+    android:backgroundTint="@color/colorGray"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/pick_schedule_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sample Text"
+        android:textAlignment="center"
+        android:textColor="@color/colorWhite"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        />
+
+</LinearLayout>

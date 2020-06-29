@@ -7,34 +7,40 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
+import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_ACTIVITY;
-import static wackycodes.ecom.eanmart.shophome.HorizontalItemViewModel.hrViewType;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_PREVIOUS;
 
 public class ShopHomeActivity extends AppCompatActivity {
 
-
     private String shopID;
 
-
     public static SwipeRefreshLayout shopHomeSwipeRefreshLayout;
-    public static TextView locationText;
+    public static TextView shopIDText;
     public static TextView badgeCartCount;
 
     private RecyclerView shopHomeContainerRecycler;
@@ -44,42 +50,49 @@ public class ShopHomeActivity extends AppCompatActivity {
     //------ View Pager for Banner Slider...
     public static List<BannerSliderModel> bannerSliderModelList;
     //------ View Pager for Banner Slider...
-    // ------- Horizontal Item View ..----------------
-    public static List <HorizontalItemViewModel> horizontalItemViewModelList;
-    public static List<HorizontalItemViewModel> gridLayoutViewList;
-    // ------- Horizontal Item View ..----------------
 
+    private Dialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_show_home );
-
+        dialog = DialogsClass.getDialog( this );
         Toolbar toolbar = findViewById( R.id.appToolbar );
         setSupportActionBar( toolbar );
         try{
             getSupportActionBar().setDisplayShowTitleEnabled( true );
-            getSupportActionBar().setTitle( "AN Electronics" );
+            getSupportActionBar().setShowHideAnimationEnabled( true );
+            getSupportActionBar().setSubtitle( R.string.sample_address );
             getSupportActionBar( ).setDisplayHomeAsUpEnabled( true );
         }catch (NullPointerException e){
         }
         // get ShopId from Intent...
         shopID = getIntent().getStringExtra( "SHOP_ID" );
+        SHOP_ID_CURRENT = shopID;
+        // Check SHOP_ID : Whether Equal or Not in Current List....
+        loadShopData(shopID);
+        if (shopID.equals( SHOP_ID_PREVIOUS )){
+            // continue...
+        }else{
+            // reload...
+            dialog.show();
+            shopHomeCategoryList.clear();
+        }
 
-        locationText = findViewById( R.id.shop_location );
+        shopIDText = findViewById( R.id.shop_id );
+        shopIDText.setText( shopID );
 
         shopHomeSwipeRefreshLayout = findViewById( R.id.shop_home_swipe_refresh_layout );
         shopHomeContainerRecycler = findViewById( R.id.shop_home_layout_container_recycler );
 
 
         // Assign value for horizontal product view in box shape...
-        hrViewType = 0;
         // Refresh Progress...
         shopHomeSwipeRefreshLayout.setColorSchemeColors( this.getResources().getColor( R.color.colorPrimary ),
                 this.getResources().getColor( R.color.colorPrimary ),
                 this.getResources().getColor( R.color.colorPrimary ));
         // Refresh Progress...
-
 
         // -------- Home List....
 
@@ -89,27 +102,26 @@ public class ShopHomeActivity extends AppCompatActivity {
         // -------- Home List....
 
         // Category icon set...
-        // ========== Home Layout Container Recycler --------------------
-
-
+        // ========== Load List Or set Adaptor --------------------
         if (shopHomeCategoryList.size() == 0) {
+            shopHomeCategoryList.add( new ArrayList <ShopHomeFragmentModel>() );
             if (CheckInternetConnection.isInternetConnected( this )) {
-                DBQuery.getQuerySetFragmentData( this, shopHomeContainerRecycler, 0, "HOME" );
+                dialog.show();
+                DBQuery.getShopHomeListQuery( this, dialog, shopID, "HOME", 0, shopHomeContainerRecycler, null );
             }
-        } else {
+        }
+        else {
             if (shopHomeCategoryList.get( 0 ).size() == 0){
                 if (CheckInternetConnection.isInternetConnected( this )) {
-                    DBQuery.getQuerySetFragmentData( this, shopHomeContainerRecycler, 0, "HOME" );
+                    dialog.show();
+                    DBQuery.getShopHomeListQuery( this, dialog, shopID, "HOME", 0, shopHomeContainerRecycler, null );
                 }
             }else{
-                shopHomeFragmentAdaptor = new ShopHomeFragmentAdaptor( shopHomeCategoryList.get( 0 ) );
+                shopHomeFragmentAdaptor = new ShopHomeFragmentAdaptor(0, shopHomeCategoryList.get( 0 ) );
                 shopHomeContainerRecycler.setAdapter( shopHomeFragmentAdaptor );
                 shopHomeFragmentAdaptor.notifyDataSetChanged();
             }
-
         }
-        // ========== Home Layout Container Recycler --------------------
-//        }
 
         // ----= Refresh Layout... check is Null.?
         if (shopHomeSwipeRefreshLayout != null)
@@ -119,21 +131,13 @@ public class ShopHomeActivity extends AppCompatActivity {
                 @Override
                 public void onRefresh() {
                     shopHomeSwipeRefreshLayout.setRefreshing( true );
-
                     if (CheckInternetConnection.isInternetConnected( ShopHomeActivity.this )){
-                        hrViewType = 0;
-
                         shopHomeCategoryList.get( 0 ).clear();
-                        DBQuery.getQuerySetFragmentData( ShopHomeActivity.this,
-                                shopHomeContainerRecycler, 0, "HOME" );
+                        DBQuery.getShopHomeListQuery( ShopHomeActivity.this
+                                , null, shopID, "HOME", 0, shopHomeContainerRecycler, shopHomeSwipeRefreshLayout );
 
                         // Access data again from database...
 //                        getQueryCategoryIcon( categoryIconRecycler, getContext() );
-//
-//                        homeCategoryListName.add("HOME");
-//                        homeCategoryList.add( new ArrayList<HomeFragmentModel>() );
-//                        getQuerySetFragmentData(getContext(), homeLayoutContainerRecycler, 0, "HOME");
-
                     }else{
                         shopHomeSwipeRefreshLayout.setRefreshing( false );
                     }
@@ -142,11 +146,7 @@ public class ShopHomeActivity extends AppCompatActivity {
             });
         // ----= Refresh Layout...
 
-
-
-
     }
-
 
     // Tool Bar Menu...
     @Override
@@ -168,8 +168,7 @@ public class ShopHomeActivity extends AppCompatActivity {
                 if (currentUser == null){
                     DialogsClass.signInUpDialog( ShopHomeActivity.this, SHOP_HOME_ACTIVITY );
                 }else{
-//                    startActivity( new Intent(ProductDetails.this, MainActivity.class) );
-//                    MainActivity.isFragmentIsMyCart = true;
+                    startActivity( new Intent( ShopHomeActivity.this, CartActivity.class) );
                 }
             }
         } );
@@ -177,7 +176,6 @@ public class ShopHomeActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
         int id = item.getItemId();
         if ((item.getItemId() == android.R.id.home)){
             finish();
@@ -188,14 +186,36 @@ public class ShopHomeActivity extends AppCompatActivity {
             if (currentUser == null){
                 DialogsClass.signInUpDialog( ShopHomeActivity.this, SHOP_HOME_ACTIVITY );
             }else{
-//                startActivity( new Intent(this, MainActivity.class) );
-//                MainActivity.isFragmentIsMyCart = true;
+                startActivity( new Intent( ShopHomeActivity.this, CartActivity.class) );
             }
             return true;
         }
         return super.onOptionsItemSelected( item );
     }
 
+    // Load Shop Data And Check whether isOpen Shop or Not...!
+    private void loadShopData(@NonNull String shopID){
+
+        DBQuery.firebaseFirestore.collection( "SHOPS" ).document( shopID )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+
+                    DocumentSnapshot documentSnapshot = task.getResult();
+
+//                    boolean isOpen = documentSnapshot.getBoolean( "is_open" );
+                    String shopName = documentSnapshot.get( "shop_name" ).toString();
+                    getSupportActionBar().setTitle( shopName );
+                    // TODO : Shop Related Data...
+
+                }else{
+
+                }
+            }
+        } );
+
+    }
 
 
 }

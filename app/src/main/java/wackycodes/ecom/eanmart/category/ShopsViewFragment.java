@@ -1,5 +1,6 @@
 package wackycodes.ecom.eanmart.category;
 
+import android.app.Dialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -21,8 +22,11 @@ import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
 import wackycodes.ecom.eanmart.apphome.MainHomeFragmentAdaptor;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
+import wackycodes.ecom.eanmart.other.DialogsClass;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopsViewFragmentList;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 
 
@@ -49,6 +53,8 @@ public class ShopsViewFragment extends Fragment {
     // Sample List of Category...
     private List <CategoryTypeModel> categoryTypeModelList = new ArrayList <>();
 
+    private Dialog dialog;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -65,8 +71,10 @@ public class ShopsViewFragment extends Fragment {
                 getContext().getResources().getColor( R.color.colorPrimary ),
                 getContext().getResources().getColor( R.color.colorPrimary ));
         // Refresh Progress...
+        dialog = DialogsClass.getDialog( view.getContext() );
         if (catID != null){
-            DBQuery.getShopsViewFragmentListQuery( CURRENT_CITY_NAME, catID );
+            dialog.show();
+            DBQuery.getShopsViewFragmentListQuery( dialog, null, CURRENT_CITY_NAME, catID );
         }
 
         // ... Recycler
@@ -81,30 +89,27 @@ public class ShopsViewFragment extends Fragment {
         shopsViewRecycler.setAdapter( shopViewFragmentAdaptor );
         shopViewFragmentAdaptor.notifyDataSetChanged();
 
-        /**if (shopsViewFragmentList.size()==0){
-            DBQuery.getShopsViewFragmentListQuery( CURRENT_CITY_NAME, "ELECTRONICS" );
-        }*/
-       /*
-        if(categoryTypeModelList.size() == 0){
-            // Sample Data..
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "AN Electronuics", String.valueOf( R.drawable.product1 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "Deep Mobiles", String.valueOf( R.drawable.product1 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "Jay T.V. & Electronics", String.valueOf( R.drawable.product2 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "Sabir Computer Shop", String.valueOf( R.drawable.product1 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "Bhopali Electronics", String.valueOf( R.drawable.product2 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_SHOPS_VIEW_NAME," ", "Pankaj Mobile shop", String.valueOf( R.drawable.product2 ) ) );
+//        if (shopsViewFragmentList.size()==0){
+//            DBQuery.getShopsViewFragmentListQuery( CURRENT_CITY_NAME, "ELECTRONICS" );
+//        }
 
-        }
-        if (shopsViewFragmentList.size()==0){
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList  ) );
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.banner_c ), "Name" , TYPE_BANNER_SHOPS_VIEW ) );
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.stip_ad_b ), "Name", TYPE_BANNER_SHOPS_VIEW  ) );
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.strip_ad_a ), "Name", TYPE_BANNER_SHOPS_VIEW  ) );
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.banner_c ), "Name", TYPE_BANNER_SHOPS_VIEW  ) );
-            shopsViewFragmentList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.stip_ad_b ), "Name", TYPE_BANNER_SHOPS_VIEW  ) );
-            shopViewFragmentAdaptor.notifyDataSetChanged();
-        }
-        */
+        // Swipe Refresh...
+        if (swipeRefreshLayout != null)
+            swipeRefreshLayout.setOnRefreshListener( new SwipeRefreshLayout.OnRefreshListener(){
+
+                @Override
+                public void onRefresh() {
+                    swipeRefreshLayout.setRefreshing( true );
+                    if (CheckInternetConnection.isInternetConnected( getContext() )){
+                        // Refreshing...
+                        DBQuery.getShopsViewFragmentListQuery( null, swipeRefreshLayout, CURRENT_CITY_NAME, catID );
+                    }else{
+                        swipeRefreshLayout.setRefreshing( false );
+                    }
+
+                }
+            });
+
         return view;
     }
 

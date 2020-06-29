@@ -17,27 +17,35 @@ import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
+import wackycodes.ecom.eanmart.productdetails.ProductModel;
+
+import static wackycodes.ecom.eanmart.other.StaticValues.VIEW_GRID_LAYOUT;
+import static wackycodes.ecom.eanmart.other.StaticValues.VIEW_HORIZONTAL_LAYOUT;
+import static wackycodes.ecom.eanmart.other.StaticValues.VIEW_RECTANGLE_LAYOUT;
 
 public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerView.ViewHolder>  {
 
-    private static final int HOME_HORIZONTAL_LAYOUT = 0;
-    private static final int VIEW_ALL_HORIZONTAL_LAYOUT = 1;
+    private int crrShopCatIndex;
+    private int layoutIndex;
+    private int viewType;
+    private List <ProductModel> horizontalItemViewModelList;
 
-    private List <HorizontalItemViewModel> horizontalItemViewModelList;
-
-    public HorizontalItemViewAdaptor(List <HorizontalItemViewModel> horizontalItemViewModelList) {
+    public HorizontalItemViewAdaptor( int crrShopCatIndex, int layoutIndex, int viewType, List <ProductModel> horizontalItemViewModelList) {
+        this.crrShopCatIndex = crrShopCatIndex;
+        this.layoutIndex = layoutIndex;
+        this.viewType = viewType;
         this.horizontalItemViewModelList = horizontalItemViewModelList;
     }
 
     @Override
     public int getItemViewType(int position) {
-        switch (horizontalItemViewModelList.get( position ).getHrViewType()) {
-            case 0:
-                // TODO : horizontal home list ...
-                return HOME_HORIZONTAL_LAYOUT;
-            case 1:
-                // TODO : View all horizontal...
-                return VIEW_ALL_HORIZONTAL_LAYOUT;
+        switch (viewType) {
+            case VIEW_HORIZONTAL_LAYOUT:
+                return VIEW_HORIZONTAL_LAYOUT;
+            case VIEW_RECTANGLE_LAYOUT:
+                return VIEW_RECTANGLE_LAYOUT;
+             case VIEW_GRID_LAYOUT:
+                return VIEW_GRID_LAYOUT;
             default:
                 return -1;
         }
@@ -48,10 +56,11 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         switch (viewType) {
-            case HOME_HORIZONTAL_LAYOUT:
+            case VIEW_HORIZONTAL_LAYOUT:
+            case VIEW_GRID_LAYOUT:
                 View hrView = LayoutInflater.from( parent.getContext() ).inflate( R.layout.horizontal_itemview_item, parent, false );
                 return new HomeHorizontalViewHolder( hrView );
-            case VIEW_ALL_HORIZONTAL_LAYOUT:
+            case VIEW_RECTANGLE_LAYOUT:
                 View viewAllView = LayoutInflater.from( parent.getContext() ).inflate( R.layout.horizontal_products_view_all_layout, parent, false );
                 return new ViewAllHorizontalViewHolder( viewAllView );
             default:
@@ -62,31 +71,31 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        String productId = horizontalItemViewModelList.get( position ).getHrProductId();
-        String imgLink = horizontalItemViewModelList.get( position ).getHrProductImage();
-        String name = horizontalItemViewModelList.get( position ).getHrProductName();
-        String price = horizontalItemViewModelList.get( position ).getHrProductPrice();
-        String cutPrice = horizontalItemViewModelList.get( position ).getHrProductCutPrice();
-        switch (horizontalItemViewModelList.get( position ).getHrViewType()) {
-            case HOME_HORIZONTAL_LAYOUT:
-                ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice );
+        String productId = horizontalItemViewModelList.get( position ).getpProductID();
+        String[] imgLink = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
+        String name = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
+        String price = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
+        String cutPrice = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
+        switch (viewType) {
+            case VIEW_HORIZONTAL_LAYOUT:
+            case VIEW_GRID_LAYOUT:
+                ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, position );
                 break;
-            case VIEW_ALL_HORIZONTAL_LAYOUT:
-                Boolean codInfo = horizontalItemViewModelList.get( position ).getHrCodInfo();
-                long stockInfo = horizontalItemViewModelList.get( position ).getHrStockInfo();
-                ((ViewAllHorizontalViewHolder) holder).setHorizontalProducts( productId, imgLink, name, price, cutPrice, codInfo, stockInfo );
+            case VIEW_RECTANGLE_LAYOUT:
+                Boolean codInfo = horizontalItemViewModelList.get( position ).getpIsCOD();
+                String stockInfo = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpStocks();
+                ((ViewAllHorizontalViewHolder) holder).setHorizontalProducts( productId, imgLink, name, price, cutPrice, codInfo, stockInfo, position );
                 break;
             default:
                 return;
         }
-
 
 //        holder.setHrProductImage( imgLink, name, price, cutPrice );
     }
 
     @Override
     public int getItemCount() {
-        if (horizontalItemViewModelList.size() > 8 && HorizontalItemViewModel.hrViewType == HOME_HORIZONTAL_LAYOUT ) {
+        if (horizontalItemViewModelList.size() > 8 && viewType == VIEW_HORIZONTAL_LAYOUT ) {
             return 8;
         } else {
             return horizontalItemViewModelList.size();
@@ -112,25 +121,26 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
 
         }
 
-        private void setHomeHrProduct(final String productId, String imgLink, String name, String price, String cutPrice) {
+        private void setHomeHrProduct(final String productId, String[] imgLink, String name, String price, String cutPrice, final int index) {
 
             hrProductName.setText( name );
             hrProductPrice.setText( "Rs." + price + "/-" );
             hrProductCutPrice.setText( "Rs." + cutPrice + "/-" );
 
-            Glide.with( itemView.getContext() ).load( imgLink ).apply( new RequestOptions()
+            Glide.with( itemView.getContext() ).load( imgLink[0] ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
-
 
             int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
             hrProductOffPercentage.setText( perOff + "% Off" );
-
 
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
                     productDetailIntent.putExtra( "PRODUCT_ID", productId );
+                    productDetailIntent.putExtra( "HOME_CAT_INDEX", crrShopCatIndex );
+                    productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+                    productDetailIntent.putExtra( "PRODUCT_INDEX", index );
                     itemView.getContext().startActivity( productDetailIntent );
                 }
             } );
@@ -159,7 +169,7 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
             hrProductStockInfo = itemView.findViewById( R.id.hr_viewAll_product_stock_info );
         }
 
-        private void setHorizontalProducts(final String productId, String imgLink, String name, String price, String cutPrice, Boolean cod, long stockInfo) {
+        private void setHorizontalProducts(final String productId, String[] imgLink, String name, String price, String cutPrice, Boolean cod, String stockInfo, final int index) {
             hrProductName.setText( name );
             hrProductPrice.setText( "Rs." + price + "/-" );
             hrProductCutPrice.setText( "Rs." + cutPrice + "/-" );
@@ -169,13 +179,13 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
             } else {
                 hrProductCodText.setVisibility( View.INVISIBLE );
             }
-            if (stockInfo > 0) {
+            if (Integer.parseInt( stockInfo ) > 0) {
                 hrProductStockInfo.setText( "in Stock" );
             } else {
                 hrProductStockInfo.setText( "Out of Stock" );
             }
 
-            Glide.with( itemView.getContext() ).load( imgLink ).apply( new RequestOptions()
+            Glide.with( itemView.getContext() ).load( imgLink[0] ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
 
             int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
@@ -186,6 +196,9 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
                 public void onClick(View v) {
                     Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
                     productDetailIntent.putExtra( "PRODUCT_ID", productId );
+                    productDetailIntent.putExtra( "HOME_CAT_INDEX", crrShopCatIndex );
+                    productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+                    productDetailIntent.putExtra( "PRODUCT_INDEX", index );
                     itemView.getContext().startActivity( productDetailIntent );
                 }
             } );

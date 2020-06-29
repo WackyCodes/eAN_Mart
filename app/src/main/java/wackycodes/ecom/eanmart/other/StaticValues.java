@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.userprofile.UserDataModel;
+import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
 public class StaticValues {
 
@@ -18,6 +19,15 @@ public class StaticValues {
     public static final int CART_TYPE_TOTAL_PRICE = 1;
     public static int TOTAL_BILL_AMOUNT;
     public static int DELIVERY_AMOUNT;
+
+    // PayMode...
+    public static int BUY_FROM_VALUE ;
+    public static final int BUY_FROM_CART = 101;
+    public static final int BUY_FROM_WISH_LIST = 102;
+    public static final int BUY_FROM_HOME = 103;
+
+    public static final int COD_MODE = 104;
+    public static final int ONLINE_MODE = 105;
 
     // address..
     public static final int EDIT_ADDRESS_MODE = 2;
@@ -74,11 +84,14 @@ public class StaticValues {
     public static final int STRIP_AD_LAYOUT_CONTAINER = 1;
     public static final int HORIZONTAL_ITEM_LAYOUT_CONTAINER = 2;
     public static final int GRID_ITEM_LAYOUT_CONTAINER = 3;
-    public static final int BANNER_AD_LAYOUT_CONTAINER = 4;
+    public static final int SHOP_HOME_CAT_LIST_CONTAINER = 4;
     public static final int CAT_ITEM_LAYOUT_CONTAINER = 5;
     public static final int BANNER_SLIDER_CONTAINER_ITEM = 6;
     public static final int ADD_NEW_PRODUCT_ITEM = 7;
 
+    public static final int VIEW_HORIZONTAL_LAYOUT = 0;
+    public static final int VIEW_RECTANGLE_LAYOUT = 1;
+    public static final int VIEW_GRID_LAYOUT = 2;
 
     public static final int VIEW_ALL_ACTIVITY = 13;
     public static final int RECYCLER_PRODUCT_LAYOUT = 11;
@@ -89,16 +102,22 @@ public class StaticValues {
     public static final int PRODUCT_DETAILS_ACTIVITY = 10;
     public static final int BUY_NOW_ACTIVITY = 19;
     public static final int SHOP_HOME_ACTIVITY = 20;
+    public static final int CONFORM_ORDER_ACTIVITY = 21;
+
+    public static final int CONTINUE_SHOPPING_FRAGMENT = 22;
 
     public static final int SHOP_TYPE_VEG = 1;
     public static final int SHOP_TYPE_NON_VEG = 2;
     public static final int SHOP_TYPE_NO_SHOW = 3;
 
+    public static String SHOP_ID_CURRENT = "1";
+    public static String SHOP_ID_PREVIOUS = "1";
 
     // Product Details... Temp List.
     public static List <String> productDetailTempList = new ArrayList <>();
 
     /*
+
     Index 0 - Product ID
     Index 1 - Product Image
     Index 2 - Product Name or Full Name

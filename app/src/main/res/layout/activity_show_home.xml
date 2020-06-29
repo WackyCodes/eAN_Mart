@@ -24,19 +24,53 @@
             app:elevation="4dp"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/ToolTheme"
-            app:titleMarginStart="40dp"
+            app:title="AN Electronics"
+            app:subtitle="@string/sample_address"
+            app:subtitleTextColor="@color/colorWhite"
             app:titleTextColor="@color/colorWhite">
 
-            <TextView
-                android:id="@+id/shop_location"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="@string/app_name"
-                android:layout_marginRight="0dp"
-                android:textColor="@color/colorWhite"
-                android:layout_marginLeft="@dimen/default_gap"
-                android:textAlignment="gravity"
-                android:gravity="center"/>
+                android:padding="2dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:text="Shop ID"
+                    android:drawableLeft="@drawable/ic_store_mall_directory_black_24dp"
+                    android:drawableTint="@color/colorWhite"
+                    android:textColorHighlight="@color/colorYellow"
+                    android:textColor="@color/colorWhite"/>
+                <TextView
+                    android:id="@+id/shop_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:text="462005012"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorWhite"/>
+<!--                <TextView-->
+<!--                    android:id="@+id/shop_location"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:maxWidth="200dp"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:maxLines="@integer/config_navAnimTime"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:text="@string/sample_address"-->
+<!--                    android:drawableLeft="@drawable/ic_store_mall_directory_black_24dp"-->
+<!--                    android:drawableTint="@color/colorWhite"-->
+<!--                    android:textColor="@color/colorWhite"-->
+<!--                    android:textAlignment="gravity"-->
+<!--                    android:gravity="center"/>-->
+            </LinearLayout>
 
         </androidx.appcompat.widget.Toolbar>
 

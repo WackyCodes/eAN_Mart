@@ -15,6 +15,12 @@ public class CategoryTypeModel {
         this.catImage = catImage;
     }
 
+    public CategoryTypeModel(String catId, String catName, String catImage) {
+        this.catId = catId;
+        this.catName = catName;
+        this.catImage = catImage;
+    }
+
     public int getType() {
         return type;
     }

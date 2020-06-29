@@ -41,8 +41,6 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
         // Required empty public constructor
     }
-    // Sample List of Category...
-    private List <CategoryTypeModel> categoryTypeModelList = new ArrayList <>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -68,7 +66,7 @@ public class HomeFragment extends Fragment {
         mainHomeFragmentAdaptor.notifyDataSetChanged();
 
         if (homePageCategoryList.size()==0&&CURRENT_CITY_CODE !=null){
-            DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, false );
+            DBQuery.getHomePageCategoryListQuery(null, null, CURRENT_CITY_CODE, false );
         }
 
         // Swipe Refresh...
@@ -80,7 +78,7 @@ public class HomeFragment extends Fragment {
                     homeSwipeRefreshLayout.setRefreshing( true );
                     if (CheckInternetConnection.isInternetConnected( getContext() )){
                         // Refreshing...
-                        DBQuery.getHomePageCategoryListQuery( CURRENT_CITY_CODE, true );
+                        DBQuery.getHomePageCategoryListQuery(null, homeSwipeRefreshLayout, CURRENT_CITY_CODE, true );
                     }else{
                         homeSwipeRefreshLayout.setRefreshing( false );
                     }
@@ -88,22 +86,6 @@ public class HomeFragment extends Fragment {
                 }
             });
 
-/*
-        if(categoryTypeModelList.size() == 0){
-            // Sample Data..
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_MAIN_HOME_CATEGORY," ", "Man Fashion", String.valueOf( R.drawable.product2 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_MAIN_HOME_CATEGORY," ", "Woman Fashion", String.valueOf( R.drawable.product1 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_MAIN_HOME_CATEGORY," ", "Woman Fashion", String.valueOf( R.drawable.product1 ) ) );
-            categoryTypeModelList.add( new CategoryTypeModel( TYPE_LIST_MAIN_HOME_CATEGORY," ", "Jwellary", String.valueOf( R.drawable.product1 ) ) );
-
-        }
-        if (homePageCategoryList.size()==0){
-            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList  ) );
-            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.banner_c ), "Name", TYPE_BANNER_MAIN_HOME  ) );
-            homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_STRIP_AD, "ShopId",  String.valueOf( R.drawable.stip_ad_b ), "Name", TYPE_BANNER_MAIN_HOME  ) );
-            mainHomeFragmentAdaptor.notifyDataSetChanged();
-        }
-*/
         return view;
     }
 

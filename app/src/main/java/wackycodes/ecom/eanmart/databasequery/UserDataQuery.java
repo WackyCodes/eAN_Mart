@@ -17,6 +17,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -35,6 +36,7 @@ import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.UserAddressDataModel;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
+import wackycodes.ecom.eanmart.userprofile.orders.OrderItemModel;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
@@ -51,6 +53,10 @@ public class UserDataQuery {
 
     // List Variables.....
     public static List <CartOrderSubItemModel> cartItemModelList = new ArrayList <>();
+    public static List <CartOrderSubItemModel> temCartItemModelList = new ArrayList <>();
+
+    // Order List...
+    public static List<OrderItemModel> orderItemModelList = new ArrayList <>();
 
     public static List<UserAddressDataModel> userAddressList = new ArrayList <>();
 
@@ -140,12 +146,10 @@ public class UserDataQuery {
     public static void loadCartDataQuery(Context context){
 
         if (CheckInternetConnection.isInternetConnected( context )){
-
             userCartLR = getCollection("CART").orderBy( "cart_index" )
                     .addSnapshotListener( new EventListener <QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-
                             if (queryDocumentSnapshots != null ) {
                                 int cartCount = 0;
                                 cartItemModelList.clear();
@@ -156,6 +160,7 @@ public class UserDataQuery {
 
                                     CartOrderSubItemModel cartOrderSubItemModel = new CartOrderSubItemModel(
                                             CART_TYPE_ITEMS,
+                                            documentSnapshot.get( "cart_id" ).toString(),
                                             documentSnapshot.get( "p_shop_id" ).toString(),
                                             documentSnapshot.get( "p_id" ).toString(),
                                             documentSnapshot.get( "p_name" ).toString(),
@@ -164,10 +169,8 @@ public class UserDataQuery {
                                             documentSnapshot.get( "p_mrp_price" ).toString(),
                                             documentSnapshot.get( "p_qty" ).toString()
                                     );
-
                                     cartItemModelList.add( cartOrderSubItemModel );
                                     cartCount = cartCount+1;
-
                                 }
 
                                 if(cartCount>0){
@@ -178,14 +181,13 @@ public class UserDataQuery {
                                     // set Invisible cart
                                     CartActivity.isCartEmpty = true;
                                 }
-
+                                if (temCartItemModelList.size()==0){
+                                    temCartItemModelList.addAll( cartItemModelList );
+                                }
                             }
-
                         }
                     } );
         }
-
-
     }
     // Set Cart badge...
     public static void setCartBadge(String cartCount){
@@ -206,12 +208,61 @@ public class UserDataQuery {
         }
 
     }
+    // Query to Upload Cart data....
+    public static void uploadCartDataQuery(final Context context, final Dialog dialog, CartOrderSubItemModel cartOrderSubItemModel){
+        Map <String, Object> cartMap = new HashMap <>();
+        cartMap.put( "cart_id", cartOrderSubItemModel.getCartID() );
+        cartMap.put( "p_shop_id", cartOrderSubItemModel.getProductShopID() );
+        cartMap.put( "p_id", cartOrderSubItemModel.getProductID() );
+        cartMap.put( "p_name", cartOrderSubItemModel.getProductName() );
+        cartMap.put( "p_image", cartOrderSubItemModel.getProductImage() );
+        cartMap.put( "p_selling_price", cartOrderSubItemModel.getProductSellingPrice() );
+        cartMap.put( "p_mrp_price", cartOrderSubItemModel.getProductMrpPrice() );
+        cartMap.put( "p_qty", cartOrderSubItemModel.getProductQty() );
+        if (CheckInternetConnection.isInternetConnected( context )){
+            getCollection("CART").document( cartOrderSubItemModel.getCartID() )
+                    .set( cartMap )
+                    .addOnCompleteListener( new OnCompleteListener <Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task <Void> task) {
+                            if (task.isSuccessful()){
+                                // Automatically updated...
+                                if (CartActivity.myCartAdaptor!=null){
+                                    CartActivity.myCartAdaptor.notifyDataSetChanged();
+                                }
+                            }else{
+
+                            }
+                            dialog.dismiss();
+                        }
+                    } );
+
+        }
+
+    }
+    // Query to delete Cart...
+    public static void deleteFromCartQuery(final Dialog dialog, String cartID){
+        getCollection("CART").document( cartID ).delete()
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task <Void> task) {
+                        if (task.isSuccessful()){
+                            if (CartActivity.myCartAdaptor!=null){
+                                CartActivity.myCartAdaptor.notifyDataSetChanged();
+                            }
+                        }else{
+
+                        }
+                        dialog.dismiss();
+                    }
+                } );
+    }
 
     // Order data query...
     public static void loadOrderDataQuery(final Context context){
 
         getCollection( "ORDERS" )
-                .orderBy( "order_date" ).orderBy( "order_time" )
+                .orderBy( "index", Query.Direction.DESCENDING ) //order_time. order_date
                 .get()
                 .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
                     @Override
@@ -236,7 +287,6 @@ public class UserDataQuery {
 
     // Notification ListenerRegistration
     public static void loadNotificationsQuery(Context context){
-
 
     }
 
@@ -355,114 +405,6 @@ public class UserDataQuery {
 
     }
 
-
-    // Query to load Cart List data....
-    public static void cartListQuery(final Context context, final boolean loadProductData, final Dialog dialog, final int requestActivity){
-        // clear all List..
-        cartItemModelList.clear();
-        if (loadProductData){
-            cartItemModelList.clear();
-        }
-        firebaseFirestore.collection( "USER" ).document( FirebaseAuth.getInstance().getUid() )
-                .collection( "USER_DATA" ).document( "MY_CART" ).get()
-                .addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task <DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            /**
-                            tempIndex = 0;
-                            final long my_cart_size = (long) task.getResult().get( "my_cart_size" );
-                            for (long x = 0; x < my_cart_size; x++) {
-                                dbTempListItem = task.getResult().get( "product_ID_" + x ).toString(); // Product ID
-                                dbTempListItem2 = task.getResult().get( "product_qty_" + x ).toString(); // Product Qty
-                                myCartCheckList.add( new MyCartCheckModel( task.getResult().get( "product_ID_" + x ).toString(),
-                                        task.getResult().get( "product_qty_" + x ).toString() ) );
-                                if (myCartCheckList.size() != 0){
-                                    ProductDetails.ALREADY_ADDED_IN_CART = isContainInMyCartCheckList( ProductDetails.productID );
-                                    // Set Badge Cart data...
-                                    if (!loadProductData){
-                                        setCartCountText( requestActivity, String.valueOf( myCartCheckList.size()) );
-                                    }
-                                }
-                                if (loadProductData) {
-                                    //set visibility of cart view...
-                                    if ( tempIndex == 0 ){
-                                        MyCartFragment.isCartEmpty = false;
-                                        MyCartFragment.dontHaveCartConstLayout.setVisibility( View.GONE );
-                                        MyCartFragment.myCartConstLayout.setVisibility( View.VISIBLE );
-                                    }
-//                            final String product_ID = task.getResult().get( "product_ID_" + x ).toString();
-                                    firebaseFirestore.collection( "PRODUCTS" )
-                                            .document( task.getResult().get( "product_ID_" + x ).toString() )
-                                            .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task <DocumentSnapshot> task) {
-                                            if (task.isSuccessful()) {
-//                                        int cartIndex = 0;
-//                                        if (myCartList.size() >= 2){
-//                                            cartIndex = myCartList.size() - 2;
-//                                        }
-
-                                                if(task.getResult().get( "product_qty_type" ) != null){
-                                                    myCartItemModelList.add( new MyCartItemModel( 0
-                                                            , myCartCheckList.get( tempIndex ).getProductId()
-                                                            , Integer.parseInt( myCartCheckList.get( tempIndex ).getProductQuantity() )
-                                                            , task.getResult().get( "product_image_1" ).toString()
-                                                            , task.getResult().get( "product_full_name" ).toString()
-                                                            , task.getResult().get( "product_price" ).toString()
-                                                            , task.getResult().get( "product_cut_price" ).toString()
-                                                            , task.getResult().get( "product_qty_type" ).toString() ) );
-                                                }else{
-                                                    myCartItemModelList.add( new MyCartItemModel( 0
-                                                            , myCartCheckList.get( tempIndex ).getProductId()
-                                                            , Integer.parseInt( myCartCheckList.get( tempIndex ).getProductQuantity() )
-                                                            , task.getResult().get( "product_image_1" ).toString()
-                                                            , task.getResult().get( "product_full_name" ).toString()
-                                                            , task.getResult().get( "product_price" ).toString()
-                                                            , task.getResult().get( "product_cut_price" ).toString()
-                                                            , "" ) );
-                                                }
-
-                                                if ( tempIndex == ( my_cart_size - 1 ) ){
-                                                    myCartItemModelList.add( new MyCartItemModel( 1 ) );
-                                                }
-                                                if (myCartCheckList.size() == 0){
-                                                    myCartItemModelList.clear();
-                                                    MyCartFragment.isCartEmpty = true;
-                                                    MyCartFragment.myCartConstLayout.setVisibility( View.GONE );
-                                                    MyCartFragment.dontHaveCartConstLayout.setVisibility( View.VISIBLE );
-                                                }
-                                                MyCartFragment.myCartAdaptor.notifyDataSetChanged();
-                                                tempIndex = tempIndex + 1;
-                                                dialog.dismiss();
-                                            } else {
-                                                dialog.dismiss();
-                                                tempIndex = tempIndex + 1;
-                                                String error = task.getException().getMessage();
-                                                showToast( context, error );
-                                            }
-                                        }
-                                    } );
-
-                                    dialog.dismiss();
-                                }else{
-                                    dialog.dismiss();
-                                }
-                            }
-
-                            dialog.dismiss();
-                      */
-                        }
-                        else {
-                            dialog.dismiss();
-                            String error = task.getException().getMessage();
-                            showToast( context, error );
-                        }
-
-                    }
-                } );
-
-    }
 
 
 

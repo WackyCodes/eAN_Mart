@@ -1,15 +1,24 @@
 package wackycodes.ecom.eanmart.productdetails;
 
 import android.app.Dialog;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -17,35 +26,62 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
+import wackycodes.ecom.eanmart.other.StaticMethods;
+import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
+import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
+import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
+import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_ITEMS;
 import static wackycodes.ecom.eanmart.other.StaticValues.PRODUCT_DETAILS_ACTIVITY;
-import static wackycodes.ecom.eanmart.other.StaticValues.productDetailTempList;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NON_VEG;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NO_SHOW;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_VEG;
 
 public class ProductDetails extends AppCompatActivity {
+
+
+    private ImageView pVegNonTypeImage; // product_veg_non_type_image
+    private LinearLayout weightSpinnerLayout;// weight_spinner_layout
+    private Spinner weightSpinner; //weight_spinner
+
+    // Cart...
+    private LinearLayout addToCartLayout;// add_to_cart_layout
+    private LinearLayout addMoreCartLayout;// add_more_cart_layout
+    private LinearLayout checkOutCartLayout;// check_out_layout
+    private ImageButton removeOneCartBtn; // remove_item_from_cart_imgBtn
+    private ImageButton addOneCartBtn; // add_item_to_cart_imgBtn
+    private TextView cartQtyText; // cart_item_text
 
     // --- Product Details Image Layout...
     private ViewPager productImagesViewPager;
     private TabLayout productImagesIndicator;
-    public static FloatingActionButton addToWishListBtn;
     private ConstraintLayout productDescriptionLayout;
     private TextView productName;
     private TextView productPrice;
     private TextView productCutPrice;
-    private TextView productCODText;
-    private TextView productCODSubText;
-    private TextView productStock;
+    private TextView productCODText; // product_item_cod_text
+
+    // create a list for testing...
+    private List<String> productImageList = new ArrayList <>();
+    private ProductDetailsImagesAdapter productDetailsImagesAdapter;
+
+    private List<String> productVariantList = new ArrayList <>();
 
     // --- Product Details Image Layout...
     private TextView productDetailsText;
@@ -53,36 +89,42 @@ public class ProductDetails extends AppCompatActivity {
     private ViewPager productDescriptionViewPager;
     private TabLayout productDescriptionIndicator;
 
-    private Button addToCartBtn;
-    private Button buyNowBtn;
     public static String productID;
     public static TextView badgeCartCount;
 
-    private ConstraintLayout activityProductDetailLayout;
     // Dialogs...
     private Dialog dialog;
-
-    // FirebaseFireStore...
-    private FirebaseFirestore firebaseFirestore;
-    private DocumentSnapshot documentSnapshot;
 
     // Product Specification ...
     private List <ProductDetailsSpecificationModel> productDetailsSpecificationModelList = new ArrayList <>();
     private String productDescription;
 
-    public static boolean ALREADY_ADDED_IN_WISHLIST = false;
+    private int crrShopCatIndex;
+    private int layoutIndex;
+    private int productIndex;
     public static boolean ALREADY_ADDED_IN_CART = false;
+    private int cartThisQty = 0;
+    private int cartThisIndex = 0;
+
+    private int currentVariant = 0;
+
+    private ProductModel pProductModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_product_details );
-        activityProductDetailLayout = findViewById( R.id.activity_product_detail_constLayout );
 
         Toolbar toolbar = findViewById( R.id.x_ToolBar );
         setSupportActionBar( toolbar );
         // TODO : get product ID through Intent ...
         productID = getIntent().getStringExtra( "PRODUCT_ID" );
+        crrShopCatIndex = getIntent().getIntExtra( "HOME_CAT_INDEX", -1 );
+        layoutIndex = getIntent().getIntExtra( "LAYOUT_INDEX", -1 );
+        productIndex = getIntent().getIntExtra( "PRODUCT_INDEX", -1 );
+
+        pProductModel = shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).getProductModelList().get( productIndex );
+
         dialog = DialogsClass.getDialog( ProductDetails.this );
         dialog.show();
         // ---- Progress Dialog...
@@ -101,183 +143,43 @@ public class ProductDetails extends AppCompatActivity {
         }catch (NullPointerException e){
         }
 
-        // Clear the ptoductDetailTempList...
-        productDetailTempList.clear();
-
-        addToWishListBtn = findViewById( R.id.add_to_wishList_btn );
-        addToCartBtn = findViewById( R.id.add_to_cart_btn );
-        buyNowBtn = findViewById( R.id.buy_now_btn );
-
         // --- Product Details Image Layout...
         productName = findViewById( R.id.product_item_name );
         productPrice = findViewById( R.id.product_item_price );
         productCutPrice = findViewById( R.id.product_item_cut_price );
         productCODText = findViewById( R.id.product_item_cod_text );
-        productCODSubText = findViewById( R.id.product_item_cod_sub_text );
-        productStock = findViewById( R.id.product_item_stocks );
 
         // --- Product Details Image Layout...
         productDescriptionLayout = findViewById( R.id.product_details_description_ConstLayout );
         productDetailsText = findViewById( R.id.product_details_text );
 
+        pVegNonTypeImage = findViewById( R.id.product_veg_non_type_image );
+        weightSpinnerLayout = findViewById( R.id.weight_spinner_layout );
+        weightSpinner = findViewById( R.id.weight_spinner );
+        // Cart...
+        addToCartLayout = findViewById( R.id.add_to_cart_layout );
+        addMoreCartLayout = findViewById( R.id.add_more_cart_layout );
+        checkOutCartLayout = findViewById( R.id.check_out_layout );
+        removeOneCartBtn = findViewById( R.id.remove_item_from_cart_imgBtn );
+        addOneCartBtn = findViewById( R.id.add_item_to_cart_imgBtn );
+        cartQtyText = findViewById( R.id.cart_item_text );
         //----------- Product Images ---
         productImagesViewPager = findViewById( R.id.product_images_viewpager );
         productImagesIndicator = findViewById( R.id.product_images_viewpager_indicator );
 
-        // create a list for testing...
-        final List<String> productImageList = new ArrayList <>();
-
-        firebaseFirestore = FirebaseFirestore.getInstance();
-
         // ---------- Product Description code----
         productDescriptionViewPager = findViewById( R.id.product_detail_viewpager );
         productDescriptionIndicator = findViewById( R.id.product_details_indicator );
+        // Default Tab Layout Invisible
+        productDescriptionLayout.setVisibility( View.GONE );
 
-        // TODO: Retrieve details from database...----------------
-        firebaseFirestore.collection( "PRODUCTS" ).document( productID )
-                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
-
-                if (task.isSuccessful()){
-
-                    documentSnapshot = task.getResult();
-                    // --- add Product Images...
-                    for (long x = 1; x < (long)documentSnapshot.get( "product_image_num" )+1; x++){
-                        productImageList.add( documentSnapshot.get( "product_image_"+x ).toString() );
-                    }
-                    // set adapter with viewpager...
-                    ProductDetailsImagesAdapter productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
-                    productImagesViewPager.setAdapter( productDetailsImagesAdapter );
-                    // Add Product ID  in productDetailTempList
-                    productDetailTempList.add( 0, productID );
-                    //add Main Image in productDetailTempList...
-                    productDetailTempList.add( 1, productImageList.get( 0 ) );
-                    // Set other Details of  Product Details Image Layout.
-                    // Product Name...
-                    productName.setText( documentSnapshot.get( "product_full_name" ).toString() );
-                    //add name in Temp List
-                    productDetailTempList.add( 2, documentSnapshot.get( "product_full_name" ).toString() );
-                    // Product Price...
-                    productPrice.setText( "Rs. " + documentSnapshot.get( "product_price" ).toString() +"/-" );
-                    // add price in  Temp List
-                    productDetailTempList.add( 3, documentSnapshot.get( "product_price" ).toString() );
-                    // Product Cut Price...
-                    productCutPrice.setText( "Rs. " + documentSnapshot.get( "product_cut_price" ).toString() +"/-" );
-                    //add cut price in  Temp List
-                    productDetailTempList.add(4, documentSnapshot.get( "product_cut_price" ).toString() );
-
-                    if ((boolean)documentSnapshot.get( "product_cod" )){
-                        productCODText.setVisibility( View.VISIBLE );
-                        productCODSubText.setVisibility( View.VISIBLE );
-                        //add COD in  Temp List
-                        productDetailTempList.add( 5, "COD" );
-                    }else{
-                        productCODText.setVisibility( View.INVISIBLE );
-                        productCODSubText.setVisibility( View.INVISIBLE );
-                        //add COD in  Temp List
-                        productDetailTempList.add( 5, "NO_COD" );
-                    }
-                    if ((long)documentSnapshot.get( "product_stocks" ) > 0){
-                        productStock.setText( "In Stock" );
-                        //add COD in  Temp List
-                        productDetailTempList.add( 6, "IN_STOCK" );
-                    }else{
-                        productStock.setText( "Out of Stock" );
-                        //add COD in  Temp List
-                        productDetailTempList.add( 6, "OUT_OF_STOCK" );
-                    }
-
-                    if(documentSnapshot.get( "product_qty_type" ) != null){
-                        productDetailTempList.add( 7, documentSnapshot.get( "product_qty_type" ).toString()  );
-                    }else{
-                        productDetailTempList.add( 7, ""  );
-                    }
-
-//                    StaticValues.tempProductAreaCode = documentSnapshot.get( "area_code" ).toString();
-
-                    // Set other Details of  Product Details Image Layout.
-                    if ((boolean)documentSnapshot.get( "use_tab_layout" )){
-                        // use tab layout...
-                        productDescriptionLayout.setVisibility( View.VISIBLE );
-                        // TODO : set Description data..
-                        productDescription = documentSnapshot.get( "product_description" ).toString() ;
-                        // TODO : set Specification data...
-                        for (long x = 1; x < (long) documentSnapshot.get( "pro_sp_head_num" )+1; x++){
-                            productDetailsSpecificationModelList.add( new ProductDetailsSpecificationModel( 0,
-                                    documentSnapshot.get( "pro_sp_head_" + x ).toString() ) );
-                            for (long i = 1; i < (long)documentSnapshot.get( "pro_sp_sub_head_"+x+"_num" )+1; i++){
-                                productDetailsSpecificationModelList.add( new ProductDetailsSpecificationModel( 1,
-                                        documentSnapshot.get( "pro_sp_sub_head_" + x + i ).toString(), documentSnapshot.get( "pro_sp_sub_head_d_" + x + i ).toString() ) );
-                            }
-                        }
-
-                        ProductDetailsDescriptionAdaptor productDetailsDescriptionAdaptor = new ProductDetailsDescriptionAdaptor( getSupportFragmentManager()
-                                , productDescriptionIndicator.getTabCount()
-                                , productDescription
-                                , productDetailsSpecificationModelList  );
-                        productDescriptionViewPager.setAdapter( productDetailsDescriptionAdaptor );
-                        productDetailsDescriptionAdaptor.notifyDataSetChanged();
-
-                    }
-                    else{
-                        // don't use tabLayout...
-                        productDescriptionLayout.setVisibility( View.GONE );
-                    }
-                    productDetailsText.setText( documentSnapshot.get( "product_details" ).toString() );
-                    // check offline wishList Size.. and run DB query to update wishList if size is 0
-                    if (currentUser != null){
-
-                       /** // for Wish list...
-                        if (DBquery.myWishList.size() == 0){
-                            DBquery.wishListQuery(ProductDetails.this, dialog, false);
-                        }
-                        // set color of wishList button based on wishList...
-                        if (DBquery.myWishList.size() != 0){
-                            if (DBquery.myWishList.contains( productID )){
-                                ALREADY_ADDED_IN_WISHLIST = true;
-                                addToWishListBtn.setSupportImageTintList( getResources().getColorStateList( R.color.colorRed ) );
-                            }else{
-                                ALREADY_ADDED_IN_WISHLIST = false;
-                            }
-                            dialog.dismiss();
-                        }
-                        */
-                        // for cart list...
-                        if (UserDataQuery.cartItemModelList.size() == 0){
-                            UserDataQuery.loadUserDataQuery(ProductDetails.this,  dialog);
-                        }
-                        if (UserDataQuery.cartItemModelList.size() != 0){
-                            for (int i = 0; i < UserDataQuery.cartItemModelList.size(); i++) {
-                                if( UserDataQuery.cartItemModelList.get( i ).getProductID().equals( productID )){
-                                    ALREADY_ADDED_IN_CART = true;
-                                    break;
-                                }else{
-                                    ALREADY_ADDED_IN_CART = false;
-                                }
-                            }
-                            dialog.dismiss();
-                        }
-
-                    }else {
-                        dialog.dismiss();
-                    }
-
-                }
-                else{
-                    String error = task.getException().getMessage();
-                    showToast(error);
-                    dialog.dismiss();
-                }
-            }
-        } );
-
-        // Retrieve details from database...----------------
+        // set adapter with viewpager...
+        productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
+        productImagesViewPager.setAdapter( productDetailsImagesAdapter );
 
         // connect TabLayout with viewPager...
         productImagesIndicator.setupWithViewPager( productImagesViewPager, true );
         //----------- Product Images ---
-
         productDescriptionViewPager.addOnPageChangeListener(
                 new TabLayout.TabLayoutOnPageChangeListener( productDescriptionIndicator ) );
         productDescriptionIndicator.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
@@ -295,215 +197,55 @@ public class ProductDetails extends AppCompatActivity {
             }
         } );
 
-        // ---------- Product Description code----
-        // TODO: WishList Code
-        // WishList Button click...
-        addToWishListBtn.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (currentUser == null){
-                    DialogsClass.signInUpDialog(ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
-                }
-                else{
-//                    dialog.show();
-                    addToWishListBtn.setEnabled( false );
-                  /**  if (ALREADY_ADDED_IN_WISHLIST){
-                        // if ALREADY_ADDED_IN_WISH_LIST then, Code for remove from wishList
-                        int listIndex = DBquery.myWishList.indexOf( productID );
-                        DBquery.removeItemFromWishList( listIndex, ProductDetails.this, dialog, PRODUCT_DETAILS_ACTIVITY );
-                        addToWishListBtn.setSupportImageTintList( ColorStateList.valueOf( Color.parseColor( "#4e4e4e" ) ) );
-                    }
-                    else {
-                        // if not add item in wishList then, Code To Add in wishList
-                        Map <String, Object> addProductIntoWishList = new HashMap <>();
-                        for (int temX = 0; temX < DBquery.myWishList.size(); temX++){
-                            addProductIntoWishList.put( "product_ID_"+temX, DBquery.myWishList.get( temX ) );
-                        }
-                        addProductIntoWishList.put( "wish_list_size", (long)DBquery.myWishList.size()+1 );
-                        addProductIntoWishList.put( "product_ID_"+ DBquery.myWishList.size(), productID );
-                        //Since we have use set Method so we have to add all the previous fields in Map also to update the List...
-                        firebaseFirestore.collection( "USER" ).document( currentUser.getUid() )
-                                .collection( "USER_DATA" ).document( "MY_WISH_LIST" )
-                                .set( addProductIntoWishList ).addOnCompleteListener( new OnCompleteListener <Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task <Void> task) {
-                                if (task.isSuccessful()){
+        // Retrieve details from database...----------------
+        getProductDetails();
+        // SetData...
+        setProductData( 0 );
+        // set Product VegNon Veg...
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setVegNonData();
+        }
+        if (pProductModel.getpIsCOD()){
+            productCODText.setVisibility( View.VISIBLE );
+            productCODText.setText( "Cash On Delivery Available" );
+        }else{
+            productCODText.setVisibility( View.GONE );
+        }
 
-                                    DBquery.myWishList.add( productID.trim() );
-                                    if (DBquery.wishListModelList.size() != 0){
-
-                                        if (documentSnapshot.get( "product_qty_type" ) != null ){
-                                            DBquery.wishListModelList.add( new MyWishListModel( documentSnapshot.get( "product_image_1" ).toString()
-                                                    , documentSnapshot.get( "product_full_name" ).toString()
-                                                    , documentSnapshot.get( "product_price" ).toString()
-                                                    , documentSnapshot.get( "product_cut_price" ).toString()
-                                                    , productID
-                                                    , " "
-                                                    , true
-                                                    , documentSnapshot.get( "product_qty_type" ).toString() ) );
-                                        }else{
-                                            DBquery.wishListModelList.add( new MyWishListModel( documentSnapshot.get( "product_image_1" ).toString()
-                                                    , documentSnapshot.get( "product_full_name" ).toString()
-                                                    , documentSnapshot.get( "product_price" ).toString()
-                                                    , documentSnapshot.get( "product_cut_price" ).toString()
-                                                    , productID
-                                                    , " "
-                                                    , true
-                                                    , "" ) );
-                                        }
-
-
-                                        // Update Stock info wishList...
-                                        if ((long)documentSnapshot.get( "product_stocks" ) > 0){
-                                            DBquery.wishListModelList.get( DBquery.wishListModelList.size() - 1 ).setWishStockInfo( "IN_STOCK" );
-//                                                        myWishListModelList.get( myWishListModelList.size() - 1 ).setWishStockInfo( "IN_STOCK" );
-                                        }else{
-                                            DBquery.wishListModelList.get( DBquery.wishListModelList.size() - 1 ).setWishStockInfo( "OUT_OF_STOCK" );
-//                                                        myWishListModelList.get( myWishListModelList.size() - 1 ).setWishStockInfo( "OUT_OF_STOCK" );
-                                        }
-                                        // Update COD info in wishList...
-                                        if ((boolean)documentSnapshot.get( "product_cod" )){
-                                            DBquery.wishListModelList.get( DBquery.wishListModelList.size() - 1 ).setWishCODinfo( true );
-                                        }else{
-                                            DBquery.wishListModelList.get( DBquery.wishListModelList.size() - 1 ).setWishCODinfo( false );
-                                        }
-
-                                    }
-
-                                    addToWishListBtn.setSupportImageTintList( getResources().getColorStateList( R.color.colorRed ) );
-                                    dialog.dismiss(); // Dismiss the Dialog First Then Show Toast Msg...
-                                    if (DBquery.myWishList.contains( productID )){
-                                        showToast( "Added to WishList SuccessFully..!" );
-                                    }else{
-                                        showToast( "Added to WishList but not Add in Local List." );
-                                    }
-                                    ALREADY_ADDED_IN_WISHLIST = true;
-                                    addToWishListBtn.setEnabled( true );
-                                }
-                                else{
-                                    dialog.dismiss();
-                                    addToWishListBtn.setSupportImageTintList( ColorStateList.valueOf( Color.parseColor( "#4e4e4e" ) ) );
-                                    String error = task.getException().getMessage();
-                                    showToast( error );
-                                    addToWishListBtn.setEnabled( true );
-                                }
-                            }
-                        } );
-
-                    }
-                   */
+        // Cart Visibility with qty...
+        if (currentUser!=null){
+            for (CartOrderSubItemModel cIM : temCartItemModelList) {
+                if (cIM.getProductID().equals( productID )) {
+                    cartThisIndex = temCartItemModelList.indexOf( cIM );
+                    cartThisQty = Integer.parseInt( cIM.getProductQty() );
+                    ALREADY_ADDED_IN_CART = true;
+                    setCartLayoutVisibility(false, cIM.getProductQty());
+                    break;
                 }
             }
-        } );
-        // WishList Button click...
-        // TODO: MyCart Code
-        // Add to Cart Click...
-        addToCartBtn.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addToCartBtn.setEnabled( false );
-                if (currentUser == null){
-                    DialogsClass.signInUpDialog(ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
-                    addToCartBtn.setEnabled( true );
-                }
-                else{
-//                    dialog.show();
-                    if (ALREADY_ADDED_IN_CART){
-                        dialog.dismiss();
-                        // Code if already add in cart...
-                        showToast( "Already Added in cart..!" );
-                        addToCartBtn.setEnabled( true );
-                    }
-                  /**  else{
-                        // Code if item not add in cart...
-                        final int tempCartSize = DBquery.myCartCheckList.size();
-                        Map<String, Object> addProductIntoCart = new HashMap <>();
-                        for (int temX = 0; temX < tempCartSize; temX++ ){
-                            addProductIntoCart.put( "product_ID_"+ temX, DBquery.myCartCheckList.get( temX ).getProductId() );
-                            addProductIntoCart.put( "product_qty_"+ temX, DBquery.myCartCheckList.get( temX ).getProductQuantity() );
-                        }
-                        addProductIntoCart.put( "product_ID_"+ tempCartSize, productID );
-                        addProductIntoCart.put( "product_qty_"+ tempCartSize, "1" );
-                        addProductIntoCart.put( "my_cart_size", (long)DBquery.myCartCheckList.size()+1  );
-                        //Since we have use set Method so we have to add all the previous fields in Map also to update the List...
-                        firebaseFirestore.collection( "USER" ).document( currentUser.getUid() )
-                                .collection( "USER_DATA" ).document( "MY_CART" )
-                                .set( addProductIntoCart ).addOnCompleteListener( new OnCompleteListener <Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task <Void> task) {
-                                if (task.isSuccessful()){
+        }
+        else{
+            ALREADY_ADDED_IN_CART = false;
+            setCartLayoutVisibility(true, null);
+        }
 
-                                    DBquery.myCartCheckList.add( new MyCartCheckModel( productID, "1" ) );
-
-                                    if (DBquery.myCartItemModelList.size() != 0){
-
-                                        if(documentSnapshot.get( "product_qty_type" ) != null){
-                                            DBquery.myCartItemModelList.add( tempCartSize, new MyCartItemModel( 0, productID
-                                                    , 1
-                                                    , documentSnapshot.get( "product_image_1" ).toString()
-                                                    , documentSnapshot.get( "product_full_name" ).toString()
-                                                    , documentSnapshot.get( "product_price" ).toString()
-                                                    , documentSnapshot.get( "product_cut_price" ).toString()
-                                                    , documentSnapshot.get( "product_qty_type" ).toString() ) );
-                                        }else{
-                                            DBquery.myCartItemModelList.add( tempCartSize, new MyCartItemModel( 0, productID
-                                                    , 1
-                                                    , documentSnapshot.get( "product_image_1" ).toString()
-                                                    , documentSnapshot.get( "product_full_name" ).toString()
-                                                    , documentSnapshot.get( "product_price" ).toString()
-                                                    , documentSnapshot.get( "product_cut_price" ).toString()
-                                                    , " " ) );
-                                        }
-
-
-                                        if (MyCartFragment.myCartAdaptor != null){
-                                            MyCartFragment.myCartAdaptor.notifyDataSetChanged();
-                                        }
-                                    }
-                                    ALREADY_ADDED_IN_CART = true;
-                                    dialog.dismiss();
-                                    showToast( "Added to Cart SuccessFully..!" );
-                                    // To Refresh Menu...
-                                    invalidateOptionsMenu();
-                                    addToCartBtn.setEnabled( true );
-
-                                    // Query To update List Size on firebase and offline list...
-                                }
-                                else{
-                                    dialog.dismiss();
-                                    String error = task.getException().getMessage();
-                                    showToast( error );
-                                    addToCartBtn.setEnabled( true );
-                                }
-                            }
-                        } );
-
-                        // Code if item not add in cart...
-                    } */
-                }
+        // Cart Action...
+        cartAction();
+        // Add Weight Data in List...
+        if (pProductModel.getProductSubModelList().get( currentVariant ).getpWeight()!=null){
+            for (int pWIndex = 0; pWIndex < pProductModel.getProductSubModelList().size(); pWIndex++ ) {
+                productVariantList.add( pProductModel.getProductSubModelList().get( pWIndex ).getpWeight() );
             }
-        } );
-        // Add to Cart Click...
-        // TODO: Buy Now Code
-        // Buy Now Click...
-        buyNowBtn.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Intent buyNowIntent = new Intent( ProductDetails.this, BuyNowActivity.class );
-//                myAddressIntent.putExtra( "MODE", SELECT_ADDRESS );
-//                startActivity( buyNowIntent );
-                // Set BUY_FROM value...
-//                StaticValues.BUY_FROM_VALUE = StaticValues.BUY_FROM_HOME;
-                // Run this query to get Size of OrderList... So if user Buy this item then New order would be added..!
-                if (currentUser != null){
-//                    DBquery.orderListQuery( ProductDetails.this, dialog, false );
-                }
-            }
-        } );
-        // Buy Now Click...
+            weightSpinnerLayout.setVisibility( View.VISIBLE );
+        }else{
+            weightSpinnerLayout.setVisibility( View.GONE );
+        }
+        //  Set Weight Spinner...
+        if(productVariantList.size() > 0){
+           setWeightSpinner();
+       }
 
     }
-
     // onCreate method End.. ----------------------------------
     @Override
     protected void onResume() {
@@ -558,8 +300,7 @@ public class ProductDetails extends AppCompatActivity {
                 if (currentUser == null){
                     DialogsClass.signInUpDialog( ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
                 }else{
-//                    startActivity( new Intent(ProductDetails.this, MainActivity.class) );
-//                    MainActivity.isFragmentIsMyCart = true;
+                    startActivity( new Intent(ProductDetails.this, CartActivity.class) );
                 }
             }
         } );
@@ -578,8 +319,7 @@ public class ProductDetails extends AppCompatActivity {
             if (currentUser == null){
                 DialogsClass.signInUpDialog( ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
             }else{
-//                startActivity( new Intent(this, MainActivity.class) );
-//                MainActivity.isFragmentIsMyCart = true;
+                startActivity( new Intent(ProductDetails.this, CartActivity.class) );
             }
             return true;
         }
@@ -590,6 +330,278 @@ public class ProductDetails extends AppCompatActivity {
     private void showToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
+
+    private boolean isInternetConnected(){
+        return CheckInternetConnection.isInternetConnected( this );
+    }
+
+    private void getProductDetails(){
+        // TODO: Retrieve details from database...----------------
+        if (isInternetConnected()){
+            DBQuery.firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID_CURRENT )
+                    .collection( "PRODUCTS" ).document( productID )
+                    .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                    if (task.isSuccessful()){
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        /** // --- add Product Images...
+                         for (long x = 1; x < (long)documentSnapshot.get( "product_image_num" )+1; x++){
+                         productImageList.add( documentSnapshot.get( "product_image_"+x ).toString() );
+                         }
+                         // set adapter with viewpager...
+                         ProductDetailsImagesAdapter productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
+                         productImagesViewPager.setAdapter( productDetailsImagesAdapter );
+                         // Set other Details of  Product Details Image Layout.
+                         // Product Name...
+                         productName.setText( documentSnapshot.get( "product_full_name" ).toString() );
+                         // Product Price...
+                         productPrice.setText( "Rs. " + documentSnapshot.get( "product_price" ).toString() +"/-" );
+                         // Product Cut Price...
+                         productCutPrice.setText( "Rs. " + documentSnapshot.get( "product_cut_price" ).toString() +"/-" );
+
+                         if ((boolean)documentSnapshot.get( "product_cod" )){
+                         productCODText.setVisibility( View.VISIBLE );
+                         productCODSubText.setVisibility( View.VISIBLE );
+                         }else{
+                         productCODText.setVisibility( View.INVISIBLE );
+                         productCODSubText.setVisibility( View.INVISIBLE );
+                         }
+                         if ((long)documentSnapshot.get( "product_stocks" ) > 0){
+                         productStock.setText( "In Stock" );
+                         }else{
+                         productStock.setText( "Out of Stock" );
+                         }
+                         */
+                        // Set other Details of  Product Details Image Layout.
+                        if ((boolean)documentSnapshot.get( "use_tab_layout" )){
+                            // use tab layout...
+                            productDescriptionLayout.setVisibility( View.VISIBLE );
+                            // TODO : set Description data..
+                            productDescription = documentSnapshot.get( "product_description" ).toString() ;
+                            // TODO : set Specification data...
+                            for (long x = 1; x < (long) documentSnapshot.get( "pro_sp_head_num" )+1; x++){
+                                productDetailsSpecificationModelList.add( new ProductDetailsSpecificationModel( 0,
+                                        documentSnapshot.get( "pro_sp_head_" + x ).toString() ) );
+                                for (long i = 1; i < (long)documentSnapshot.get( "pro_sp_sub_head_"+x+"_num" )+1; i++){
+                                    productDetailsSpecificationModelList.add( new ProductDetailsSpecificationModel( 1,
+                                            documentSnapshot.get( "pro_sp_sub_head_" + x + i ).toString()
+                                            , documentSnapshot.get( "pro_sp_sub_head_d_" + x + i ).toString() ) );
+                                }
+                            }
+
+                            ProductDetailsDescriptionAdaptor productDetailsDescriptionAdaptor
+                                    = new ProductDetailsDescriptionAdaptor( getSupportFragmentManager()
+                                    , productDescriptionIndicator.getTabCount()
+                                    , productDescription
+                                    , productDetailsSpecificationModelList  );
+                            productDescriptionViewPager.setAdapter( productDetailsDescriptionAdaptor );
+                            productDetailsDescriptionAdaptor.notifyDataSetChanged();
+
+                        }
+                        else{
+                            // don't use tabLayout...
+                            productDescriptionLayout.setVisibility( View.GONE );
+                        }
+                        productDetailsText.setText( documentSnapshot.get( "product_details" ).toString() );
+                        dialog.dismiss();
+                    }
+                    else{
+                        String error = task.getException().getMessage();
+                        showToast(error);
+                        dialog.dismiss();
+                    }
+                }
+            } );
+        }else{
+            dialog.dismiss();
+        }
+
+    }
+
+    private void setProductData(int variantIndex){
+        // Set ImageLayout Data
+        productImageList.clear();
+        ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( variantIndex );
+        productImageList.addAll( Arrays.asList( productSubModel.getpImage() ) );
+        productName.setText( productSubModel.getpName() );
+        productPrice.setText( "Rs." + productSubModel.getpSellingPrice() + "/-" );
+        productCutPrice.setText( "Rs." + productSubModel.getpMrpPrice() + "/-" );
+
+        if (productDetailsImagesAdapter!=null){
+            productDetailsImagesAdapter.notifyDataSetChanged();
+        }else{
+            productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
+            productImagesViewPager.setAdapter( productDetailsImagesAdapter );
+            productDetailsImagesAdapter.notifyDataSetChanged();
+        }
+
+    }
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void setVegNonData(){
+        // Set veg Non Image...
+        if ( pProductModel.getpVegNonType() == SHOP_TYPE_VEG){
+            pVegNonTypeImage.setImageTintList( this.getColorStateList( R.color.colorGreen )  );
+            pVegNonTypeImage.setBackgroundTintList( this.getColorStateList(  R.color.colorGreen ) );
+        }else if( pProductModel.getpVegNonType() == SHOP_TYPE_NON_VEG){
+            pVegNonTypeImage.setImageTintList( this.getColorStateList( R.color.colorRed )  );
+            pVegNonTypeImage.setBackgroundTintList( this.getColorStateList(  R.color.colorRed ) );
+        }else if( pProductModel.getpVegNonType() == SHOP_TYPE_NO_SHOW){
+            pVegNonTypeImage.setVisibility( View.GONE );
+        }
+    }
+    private void setWeightSpinner(){
+        // Set city code Spinner
+        ArrayAdapter <String> weightAdaptor = new ArrayAdapter <String>(this,
+                android.R.layout.simple_spinner_item, productVariantList);
+        weightAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        weightSpinner.setAdapter(weightAdaptor);
+        weightSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView <?> parent, View view, int position, long id) {
+                currentVariant = position;
+                setProductData( currentVariant );
+                // update cart variant...
+                if (currentUser!=null && ALREADY_ADDED_IN_CART){
+                    updateCartVariant(currentVariant);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView <?> parent) {
+//                if (cityList.size() == 1 || ! isUploadImages)
+//                    showToast( "Upload Images first..!" );
+            }
+        } );
+    }
+
+    private void cartAction(){
+
+        // Add to Cart Click...
+        addToCartLayout.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentUser!=null && isInternetConnected()){
+                    dialog.show();
+                    cartThisQty = 1;
+                    String cartID = StaticMethods.getRandomCartID();
+                    ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( currentVariant );
+                    String pName = productSubModel.getpName();
+                    String pImageLink[] = productSubModel.getpImage();
+                    String pPrice = productSubModel.getpSellingPrice();
+                    String pMrpPrice = productSubModel.getpMrpPrice();
+                    String pWeight = productSubModel.getpWeight();
+                    if (pWeight!=null){
+                        pName = pName + " ( " + pWeight + " )";
+                    }
+                    uploadOnDatabaseNewCart(cartID, pName, pImageLink[0], pPrice, pMrpPrice, "1" );
+                }
+                else{
+                    DialogsClass.signInUpDialog( ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
+                }
+            }
+        } );
+
+        addOneCartBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cartThisQty = cartThisQty + 1;
+//                setCartLayoutVisibility(false, String.valueOf( cartThisQty + 1 ) );
+                updateCartThisQty( String.valueOf( cartThisQty ));
+            }
+        } );
+
+        removeOneCartBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cartThisQty = cartThisQty - 1;
+                if (cartThisQty > 0){
+//                    setCartLayoutVisibility(false, String.valueOf( cartThisQty ) );
+                    updateCartThisQty( String.valueOf( cartThisQty ));
+                }else{
+                    if (isInternetConnected()){
+                        dialog.show();
+                        setCartLayoutVisibility(true, null );
+                        //  REMOVE FROM CART...
+                        removeFromCart();
+                    }
+                }
+            }
+        } );
+
+        checkOutCartLayout.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // GOTO Cart Activity...
+                startActivity( new Intent(ProductDetails.this, CartActivity.class) );
+            }
+        } );
+
+    }
+
+    private void setCartLayoutVisibility( boolean isCartBtnVisible,@Nullable String cartQty ){
+        if (isCartBtnVisible){
+            addToCartLayout.setVisibility( View.VISIBLE );
+            addMoreCartLayout.setVisibility( View.GONE );
+        }else{
+            addToCartLayout.setVisibility( View.GONE );
+            addMoreCartLayout.setVisibility( View.VISIBLE );
+            updateCartThisQty(cartQty);
+        }
+    }
+
+    private void updateCartThisQty( String pQty ){
+        cartQtyText.setText( pQty );
+        temCartItemModelList.get( cartThisIndex ).setProductQty( pQty );
+    }
+    private void updateCartVariant( int variantNo ){
+        ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( variantNo );
+        String pName = productSubModel.getpName();
+        String pImageLink[] = productSubModel.getpImage();
+        String pPrice = productSubModel.getpSellingPrice();
+        String pMrpPrice = productSubModel.getpMrpPrice();
+        String pWeight = productSubModel.getpWeight();
+        if (pWeight!=null){
+            pName = pName + " ( " + pWeight + " )";
+        }
+        temCartItemModelList.get( cartThisIndex ).setProductName( pName );
+        temCartItemModelList.get( cartThisIndex ).setProductImage( pImageLink[0]);
+        temCartItemModelList.get( cartThisIndex ).setProductSellingPrice( pPrice );
+        temCartItemModelList.get( cartThisIndex ).setProductMrpPrice( pMrpPrice );
+    }
+
+    private void uploadOnDatabaseNewCart(String cartID, String pName, String pImageLink, String pPrice, String pMrpPrice, String pQty){
+//        dialog.show();
+        CartOrderSubItemModel cartOrderSubItemModel = new CartOrderSubItemModel(
+                CART_TYPE_ITEMS,
+                cartID,
+                SHOP_ID_CURRENT,
+                productID,
+                pName,
+                pImageLink,
+                pPrice,
+                pMrpPrice,
+                pQty
+        );
+        // Add In Temp Cart list..
+        temCartItemModelList.add( cartOrderSubItemModel );
+        cartThisQty = 1;
+        cartThisIndex = temCartItemModelList.size() - 1;
+        ALREADY_ADDED_IN_CART = true;
+        // query to update on database...
+        UserDataQuery.uploadCartDataQuery( ProductDetails.this, dialog, cartOrderSubItemModel);
+        setCartLayoutVisibility(false, pQty );
+    }
+
+    private void removeFromCart(){
+        String cartID = temCartItemModelList.get( cartThisIndex ).getCartID();
+        UserDataQuery.deleteFromCartQuery(  dialog, cartID );
+        temCartItemModelList.remove( cartThisIndex );
+        cartThisQty = 0;
+        cartThisIndex = 0;
+        ALREADY_ADDED_IN_CART = false;
+    }
+
 
 }
 

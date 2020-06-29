@@ -12,20 +12,25 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.cartItemModelList;
+import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
+import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
 
 public class CartActivity extends AppCompatActivity {
 
     // my cart...
     public static ConstraintLayout myCartConstLayout;
 
-    private Button myCartContinueBtn;
+    private LinearLayout myCartContinueBtn;
     public static TextView myCartTotalAmounts2;
 
     private RecyclerView myCartItemRecyclerView;
@@ -36,7 +41,6 @@ public class CartActivity extends AppCompatActivity {
     // Don't have any cart item...
     public static ConstraintLayout dontHaveCartConstLayout;
     private Button dontHaveCartBtn;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +71,7 @@ public class CartActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager( this );
         linearLayoutManager.setOrientation( LinearLayoutManager.VERTICAL );
         myCartItemRecyclerView.setLayoutManager( linearLayoutManager );
-        myCartAdaptor = new MyCartAdaptor( cartItemModelList );
+        myCartAdaptor = new MyCartAdaptor( temCartItemModelList );
         myCartItemRecyclerView.setAdapter( myCartAdaptor );
 
         myCartAdaptor.notifyDataSetChanged();
@@ -75,7 +79,10 @@ public class CartActivity extends AppCompatActivity {
         myCartContinueBtn.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showConditionDialog();
+//                showConditionDialog();
+                Intent myAddressIntent = new Intent( CartActivity.this, MyAddressesActivity.class );
+                myAddressIntent.putExtra( "MODE", SELECT_ADDRESS );
+                startActivity( myAddressIntent );
             }
         } );
 
@@ -87,7 +94,6 @@ public class CartActivity extends AppCompatActivity {
             myCartConstLayout.setVisibility( View.VISIBLE );
             dontHaveCartConstLayout.setVisibility( View.GONE );
         }
-
 
     }
 

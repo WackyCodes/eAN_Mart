@@ -93,6 +93,12 @@ public class StaticMethods {
         return crrTime;
     }
 
+    public static String getRandomCartID(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMddHHmmss", Locale.getDefault());
+        //You can change "yyyyMMdd_HHmmss as per your requirement
+        String random10 = simpleDateFormat.format(new Date());
+        return random10;
+    }
 
     public static void writeFileInLocal(Context context, String fileName, String textMsg){
         try {
@@ -115,7 +121,6 @@ public class StaticMethods {
             e.printStackTrace();
         }
     }
-
 
     // yyyy/mm/dd hh:mm:ss
 

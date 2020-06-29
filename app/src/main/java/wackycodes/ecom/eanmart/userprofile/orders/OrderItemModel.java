@@ -1,6 +1,8 @@
-package wackycodes.ecom.eanmart.userprofile.cart;
+package wackycodes.ecom.eanmart.userprofile.orders;
 
 import java.util.List;
+
+import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
 public class OrderItemModel {
     // Cart Item...

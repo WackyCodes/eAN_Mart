@@ -4,6 +4,7 @@ public class CartOrderSubItemModel {
 
     private int cartIndex;
     private int cartType;
+    private String cartID;
 
     private String productShopID;
     private String productID;
@@ -22,8 +23,13 @@ public class CartOrderSubItemModel {
         this.productQty = productQty;
     }
 
-    public CartOrderSubItemModel(int cartType, String productShopID, String productID, String productName, String productImage, String productSellingPrice, String productMrpPrice, String productQty) {
+
+
+    public CartOrderSubItemModel(int cartType, String cartID, String productShopID, String productID,
+                                 String productName, String productImage, String productSellingPrice,
+                                 String productMrpPrice, String productQty) {
         this.cartType = cartType;
+        this.cartID = cartID;
         this.productShopID = productShopID;
         this.productID = productID;
         this.productName = productName;
@@ -55,6 +61,14 @@ public class CartOrderSubItemModel {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getCartID() {
+        return cartID;
+    }
+
+    public void setCartID(String cartID) {
+        this.cartID = cartID;
     }
 
     public String getProductID() {

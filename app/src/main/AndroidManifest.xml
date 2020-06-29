@@ -17,7 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".userprofile.AccountSettingActivity"></activity>
+        <activity android:name=".buyprocess.ConformOrderActivity"></activity>
+        <activity android:name=".userprofile.orders.OrderListActivity" />
+        <activity android:name=".userprofile.AccountSettingActivity" />
         <activity android:name=".userprofile.UserProfileActivity" />
         <activity android:name=".userprofile.addresses.AddAddressActivity" />
         <activity android:name=".userprofile.addresses.MyAddressesActivity" />
