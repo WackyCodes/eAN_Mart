@@ -14,6 +14,10 @@ public class CartOrderSubItemModel {
     private String productMrpPrice;
     private String productQty;
 
+    public CartOrderSubItemModel(int cartType) {
+        this.cartType = cartType;
+    }
+
     public CartOrderSubItemModel(String productShopID, String productName, String productImage, String productSellingPrice, String productMrpPrice, String productQty) {
         this.productShopID = productShopID;
         this.productName = productName;

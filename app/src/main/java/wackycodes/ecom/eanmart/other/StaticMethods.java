@@ -48,7 +48,7 @@ public class StaticMethods {
     }
 
 
-    // create a random order ID of 10 Digits...
+    // create a random order ID of 12 Digits...
     public static String getRandomOrderID(){
 
         Random random = new Random();
@@ -74,17 +74,21 @@ public class StaticMethods {
 
     }
 
-    public static String getCurrentDateDay(){
+    public static String getCurrentDate(){
     //        Calendar calendar = Calendar.getInstance();
         Date date =  Calendar.getInstance().getTime();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         //You can change "yyyyMMdd_HHmmss as per your requirement
     //        String crrDate = simpleDateFormat.format(new Date()) ;
-
-        String crrDateDay =
-                simpleDateFormat.format(new Date())+ " " + new SimpleDateFormat( "EEEE", Locale.ENGLISH).format( date.getTime() );
-
+        String crrDateDay = simpleDateFormat.format(new Date());
+//                simpleDateFormat.format(new Date())+ " " + new SimpleDateFormat( "EEEE", Locale.ENGLISH).format( date.getTime() );
         return crrDateDay;
+    }
+
+    public static String getCurrentDay(){
+        Date date =  Calendar.getInstance().getTime();
+        String  currentDay = new SimpleDateFormat( "EEEE", Locale.ENGLISH).format( date.getTime());
+        return currentDay;
     }
 
     public static String getCurrentTime(){
@@ -99,6 +103,13 @@ public class StaticMethods {
         String random10 = simpleDateFormat.format(new Date());
         return random10;
     }
+
+    public static String getRandomIndex(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
+        String randomIndex = simpleDateFormat.format(new Date()) ;
+        return randomIndex;
+    }
+
 
     public static void writeFileInLocal(Context context, String fileName, String textMsg){
         try {

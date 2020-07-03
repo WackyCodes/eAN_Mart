@@ -80,38 +80,69 @@
         app:layout_constraintStart_toStartOf="@+id/product_cut_price"
         app:layout_constraintTop_toTopOf="@+id/product_cut_price" />
 
-    <TextView
-        android:id="@+id/item_quntity"
+    <LinearLayout
+        android:id="@+id/add_remove_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Qty : 1"
-        android:paddingRight="4dp"
-        android:paddingLeft="4dp"
-        android:textColor="#FFFFFF"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:background="@drawable/back_rectangle_4dp_layout"
-        android:backgroundTint="#F44336"
+        android:background="@drawable/back_no_back_color_1dp_border"
+        android:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toStartOf="@+id/product_price"
         app:layout_constraintHorizontal_bias="0.079"
         app:layout_constraintStart_toStartOf="@+id/product_name"
-        app:layout_constraintTop_toBottomOf="@+id/product_name" />
+        app:layout_constraintTop_toBottomOf="@+id/product_name"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/remove_item_from_cart_imgBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorNoColor"
+            android:tint="@color/colorPrimary"
+            android:padding="4dp"
+            app:srcCompat="@drawable/ic_remove_circle_outline_black_24dp" />
+
+        <TextView
+            android:id="@+id/cart_item_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="1"
+            android:padding="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/colorSecondary"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/add_item_to_cart_imgBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorNoColor"
+            android:padding="4dp"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_add_circle_outline_black_24dp"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/remove_item_from_cart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_delete_black_24dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:drawableTint="@color/colorRed"
-        android:drawablePadding="4dp"
-        android:paddingLeft="4dp"
         android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:drawableLeft="@drawable/ic_delete_black_24dp"
+        android:drawablePadding="4dp"
+        android:drawableTint="@color/colorRed"
+        android:paddingLeft="4dp"
         android:paddingRight="4dp"
+        android:text="Remove"
         android:textColor="#302B2B"
-        android:text="Remove from Cart"
         app:layout_constraintBottom_toBottomOf="@+id/product_image"
-        app:layout_constraintStart_toStartOf="@+id/item_quntity" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/add_remove_layout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

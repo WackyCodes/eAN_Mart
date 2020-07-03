@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.buyprocess.ConformOrderActivity;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
@@ -85,23 +86,20 @@ public class MyAddressesActivity extends AppCompatActivity {
                     int index = 0;
                     for (int x = 0; x < size; x++){
                         if ( userAddressList.get( x ).getSelectedAddress() ){
+                            ConformOrderActivity.index = x;
                             index = x;
                         }
                     }
                     // Check first if user come to Change address...
                     if (isRequestForChangeAddress){
                         // finish the previous activity before reStart...
-//                        ConformOrderActivity.conFormOrderActivity.finish();
+                        finish();
+                    }else{
+                        Intent goOrderConfirmation = new Intent(MyAddressesActivity.this, ConformOrderActivity.class );
+                        goOrderConfirmation.putExtra( "INDEX", index );
+                        startActivity( goOrderConfirmation );
+                        finish();
                     }
-//                    if (DBquery.myAddressRecyclerModelList.get( index ).getAreaKeyCode().equals( StaticValues.userAreaCode )){ /// Check For product....
-//                        Intent goOrderConfirmation = new Intent(MyAddressesActivity.this, ConformOrderActivity.class );
-//                        goOrderConfirmation.putExtra( "INDEX", index );
-//                        startActivity( goOrderConfirmation );
-//                        finish();
-//                    }else{
-//                        Toast.makeText( MyAddressesActivity.this, "This product is not for this Location.! Please add another address.!", Toast.LENGTH_SHORT ).show();
-////                        AlertDialog.Builder alertDialog = new DialogsClass()
-//                    }
 
                 }else{
                     // Means List is Empty So we have to suggest to add any address...

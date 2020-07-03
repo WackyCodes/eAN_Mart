@@ -34,24 +34,40 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
+import wackycodes.ecom.eanmart.databasequery.OrderQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
+import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.UserAddressDataModel;
+import wackycodes.ecom.eanmart.userprofile.orders.OrderItemModel;
 
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
+import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
+import static wackycodes.ecom.eanmart.other.StaticMethods.getRandomOrderID;
 import static wackycodes.ecom.eanmart.other.StaticValues.BUY_FROM_CART;
 import static wackycodes.ecom.eanmart.other.StaticValues.BUY_FROM_VALUE;
+import static wackycodes.ecom.eanmart.other.StaticValues.CONTINUE_SHOPPING_FRAGMENT;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
+import static wackycodes.ecom.eanmart.other.StaticValues.USER_DATA_MODEL;
 
 public class ConformOrderFragment extends Fragment {
 
@@ -178,9 +194,10 @@ public class ConformOrderFragment extends Fragment {
                          "Your mobile no. is not exist in our record. Please update your mobile from profile section.!" );
                          }
                          }else{
-                         checkForAreaCode();
+                         checkForAreaCode(getDeliveryPin());
                          }
                          */
+
                     }
                     else if (selectedMode == payPaytmRadioBtn.getId()){
 //                        showPaytmDialog();
@@ -199,7 +216,6 @@ public class ConformOrderFragment extends Fragment {
 
             }
         } );
-
 
         return view;
     }
@@ -242,16 +258,6 @@ public class ConformOrderFragment extends Fragment {
         return pinCode;
     }
 
-    // Order Sorting Key...
-    private String getCityKey(){
-        String cityKey = addressRecyclerModel.getAddCityName(); // TODO: Not needed...!
-        return cityKey;
-    }
-    private String getAreaKey(){
-        String areaKey = addressRecyclerModel.getAddAreaPinCode(); // TODO: Not needed...!
-        return areaKey;
-    }
-
     private String getScheduleTime(){
         int scheduleMode = scheduleRadioGroup.getCheckedRadioButtonId();
         if (scheduleMode==scheduleMorning.getId()){
@@ -266,45 +272,162 @@ public class ConformOrderFragment extends Fragment {
         return scheduleTime;
     }
 
-    // Check For Product is exist in particular Area ..
-    private void checkForAreaCode(){
-        dialog.show();
-        if (true ) {
-            showToast( "Code Not found!" );
-//            DBQuery.firebaseFirestore.collection( "AREA_CODE" ).orderBy( "area_code" )
-//                    .get()
-//                    .addSnapshotListener( new EventListener <DocumentSnapshot>() {
-//                        @Override
-//                        public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-//                            if (documentSnapshot.exists()) {
-//                                callOrderQuery();
-//                            } else {
-//                                dialog.dismiss();
-//                                showToast( "Product is not available for this Area Code!" );
-//                            }
-//                        }
-//                    } );
-        }else{
-            dialog.dismiss();
-            showToast( "Your city or Area name is not found." );
+    // Billing Function...
+    private int getTotalAmounts(){
+        int totalAmounts = 0;
+        for ( int i = 0; i<temCartItemModelList.size(); i++){
+            int sellingP = Integer.parseInt( temCartItemModelList.get( i ).getProductSellingPrice() );
+            int productQty = Integer.parseInt( temCartItemModelList.get( i ).getProductQty() );
+            totalAmounts = totalAmounts + ( sellingP * productQty );
         }
+        return totalAmounts;
+    }
+    private int getTotalMrps(){
+        int totalMrp = 0;
+        for ( int i = 0; i<temCartItemModelList.size(); i++){
+            int productQty = Integer.parseInt( temCartItemModelList.get( i ).getProductQty() );
+            int mrpP = Integer.parseInt( temCartItemModelList.get( i ).getProductMrpPrice() );
+            totalMrp = totalMrp + ( mrpP * productQty );
+        }
+        return totalMrp;
     }
 
-    // Order Query call...
-    private void callOrderQuery( ){
+    // Check For Product is exist in particular Area ..
+    private void checkForAreaCode(final String areaPin){
+        dialog.show();
+//            showToast( "Code Not found!" );
+        firebaseFirestore.collection( "AREA_CODE" )
+                .whereEqualTo( "area_city_code", CURRENT_CITY_CODE )
+                .get()
+                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            int sizeOfSnap = task.getResult().size();
+                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()){
+                                if (documentSnapshot.getId().equals( areaPin )){
+                                    // Process next step...
+                                    if (!dialog.isShowing()){
+                                        dialog.show();
+                                    }
+                                    // Check For Order...
+                                    checkOrderId( getRandomOrderID(), 2 );
+                                    break;
+                                }
+                                sizeOfSnap--;
+                            }
 
+                            if (sizeOfSnap > 0){
+                                dialog.dismiss();
+                                showToast( "This Product can not delivered out of "+ CURRENT_CITY_NAME );
+                            }
+
+                        }
+                    }
+                } );
+    }
+    private void checkOrderId(@NonNull final String orderID, final int round ){
+        final CollectionReference collectionReference =
+                firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID_CURRENT ).collection( "ORDERS" );
+
+        collectionReference.document( orderID )
+                .addSnapshotListener( new EventListener <DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        if (documentSnapshot.exists()) {
+                            String newOrderID = getRandomOrderID();
+                            if (round > 0){
+                                int newRound = round - 1;
+                                checkOrderId(newOrderID, newRound);
+                                showToast( "Please Wait. Order Request May take some time.!" );
+                            }else{
+                                dialog.dismiss();
+                                showToast( "Sorry! Order Failed.. Please Retry.!" );
+                            }
+
+                        }
+                        else {
+                            // Next step..
+                            Map<String, Object> orderMap = new HashMap <>();
+                            orderMap.put( "order_id", orderID );
+                            orderMap.put( "is_success", false );
+                            collectionReference.document( orderID )
+                                    .set( orderMap )
+                                    .addOnCompleteListener( new OnCompleteListener <Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task <Void> task) {
+                                            // GOTO OrderQuery...
+                                            callOrderQuery( orderID );
+
+                                        }
+                                    } );
+                        }
+                    }
+                } );
+    }
+    // Order Query call...
+    private void callOrderQuery( String orderID ){
         if (!dialog.isShowing()){
             dialog.show();
         }
-        int payMode = StaticValues.COD_MODE;
+//        int payMode = StaticValues.COD_MODE;
+        // User Information...
+//        String orderByUserId = DBQuery.currentUser.getUid();
+//        String orderByUserName = USER_DATA_MODEL.getUserFullName();
+//        String orderByUserMobile = USER_DATA_MODEL.getUserMobile();
+        String orderDeliveredName = getDeliveredFullName(); // 1
+        String orderDeliveryAddress = getDeliveryAddress(); // 2
+        String orderDeliveryPin = getDeliveryPin(); // 3
+//        String orderDate = StaticMethods.getCurrentDate();
+//        String orderDay = StaticMethods.getCurrentDay();
+//        String orderTime = StaticMethods.getCurrentTime();
 
+        //String orderID = getRandomOrderID(); // 4. Check whether is Exist() already Or not...
+//        String shopID = SHOP_ID_CURRENT;
+//        String deliveryID = " ";
+        int totalAmounts = getTotalAmounts(); // 5
+        int billingAmounts; // 6
+        int savingAmounts = getTotalMrps() - totalAmounts; // 7
+//        String orderStatus = "PENDING";
+        String deliveryCharge = "50"; // 8
+        // 9. deliverySchedule
 
+        if (totalAmounts>=500){
+            deliveryCharge = "Free";
+            billingAmounts = totalAmounts;
+        }else{
+            billingAmounts = totalAmounts + 50;
+        }
 
+//        this.cartOrderSubItemModelList = cartOrderSubItemModelList;
+//        this.deliveryItemModelList = deliveryItemModelList;
 
-//        setFragment( new ContinueShopping() );
+        OrderQuery.placeOrderRequestQuery( dialog,
+                orderID, orderDeliveredName, orderDeliveryAddress, orderDeliveryPin,
+                String.valueOf( totalAmounts ), String.valueOf( billingAmounts ), String.valueOf( savingAmounts ), deliveryCharge
+                , deliverySchedule
+        );
+
+        setFragment( new ContinueShopping() );
     }
 
-   /** private void queryToBuy(int payMode, int BUY_FROM_VALUE  ){
+    // Fragment Transaction...
+    public void setFragment( Fragment fragment){
+        try{
+            getActivity().getParent().getActionBar().setTitle( "Continue Shopping..." );
+            getActivity().getParent().getActionBar().setDisplayShowTitleEnabled( true );
+            getActivity().getParent().getActionBar().setDisplayHomeAsUpEnabled( false );
+        }catch (NullPointerException e){ }
+        ConformOrderActivity.currentFrameLayout = CONTINUE_SHOPPING_FRAGMENT;
+        orderConfirmConstLayout.setVisibility( View.GONE );
+        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations( R.anim.slide_from_right, R.anim.slide_out_from_left );
+//        onDestroyView();
+        fragmentTransaction.replace( confirmOrderFragmentFrameLayout.getId(),fragment );
+        fragmentTransaction.commit();
+    }
+
+    /** private void queryToBuy(int payMode, int BUY_FROM_VALUE  ){
         // User Information...
         String orderByUserId = FirebaseAuth.getInstance().getUid();
         String orderDeliveredName = getDeliveredFullName();

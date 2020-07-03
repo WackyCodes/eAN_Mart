@@ -1,16 +1,20 @@
 package wackycodes.ecom.eanmart.userprofile.orders;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.userprofile.cart.MyCartAdaptor;
 
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.orderItemModelList;
@@ -36,7 +40,7 @@ public class OrderListActivity extends AppCompatActivity {
         setSupportActionBar( toolbar );
         // Set Title on Action Menu
         try{
-            getSupportActionBar().setDisplayShowTitleEnabled( false );
+            getSupportActionBar().setDisplayShowTitleEnabled( true );
             getSupportActionBar().setTitle( "My Orders" );
             getSupportActionBar( ).setDisplayHomeAsUpEnabled( true );
         }catch (NullPointerException e){
@@ -68,5 +72,18 @@ public class OrderListActivity extends AppCompatActivity {
             noOrderLayout.setVisibility(  View.GONE );
         }
     }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home){
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected( item );
+    }
+
+
 
 }

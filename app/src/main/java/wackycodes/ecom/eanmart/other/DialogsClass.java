@@ -2,10 +2,14 @@ package wackycodes.ecom.eanmart.other;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
@@ -132,6 +137,21 @@ public class DialogsClass {
         } );
         signInUpDialog.show();
 
+    }
+
+
+    public static void setAlarmOnNotification(Context context, String notifyTitle, String notifyBody){
+        Uri alarmSound = RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
+        MediaPlayer mp = MediaPlayer. create ( context, alarmSound );
+        mp.start();
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context, "default" )
+                        .setSmallIcon(R.mipmap.logo_round )
+                        .setContentTitle( notifyTitle )
+                        .setContentText( notifyBody ) ;
+//        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context. NOTIFICATION_SERVICE );
+        NotificationManager mNotificationManager = (NotificationManager)context.getSystemService( Context.NOTIFICATION_SERVICE );
+        mNotificationManager.notify(( int ) System. currentTimeMillis() , mBuilder.build());
     }
 
 

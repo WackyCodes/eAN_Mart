@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".shophome.aboutshop.AboutShopActivity">
+
+    <!--   my account Top        -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/shop_image"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:background="@color/colorGray"
+            android:scaleType="fitCenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_photo_banner_black_24dp" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/shop_logo"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:elevation="6dp"
+            app:civ_border_color="@color/colorWhite"
+            app:civ_border_width="2dp"
+            app:layout_constraintBottom_toBottomOf="@+id/shop_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shop_image"
+            app:srcCompat="@drawable/ic_account_circle_gray_24dp" />
+
+        <ImageView
+            android:id="@+id/verify_tag_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/back_round_white_layout"
+            android:backgroundTint="@color/colorGreen"
+            android:elevation="8dp"
+            android:padding="2dp"
+            android:textAlignment="center"
+            android:tint="@color/colorWhite"
+            app:layout_constraintBottom_toBottomOf="@+id/shop_logo"
+            app:layout_constraintEnd_toEndOf="@+id/shop_logo"
+            app:layout_constraintStart_toStartOf="@+id/shop_logo"
+            app:layout_constraintTop_toBottomOf="@+id/shop_logo"
+            app:srcCompat="@drawable/ic_check_black_24dp" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/back_rectangle_4dp_layout"
+            android:backgroundTint="@color/colorWhite"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shop_image">
+
+            <TextView
+                android:id="@+id/shop_rating_text"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:drawableLeft="@drawable/ic_star_black_24dp"
+                android:drawableTint="@color/colorBlue"
+                android:paddingRight="2dp"
+                android:text="4.3"
+                android:textAlignment="center"
+                android:textColor="@color/colorBlack"
+                android:textSize="14dp" />
+
+            <LinearLayout
+                android:id="@+id/shop_veg_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="4dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/back_no_back_color_1dp_border"
+                    android:backgroundTint="@color/colorGreen"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/dot_default"
+                    android:tint="@color/colorGreen" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/dot_selector"
+                    android:padding="6dp"
+                    android:text="Veg"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGreen" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/back_rectangle_4dp_layout"
+            android:backgroundTint="@color/colorWhite"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shop_image">
+
+            <TextView
+                android:id="@+id/shop_open_close_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/back_rectangle_4dp_layout"
+                android:backgroundTint="@color/colorGreen"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:text="Open"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/shop_opening_timing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/dot_selector"
+                android:padding="6dp"
+                android:text="10AM - 8PM"
+                android:textAlignment="center"
+                android:textColor="@color/colorGreen" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="462010909"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textSize="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="@string/sample_name"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textSize="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_place_black_24dp"
+            android:drawableTint="@color/colorBlue"
+            android:paddingRight="2dp"
+            android:text="@string/sample_address"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textSize="14dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:text="Type:"
+                android:textAlignment="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:text="Electronics"
+                android:textAlignment="center"
+                android:textColor="@color/colorSecondary" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="@string/sample_tag_line"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textSize="14dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/my_cart_continue_linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/colorSecondary"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/my_cart_ConstLayout"
+        app:layout_constraintStart_toStartOf="@+id/my_cart_ConstLayout">
+
+        <LinearLayout
+            android:id="@+id/continue_shopping_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/back_rectangle_4dp_layout"
+            android:backgroundTint="@color/colorPrimary"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableLeft="@drawable/ic_navigate_before_black_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:drawablePadding="6dp"
+                android:gravity="center_vertical"
+                android:text="Shopping"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/my_cart_total_amounts2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_local_phone_black_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:drawablePadding="6dp"
+                android:text="Call"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Helpline"
+                android:textColor="@color/colorWhite" />
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

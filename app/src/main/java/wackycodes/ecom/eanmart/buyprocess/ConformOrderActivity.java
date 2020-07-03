@@ -14,11 +14,13 @@ import android.widget.Toast;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 
 import static wackycodes.ecom.eanmart.other.StaticValues.CONFORM_ORDER_ACTIVITY;
 import static wackycodes.ecom.eanmart.other.StaticValues.CONTINUE_SHOPPING_FRAGMENT;
+import static wackycodes.ecom.eanmart.other.StaticValues.USER_DATA_MODEL;
 
 public class ConformOrderActivity extends AppCompatActivity {
 
@@ -55,11 +57,10 @@ public class ConformOrderActivity extends AppCompatActivity {
         confirmOrderFrameLayout = findViewById( R.id.confirm_order_frame );
 
         if (!StaticValues.USER_DATA_MODEL.isLoadData()){
-//            DBquery.userInformationQuery( this, dialogsClass.progressDialog( this )  );
-            // TODO:?
+            UserDataQuery.loadUserDataQuery(this, null);
         }
 
-//        setFragment( new ConformOrderFragment() );
+        setFragment( new ConformOrderFragment() );
 
     }
 

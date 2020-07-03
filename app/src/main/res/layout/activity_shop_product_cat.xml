@@ -5,43 +5,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".buyprocess.ConformOrderActivity">
+    tools:context=".shophome.ShopProductCatActivity">
+
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout3"
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ToolTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/x_ToolBar"
+            android:id="@+id/appToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             android:scaleType="center"
             app:elevation="4dp"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/ToolTheme"
-            app:titleMarginStart="40dp"
             app:titleTextColor="@color/colorWhite">
 
         </androidx.appcompat.widget.Toolbar>
 
-
     </com.google.android.material.appbar.AppBarLayout>
 
-    <FrameLayout
-        android:id="@+id/confirm_order_frame"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/shop_home_swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout3">
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/shop_home_layout_container_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorRecyclerBack"
+            android:visibility="visible" />
 
-    </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

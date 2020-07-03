@@ -1,6 +1,7 @@
 package wackycodes.ecom.eanmart.category;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.other.StaticMethods;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NON_VEG;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NO_SHOW;
@@ -73,7 +75,7 @@ public class ShopListAdaptor extends RecyclerView.Adapter <ShopListAdaptor.ViewH
         }
 
         @SuppressLint("NewApi")
-        private void setData(String shopID, String sLogoLink, String sName, String sCategory, String sRating, int sVegType ){
+        private void setData(final String shopID, String sLogoLink, String sName, String sCategory, String sRating, int sVegType ){
 
             Glide.with( itemView.getContext() ).load( sLogoLink ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( shopLogo );
@@ -92,8 +94,12 @@ public class ShopListAdaptor extends RecyclerView.Adapter <ShopListAdaptor.ViewH
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO : Use Shop ID and Go TO...
-                    StaticMethods.showToast( itemView.getContext(), "Code Not Found..!" );
+                    //  : Use Shop ID and Go TO...
+//                    StaticMethods.showToast( itemView.getContext(), "Code Not Found..!" );
+                    Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
+                    intent.putExtra( "SHOP_ID", shopID );
+                    itemView.getContext().startActivity( intent );
+
                 }
             } );
 

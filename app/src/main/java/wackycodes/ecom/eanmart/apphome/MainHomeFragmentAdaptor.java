@@ -241,9 +241,13 @@ public class MainHomeFragmentAdaptor extends RecyclerView.Adapter {
                         setFromHomeFragment(shopsViewFragment , FRAGMENT_MAIN_SHOPS_VIEW );
                         break;
                     case TYPE_LIST_SHOPS_VIEW_NAME:
-                        Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
-                        intent.putExtra( "SHOP_ID", docID );
-                        itemView.getContext().startActivity( intent );
+                        if (docID != null){
+                            Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
+                            intent.putExtra( "SHOP_ID", docID );
+                            itemView.getContext().startActivity( intent );
+                        }else{
+                            showToast( itemView.getContext(), "Shop ID not found!" );
+                        }
 
 //                        MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
 //                        MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;

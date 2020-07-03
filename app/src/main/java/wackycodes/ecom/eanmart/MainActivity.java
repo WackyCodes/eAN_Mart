@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -55,12 +57,15 @@ import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.userprofile.UserProfileActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
+import wackycodes.ecom.eanmart.userprofile.notifications.NotificationActivity;
+import wackycodes.ecom.eanmart.userprofile.orders.OrderListActivity;
 
 import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
+import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.loadCartDataQuery;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
@@ -150,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(currentUser != null){
             drawerCityTitle.setText("Your City");
             drawerCityName.setText( CURRENT_CITY_NAME );
+            loadCartDataQuery(MainActivity.this);
+            // Run user Notification Query to update..
+            UserDataQuery.loadNotificationsQuery( MainActivity.this );
         }
 
         // Assigning and Set fragment...
@@ -163,13 +171,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // SearchView...
         homeMainSearchView = findViewById( R.id.home_shop_search_view );
         homeSearchItemRecycler = findViewById( R.id.home_search_recycler_view );
-
+//        homeMainSearchView.setFocusableInTouchMode( false );
+        homeMainSearchView.setFocusable( false );
         LinearLayoutManager searchLinearLManager = new LinearLayoutManager( this );
         searchLinearLManager.setOrientation( RecyclerView.VERTICAL );
         homeSearchItemRecycler.setLayoutManager( searchLinearLManager );
         searchAdaptor = new SearchAdapter( searchShopItemList );
         homeSearchItemRecycler.setAdapter( searchAdaptor );
-        getShopSearchItems();
+        getShopSearchItems( );
     }
 
     @Override
@@ -299,15 +308,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             notificationItem.setActionView( R.layout.badge_notification_layout );
             badgeNotifyCount = notificationItem.getActionView().findViewById( R.id.badge_count );
             if (currentUser != null){
-                // Run user Notification Query to update...
-                UserDataQuery.loadNotificationsQuery( MainActivity.this );
+                if (UserDataQuery.notificationModelList.size() > 0){
+                    badgeNotifyCount.setVisibility( View.VISIBLE );
+                    badgeNotifyCount.setText( String.valueOf( UserDataQuery.notificationModelList.size() ) );
+                }else{
+                    badgeNotifyCount.setVisibility( View.GONE );
+                }
+            }else{
+                badgeNotifyCount.setVisibility( View.GONE );
             }
             notificationItem.getActionView().setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    Intent catIntent = new Intent( MainActivity.this, NotificationActivity.class);
-//                    startActivity( catIntent );
-                    showToast("Code Not found.!");
+                    Intent catIntent = new Intent( MainActivity.this, NotificationActivity.class);
+                    startActivity( catIntent );
                 }
             } );
 
@@ -337,8 +351,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         } else
         if (id == R.id.menu_notification_main){
-            // GOTO : Notification Activity -- // CatTypeMobileRecycler
-            // written code... in onCreateOptionsMenu() method.
+            Intent catIntent = new Intent( MainActivity.this, NotificationActivity.class);
+            startActivity( catIntent );
             return true;
         } else
 
@@ -371,6 +385,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (mainNavItemId == R.id.menu_my_cart){
                 if (currentUser!=null){
                     gotoCart();
+                }else{
+                    DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
+                }
+            }else
+            if (mainNavItemId == R.id.menu_my_order){
+                if (currentUser!=null){
+                    startActivity( new Intent( MainActivity.this, OrderListActivity.class ) );
                 }else{
                     DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
                 }
@@ -552,6 +573,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void getShopSearchItems(){
+
         // Search Methods...
         homeMainSearchView.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
             @Override
@@ -582,7 +604,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     String.valueOf((long)documentSnapshot.get( "shop_veg_type" ) )
                                             )
                                     );
-                                    searchShopItemList.add( model );
                                     if ( !searchShopTags.contains( model.getShopID() )){
                                         searchShopItemList.add( model );
                                         searchShopTags.add( model.getShopID() );
@@ -604,6 +625,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     dialog.dismiss();
                                 }
                                 dialog.dismiss();
+                                closeKeyboard();
                             }else{
                                 // error...
                                 dialog.dismiss();
@@ -640,7 +662,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    class SearchAdapter extends ShopListAdaptor implements Filterable {
+    private void closeKeyboard(){
+        View view = this.getCurrentFocus();
+        if (view!=null){
+            InputMethodManager inputMethodManager = (InputMethodManager)getSystemService( Context.INPUT_METHOD_SERVICE );
+            inputMethodManager.hideSoftInputFromWindow( view.getWindowToken(), 0 );
+        }
+    }
+
+    private class SearchAdapter extends ShopListAdaptor implements Filterable {
 
         public SearchAdapter(List <ShopItemModel> shopItemModelList) {
             super( shopItemModelList );

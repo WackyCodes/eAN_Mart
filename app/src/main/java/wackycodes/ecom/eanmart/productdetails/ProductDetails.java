@@ -40,6 +40,7 @@ import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
@@ -47,14 +48,17 @@ import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
 import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_ITEMS;
+import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_TOTAL_PRICE;
 import static wackycodes.ecom.eanmart.other.StaticValues.PRODUCT_DETAILS_ACTIVITY;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NON_VEG;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NO_SHOW;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_VEG;
+import static wackycodes.ecom.eanmart.other.StaticValues.isVerifiedMobile;
+import static wackycodes.ecom.eanmart.shophome.ShopHomeActivity.searchProductList;
 
 public class ProductDetails extends AppCompatActivity {
-
+    public static AppCompatActivity productDetails;
 
     private ImageView pVegNonTypeImage; // product_veg_non_type_image
     private LinearLayout weightSpinnerLayout;// weight_spinner_layout
@@ -105,6 +109,7 @@ public class ProductDetails extends AppCompatActivity {
     public static boolean ALREADY_ADDED_IN_CART = false;
     private int cartThisQty = 0;
     private int cartThisIndex = 0;
+    private String cartShopID;
 
     private int currentVariant = 0;
 
@@ -114,6 +119,7 @@ public class ProductDetails extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_product_details );
+        productDetails = this;
 
         Toolbar toolbar = findViewById( R.id.x_ToolBar );
         setSupportActionBar( toolbar );
@@ -123,7 +129,18 @@ public class ProductDetails extends AppCompatActivity {
         layoutIndex = getIntent().getIntExtra( "LAYOUT_INDEX", -1 );
         productIndex = getIntent().getIntExtra( "PRODUCT_INDEX", -1 );
 
-        pProductModel = shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).getProductModelList().get( productIndex );
+        if (crrShopCatIndex != -1 && layoutIndex != -1){
+            // This is for layout product click...
+            pProductModel = shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).getProductModelList().get( productIndex );
+        }else{
+            // This is for search activity...
+            if (searchProductList.size() > 0)
+                pProductModel = searchProductList.get( productIndex );
+            else{
+                showToast( "Product Not found!" );
+                finish();
+            }
+        }
 
         dialog = DialogsClass.getDialog( ProductDetails.this );
         dialog.show();
@@ -213,16 +230,8 @@ public class ProductDetails extends AppCompatActivity {
         }
 
         // Cart Visibility with qty...
-        if (currentUser!=null){
-            for (CartOrderSubItemModel cIM : temCartItemModelList) {
-                if (cIM.getProductID().equals( productID )) {
-                    cartThisIndex = temCartItemModelList.indexOf( cIM );
-                    cartThisQty = Integer.parseInt( cIM.getProductQty() );
-                    ALREADY_ADDED_IN_CART = true;
-                    setCartLayoutVisibility(false, cIM.getProductQty());
-                    break;
-                }
-            }
+        if (currentUser!=null && temCartItemModelList.size()>0){
+            setCartUpdate();
         }
         else{
             ALREADY_ADDED_IN_CART = false;
@@ -252,6 +261,14 @@ public class ProductDetails extends AppCompatActivity {
         super.onResume();
         // To Refresh Menu...
         invalidateOptionsMenu();
+        // Cart Visibility with qty...
+        if (currentUser!=null && temCartItemModelList.size()>0){
+            setCartUpdate();
+        }
+        else{
+            ALREADY_ADDED_IN_CART = false;
+            setCartLayoutVisibility(true, null);
+        }
     }
 
     @Override
@@ -419,6 +436,21 @@ public class ProductDetails extends AppCompatActivity {
 
     }
 
+    private void setCartUpdate(){
+        cartShopID = temCartItemModelList.get( currentVariant ).getProductShopID();
+        for ( int p = 0; p <temCartItemModelList.size()-1; p++){
+            CartOrderSubItemModel cIM = temCartItemModelList.get( p );
+            if (cIM.getProductID().equals( productID )) {
+                cartThisIndex = temCartItemModelList.indexOf( cIM );
+                cartThisQty = Integer.parseInt( cIM.getProductQty() );
+                ALREADY_ADDED_IN_CART = true;
+                setCartLayoutVisibility(false, cIM.getProductQty());
+                break;
+            }
+        }
+
+    }
+
     private void setProductData(int variantIndex){
         // Set ImageLayout Data
         productImageList.clear();
@@ -482,19 +514,22 @@ public class ProductDetails extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (currentUser!=null && isInternetConnected()){
-                    dialog.show();
-                    cartThisQty = 1;
-                    String cartID = StaticMethods.getRandomCartID();
-                    ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( currentVariant );
-                    String pName = productSubModel.getpName();
-                    String pImageLink[] = productSubModel.getpImage();
-                    String pPrice = productSubModel.getpSellingPrice();
-                    String pMrpPrice = productSubModel.getpMrpPrice();
-                    String pWeight = productSubModel.getpWeight();
-                    if (pWeight!=null){
-                        pName = pName + " ( " + pWeight + " )";
+                    if (cartShopID != null){
+                        if (cartShopID.equals( SHOP_ID_CURRENT )){
+                            // Continue...
+                            dialog.show();
+                            uploadOnDatabaseNewCart( );
+                        }
+                        else{
+                            DialogsClass.alertDialog( ProductDetails.this, "Cart has another shop's products!",
+                                    "Sorry! You Can not purchase from different shop at a time. Please remove your cart to purchase from this shop. " ).show();
+                        }
                     }
-                    uploadOnDatabaseNewCart(cartID, pName, pImageLink[0], pPrice, pMrpPrice, "1" );
+                    else{
+                        // Continue...
+                        dialog.show();
+                        uploadOnDatabaseNewCart( );
+                    }
                 }
                 else{
                     DialogsClass.signInUpDialog( ProductDetails.this, PRODUCT_DETAILS_ACTIVITY );
@@ -570,7 +605,20 @@ public class ProductDetails extends AppCompatActivity {
         temCartItemModelList.get( cartThisIndex ).setProductMrpPrice( pMrpPrice );
     }
 
-    private void uploadOnDatabaseNewCart(String cartID, String pName, String pImageLink, String pPrice, String pMrpPrice, String pQty){
+    private void uploadOnDatabaseNewCart( ){
+        String cartID = StaticMethods.getRandomCartID();
+        ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( currentVariant );
+        String pName = productSubModel.getpName();
+        String pImageLink[] = productSubModel.getpImage();
+        String pPrice = productSubModel.getpSellingPrice();
+        String pMrpPrice = productSubModel.getpMrpPrice();
+        String pWeight = productSubModel.getpWeight();
+        if (pWeight!=null){
+            pName = pName + " ( " + pWeight + " )";
+        }
+        String pQty = "1";
+//        uploadOnDatabaseNewCart(cartID, pName, pImageLink[0], pPrice, pMrpPrice, "1" );
+
 //        dialog.show();
         CartOrderSubItemModel cartOrderSubItemModel = new CartOrderSubItemModel(
                 CART_TYPE_ITEMS,
@@ -578,16 +626,30 @@ public class ProductDetails extends AppCompatActivity {
                 SHOP_ID_CURRENT,
                 productID,
                 pName,
-                pImageLink,
+                pImageLink[0],
                 pPrice,
                 pMrpPrice,
                 pQty
         );
+        int sizeOfCartList = temCartItemModelList.size();
+        if (sizeOfCartList>0){
+            if (sizeOfCartList == 2){
+                cartThisIndex = sizeOfCartList - 1;
+                temCartItemModelList.add(cartThisIndex, cartOrderSubItemModel );
+            }else{
+                cartThisIndex = sizeOfCartList - 2;
+                temCartItemModelList.add(cartThisIndex, cartOrderSubItemModel );
+            }
+
+        }else{
+            cartThisIndex = 0;
+            temCartItemModelList.add( cartOrderSubItemModel );
+            temCartItemModelList.add( new CartOrderSubItemModel( CART_TYPE_TOTAL_PRICE ) );
+        }
         // Add In Temp Cart list..
-        temCartItemModelList.add( cartOrderSubItemModel );
         cartThisQty = 1;
-        cartThisIndex = temCartItemModelList.size() - 1;
         ALREADY_ADDED_IN_CART = true;
+        cartShopID = SHOP_ID_CURRENT;
         // query to update on database...
         UserDataQuery.uploadCartDataQuery( ProductDetails.this, dialog, cartOrderSubItemModel);
         setCartLayoutVisibility(false, pQty );

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,9 +17,12 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 
+import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
 import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_ITEMS;
 import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_TOTAL_PRICE;
 
@@ -74,7 +78,7 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
                 int productQuantity = Integer.parseInt( myCartItemModel1.getProductQty() );
 //                String qtyType = myCartItemModel1.getProductQtyType();
                 String qtyType = "Sample";
-                ((MyCartViewHolder) holder).setCartData( productID, imgLink, name, price, cutPrice, productQuantity, qtyType );
+                ((MyCartViewHolder) holder).setCartData(position, productID, imgLink, name, price, cutPrice, productQuantity, qtyType );
                 break;
             case CART_TYPE_TOTAL_PRICE:
                 int totalItems = 0;
@@ -114,6 +118,9 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
         private TextView productCutPrice;
         private TextView removeItemBtn;
         private TextView productQuantity;
+        private ImageButton removeOneCartBtn; // remove_item_from_cart_imgBtn
+        private ImageButton addOneCartBtn; // add_item_to_cart_imgBtn
+        Dialog dialog;
 
         public MyCartViewHolder(@NonNull final View itemView) {
             super( itemView );
@@ -123,53 +130,67 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
             productPrice = itemView.findViewById( R.id.product_price );
             productCutPrice = itemView.findViewById( R.id.product_cut_price );
             removeItemBtn = itemView.findViewById( R.id.remove_item_from_cart );
-            productQuantity = itemView.findViewById( R.id.item_quntity );
+            productQuantity = itemView.findViewById( R.id.cart_item_text );
+            removeOneCartBtn = itemView.findViewById( R.id.remove_item_from_cart_imgBtn );
+            addOneCartBtn = itemView.findViewById( R.id.add_item_to_cart_imgBtn );
+
+            dialog = DialogsClass.getDialog( itemView.getContext() );
 
         }
 
-        private void setCartData(final String productId, String imgLink, String name, final String price, final String cutPrice, final int quantity, String qtyType ){
-
+        private void setCartData(final int index, final String productId, String imgLink,
+                                 String name, final String price, final String cutPrice, final int quantity, String qtyType ){
             Glide.with( itemView.getContext() ).load( imgLink )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp) ).into( productImage );
 
-            productQuantity.setText( "Qty: " + quantity + " " + qtyType );
+            productQuantity.setText( String.valueOf( quantity ) );
             productName.setText( name );
             // Set Price according to quantity...
             productPrice.setText( "Rs."+ price +"/-" );
             productCutPrice.setText( "Rs." + cutPrice  + "/-" );
-
+            removeItemBtn.setEnabled( true );
             removeItemBtn.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO : call method...
-                    Dialog dialog = DialogsClass.getDialog( itemView.getContext() );
-//                    dialog.show();
                     removeItemBtn.setEnabled( false );
-                    // if item in cart then, Code for remove from cart
-//                    DBquery.removeItemFromCart( getIndexOf( productId ), itemView.getContext(), StaticValues.REMOVE_ONE_ITEM, dialog );
-//                    removeItemBtn.setEnabled( true );
+                    if (CheckInternetConnection.isInternetConnected( itemView.getContext() )){
+                        dialog.show();
+                        //  REMOVE FROM CART...
+                        removeFromCart(dialog, index );
+                    }else{
+                        removeItemBtn.setEnabled( true );
+                    }
                 }
             } );
 
-            productQuantity.setOnClickListener( new View.OnClickListener() {
+            addOneCartBtn.setOnClickListener( new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    // TODO : Create method...
-//                    dialogsClass.getQuantityDialog( getIndexOf( productId ), itemView.getContext() );
+                public void onClick(View v) {
+                   int qty = quantity + 1;
+                    updateCartThisQty(String.valueOf( qty ), index );
+                }
+            } );
+            removeOneCartBtn.setEnabled( true );
+            removeOneCartBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int qty = quantity - 1;
+                    if (qty > 0){
+                        updateCartThisQty(String.valueOf( qty ), index );
+                    }else{
+                        removeOneCartBtn.setEnabled( false );
+                        if (CheckInternetConnection.isInternetConnected( itemView.getContext() )){
+                            dialog.show();
+                            //  REMOVE FROM CART...
+                            removeFromCart(dialog, index );
+                        }else{
+                            removeOneCartBtn.setEnabled( true );
+                        }
+                    }
                 }
             } );
 
         }
-
-//        private int getIndexOf(String proId){
-//            int listIndex = -1;
-//            for ( int i = 0; i < DBquery.myCartCheckList.size(); i++) {
-//                if (DBquery.myCartCheckList.get( i ).getProductId().equals( proId )){
-//                    listIndex = i;
-//                }
-//            }
-//            return listIndex;
-//        }
 
         private String  getPriceValue(int qty, String price){
             if (qty == 1){
@@ -180,6 +201,26 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
             }
             return null;
         }
+
+        private void removeFromCart(Dialog dialog, int cartIndex){
+            String cartID = temCartItemModelList.get( cartIndex ).getCartID();
+            UserDataQuery.deleteFromCartQuery(  dialog, cartID );
+            temCartItemModelList.remove( cartIndex );
+
+            if (temCartItemModelList.size()==1){
+                temCartItemModelList.clear();
+                CartActivity.myCartConstLayout.setVisibility( View.GONE );
+                CartActivity.dontHaveCartConstLayout.setVisibility( View.VISIBLE );
+            }
+            CartActivity.myCartAdaptor.notifyDataSetChanged();
+        }
+
+        private void updateCartThisQty( String pQty, int cartIndex ){
+            productQuantity.setText( pQty );
+            temCartItemModelList.get( cartIndex ).setProductQty( pQty );
+            CartActivity.myCartAdaptor.notifyDataSetChanged();
+        }
+
     }
 
     public class MyCartTotalAmountHolder extends RecyclerView.ViewHolder{
@@ -224,7 +265,6 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
 
         }
     }
-
 
 
 }

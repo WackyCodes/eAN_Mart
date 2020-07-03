@@ -1,6 +1,8 @@
 package wackycodes.ecom.eanmart.userprofile.cart;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -8,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -15,15 +19,26 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.List;
+
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
+import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.productdetails.ProductDetails;
+import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
+import wackycodes.ecom.eanmart.userprofile.orders.DeliveryItemModel;
+import wackycodes.ecom.eanmart.userprofile.orders.OrderItemModel;
 
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.cartItemModelList;
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
 import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
+import static wackycodes.ecom.eanmart.productdetails.ProductDetails.productDetails;
+import static wackycodes.ecom.eanmart.shophome.ShopHomeActivity.shopHomeActivity;
 
 public class CartActivity extends AppCompatActivity {
 
@@ -35,18 +50,30 @@ public class CartActivity extends AppCompatActivity {
 
     private RecyclerView myCartItemRecyclerView;
     public static  MyCartAdaptor myCartAdaptor;
+    private TextView addMoreCartBtn;
 
     public static boolean isCartEmpty;
 
     // Don't have any cart item...
     public static ConstraintLayout dontHaveCartConstLayout;
     private Button dontHaveCartBtn;
+    Dialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_cart );
+        dialog = DialogsClass.getDialog( this );
 
+        Toolbar toolbar = findViewById( R.id.x_ToolBar );
+        setSupportActionBar( toolbar );
+        // Set Title on Action Menu
+        try{
+            getSupportActionBar().setDisplayShowTitleEnabled( true );
+            getSupportActionBar().setTitle( "My Cart" );
+            getSupportActionBar( ).setDisplayHomeAsUpEnabled( true );
+        }catch (NullPointerException e){
+        }
         dontHaveCartConstLayout = findViewById( R.id.my_cart_dont_have_cart_ConstLayout );
         myCartConstLayout = findViewById( R.id.my_cart_ConstLayout );
 
@@ -62,6 +89,7 @@ public class CartActivity extends AppCompatActivity {
         } );
         // Don't have any cart item...
 
+        addMoreCartBtn = findViewById( R.id.add_more_cart_btn);
         // My Cart...
         myCartContinueBtn = findViewById( R.id.my_cart_continue_btn);
         myCartTotalAmounts2 = findViewById( R.id.my_cart_total_amounts2);
@@ -86,6 +114,49 @@ public class CartActivity extends AppCompatActivity {
             }
         } );
 
+        addMoreCartBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (productDetails!=null){
+                    productDetails.finish();
+                }
+//                shopHomeActivity.finish();
+//                Intent intent = new Intent( CartActivity.this, ShopHomeActivity.class );
+//                startActivity( intent );
+                finish();
+            }
+        } );
+
+        setMyCartConstLayout();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate( R.menu.menu_cart_delete,menu);
+        MenuItem cartItem = menu.findItem( R.id.menu_remove_cart );
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home){
+            finish();
+            return true;
+        }else
+            if (id == R.id.menu_remove_cart){
+                if (CheckInternetConnection.isInternetConnected( CartActivity.this ) && temCartItemModelList.size()>0){
+                    dialog.show();
+                    clearCartList();
+                }
+                return true;
+            }
+        return super.onOptionsItemSelected( item );
+    }
+
+    private void setMyCartConstLayout(){
         // Check first if any item in cart..
         if ( isCartEmpty ){
             myCartConstLayout.setVisibility( View.GONE );
@@ -94,40 +165,18 @@ public class CartActivity extends AppCompatActivity {
             myCartConstLayout.setVisibility( View.VISIBLE );
             dontHaveCartConstLayout.setVisibility( View.GONE );
         }
-
     }
 
-    private void showConditionDialog(){
-
-        final Dialog deliveryDialog = new Dialog( this );
-        deliveryDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
-//        deliveryDialog.setContentView( R.layout.dialog_delivery_charge );
-////        deliveryDialog.setCancelable( false );
-////
-////        ImageButton closeBtn = deliveryDialog.findViewById( R.id.close_btn );
-////        Button dialogContinueBtn = deliveryDialog.findViewById( R.id.accept_and_continue_btn );
-////
-////        closeBtn.setOnClickListener( new View.OnClickListener() {
-////            @Override
-////            public void onClick(View v) {
-////                deliveryDialog.dismiss();
-////            }
-////        } );
-////
-////        dialogContinueBtn.setOnClickListener( new View.OnClickListener() {
-////            @Override
-////            public void onClick(View v) {
-////
-////                Intent myAddressIntent = new Intent( getContext(), MyAddressesActivity.class );
-////                myAddressIntent.putExtra( "MODE", SELECT_ADDRESS );
-////                startActivity( myAddressIntent );
-////                StaticValues.BUY_FROM_VALUE = StaticValues.BUY_FROM_CART;
-////            }
-////        } );
-
-        deliveryDialog.show();
-
+    private void clearCartList(){
+        for (int i = 0; i<temCartItemModelList.size()-1; i++){
+            dialog.show();
+            UserDataQuery.deleteFromCartQuery(dialog, temCartItemModelList.get( 0 ).getCartID() );
+        }
+        temCartItemModelList.clear();
+        isCartEmpty = true;
+        myCartAdaptor.notifyDataSetChanged();
+        setMyCartConstLayout();
+        dialog.dismiss();
     }
-
 
 }

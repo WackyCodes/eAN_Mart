@@ -7,15 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".userprofile.cart.CartActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ToolTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/x_ToolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:scaleType="center"
+            app:elevation="4dp"
+            app:popupTheme="@style/ToolTheme"
+            app:titleMarginStart="40dp"
+            app:titleTextColor="@color/colorWhite">
+
+        </androidx.appcompat.widget.Toolbar>
+
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/my_cart_dont_have_cart_ConstLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
 
         <TextView
             android:id="@+id/textView16"
@@ -26,12 +51,12 @@
             android:layout_marginTop="100dp"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:padding="16dp"
             android:text="Sorry..! You Don't have any item in your Cart.\n Please continue shopping..."
+            android:textAlignment="center"
             android:textColor="@color/colorSecondary"
             android:textSize="18dp"
-            android:padding="16dp"
-            android:gravity="center"
-            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -46,8 +71,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
             android:backgroundTint="@color/colorPrimary"
-            android:textColor="@color/colorWhite"
             android:text="Go To Shop"
+            android:textColor="@color/colorWhite"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView16" />
@@ -57,12 +82,12 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/my_cart_ConstLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/my_cart_recyclerView"
@@ -72,7 +97,25 @@
             app:layout_constraintBottom_toTopOf="@+id/my_cart_continue_linearLayout"
             app:layout_constraintEnd_toEndOf="@+id/my_cart_ConstLayout"
             app:layout_constraintStart_toStartOf="@+id/my_cart_ConstLayout"
-            app:layout_constraintTop_toTopOf="@+id/my_cart_ConstLayout"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/add_more_cart_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/my_cart_continue_linearLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            android:drawablePadding="4dp"
+            android:paddingRight="4dp"
+            android:elevation="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/back_rectangle_4dp_layout"
+            android:backgroundTint="@color/colorPrimary"
+            android:gravity="center_vertical"
+            android:drawableTint="@color/colorWhite"
+            android:drawableLeft="@drawable/ic_navigate_before_black_24dp"
+            android:text="Add More in Cart"
+            android:textColor="@color/colorWhite"/>
 
         <LinearLayout
             android:id="@+id/my_cart_continue_linearLayout"
@@ -96,7 +139,7 @@
                     android:id="@+id/my_cart_total_amounts2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Rs.2,999/-"
+                    android:text="Rs./-"
                     android:textColor="@color/colorWhite"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -105,7 +148,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Total Amounts"
-                    android:textColor="@color/colorWhite"/>
+                    android:textColor="@color/colorWhite" />
 
             </LinearLayout>
 
@@ -113,21 +156,21 @@
                 android:id="@+id/my_cart_continue_btn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:layout_margin="4dp"
-                android:gravity="center"
-                android:backgroundTint="@color/colorPrimary"
+                android:layout_weight="1"
                 android:background="@drawable/back_rectangle_4dp_layout"
+                android:backgroundTint="@color/colorPrimary"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:text="Continue"
                     android:drawableRight="@drawable/ic_navigate_next_black_24dp"
                     android:drawablePadding="6dp"
                     android:drawableTint="@color/colorWhite"
+                    android:gravity="center_vertical"
+                    android:text="Check Out"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold" />
 

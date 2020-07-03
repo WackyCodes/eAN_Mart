@@ -18,7 +18,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
@@ -32,11 +34,13 @@ import wackycodes.ecom.eanmart.productdetails.ProductModel;
 import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentAdaptor;
 import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentModel;
 
+import static wackycodes.ecom.eanmart.other.StaticMethods.getRandomOrderID;
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_SLIDER_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.GRID_ITEM_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.HORIZONTAL_ITEM_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
 import static wackycodes.ecom.eanmart.other.StaticValues.STRIP_AD_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_SHOPS_VIEW;
@@ -264,6 +268,7 @@ public class DBQuery {
         if (shopHomeCategoryList.size() != 0){
             shopHomeCategoryList.get( index ).clear(); // Reload Products Or Load First Time...
         }else{
+            shopHomeCategoryListName.add( categoryID.toUpperCase() );
             shopHomeCategoryList.add( new ArrayList <ShopHomeFragmentModel>() ); // If List Blank...
         }
 //        shopID = "46200001";
@@ -416,6 +421,7 @@ public class DBQuery {
         } );
 
     }
+
 
 
 }

@@ -31,6 +31,7 @@ import wackycodes.ecom.eanmart.productdetails.ProductSubModel;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
 import static wackycodes.ecom.eanmart.other.StaticValues.GRID_PRODUCT_LAYOUT;
 import static wackycodes.ecom.eanmart.other.StaticValues.RECYCLER_PRODUCT_LAYOUT;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
@@ -185,15 +186,24 @@ public class ViewAllActivity  extends AppCompatActivity {
             public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                 if (task.isSuccessful()){
                     // access the banners from database...
-                    String[] pImage;
+//                    String[] pImage;
                     long p_no_of_variants = (long) task.getResult().get( "p_no_of_variants" );
                     List<ProductSubModel> productSubModelList = new ArrayList <>();
                     for (long tempI = 1; tempI <= p_no_of_variants; tempI++){
-                        int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
-                        pImage = new String[p_no_of_images];
-                        for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
-                            pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
+//                        int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
+//                        pImage = new String[p_no_of_images];
+//                        for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
+//                            pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
+//                        }
+                        // We can use Array...
+//                        String[] pImage = (String[]) task.getResult().get( "p_image_" + tempI );
+                        ArrayList<String> Images = (ArrayList <String>) task.getResult().get( "p_image_" + tempI );
+                        int sz = Images.size();
+                        String[] pImage = new String[sz];
+                        for (int i = 0; i < sz; i++){
+                            pImage[i] = Images.get( i );
                         }
+
                         // add Data...
                         productSubModelList.add( new ProductSubModel(
                                 task.getResult().get( "p_name_"+tempI).toString(),
@@ -222,6 +232,7 @@ public class ViewAllActivity  extends AppCompatActivity {
                                 p_veg_non_type,
                                 productSubModelList
                         ) );
+                        shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).setProductModelList( horizontalItemViewModelListViewAll );
                         horizontalItemViewAdaptor.notifyDataSetChanged();
                     }else{
                         gridViewModelListViewAll.add( new ProductModel(
@@ -233,6 +244,7 @@ public class ViewAllActivity  extends AppCompatActivity {
                                 p_veg_non_type,
                                 productSubModelList
                         ) );
+                        shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).setProductModelList( gridViewModelListViewAll );
                         itemActivityGridViewAdapter.notifyDataSetChanged();
                     }
                 }

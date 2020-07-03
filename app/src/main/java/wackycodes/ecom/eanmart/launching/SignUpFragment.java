@@ -161,10 +161,6 @@ public class SignUpFragment extends Fragment {
                         public void onComplete(@NonNull Task <Void> task) {
                             if(task.isSuccessful()){
 
-//                                CollectionReference userDataReference =
-//                                        firebaseFirestore.collection( "USER" )
-//                                                .document( firebaseAuth.getUid() )
-//                                                .collection( "USER_DATA" );
                                 loadUserData();
                             }else{
                                 String error = task.getException().getMessage();
@@ -194,6 +190,7 @@ public class SignUpFragment extends Fragment {
                 AuthActivity.setFragmentRequest == FRAGMENT_SIGN_UP){
             // if Come from request...
             UserDataQuery.loadUserDataQuery( null, null );
+            UserDataQuery.loadCartDataQuery( null );
             AuthActivity.setFragmentRequest = -1;
             AuthActivity.comeFromActivity = -1;
             getActivity().finish();

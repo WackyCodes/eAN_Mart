@@ -8,7 +8,7 @@ import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
 public class StaticValues {
 
-    public static String APP_VERSION = "em-1-01";
+    public static String APP_VERSION = "em-1-01"; // ev-1-01
 
     public static final String DEFAULT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_NAME ;
@@ -38,6 +38,13 @@ public class StaticValues {
     public static final int QUERY_TO_ADD_ADDRESS = 20;
     public static final int QUERY_TO_REMOVE_ADDRESS = 21;
     public static final int QUERY_TO_UPDATE_ADDRESS = 22;
+
+    public static final int NOTIFY_SIMPLE = 0;
+    public static final int NOTIFY_ORDER_ACCEPTED = 1;
+    public static final int NOTIFY_ORDER_ON_DELIVERY = 2;
+    public static final int NOTIFY_ORDER_DELIVERED = 3;
+    public static final int NOTIFY_ORDER_CANCEL = 4;
+    public static final int NOTIFY_OFFER = 5;
 
     // User Data Model...
     public static final UserDataModel USER_DATA_MODEL = new UserDataModel();
@@ -105,6 +112,7 @@ public class StaticValues {
     public static final int CONFORM_ORDER_ACTIVITY = 21;
 
     public static final int CONTINUE_SHOPPING_FRAGMENT = 22;
+    public static final int SHOP_PRODUCT_CAT_ACTIVITY = 23;
 
     public static final int SHOP_TYPE_VEG = 1;
     public static final int SHOP_TYPE_NON_VEG = 2;

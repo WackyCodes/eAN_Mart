@@ -45,6 +45,7 @@ import wackycodes.ecom.eanmart.productdetails.ProductSubModel;
 import wackycodes.ecom.eanmart.wcustomview.MyGridView;
 import wackycodes.ecom.eanmart.wcustomview.MyImageView;
 
+import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_SLIDER_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.GRID_ITEM_LAYOUT_CONTAINER;
@@ -304,6 +305,12 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             // set Image Resouice from database..
             Glide.with( itemView.getContext() ).load( imgLink )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( stripAdImage );
+            itemView.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    StaticMethods.showToast( itemView.getContext(), "Code not found!" );
+                }
+            } );
         }
     }
     //============  Strip ad  View Holder ============
@@ -359,17 +366,17 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 view.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onCategoryClick( itemView.getContext(), categoryTypeModelList.get( position ).getCatId() );
+                        onCategoryClick( itemView.getContext(),categoryTypeModelList.get( position ).getCatName(), categoryTypeModelList.get( position ).getCatId() );
                     }
                 } );
                 return view;
             }
 
-            private void onCategoryClick(Context context, String docID){
-                StaticMethods.showToast( context, "Code not Found!" );
-//                Intent intent = new Intent( itemView.getContext(), ShopHomeActivity.class );
-//                intent.putExtra( "CAT_ID", docID );
-//                itemView.getContext().startActivity( intent );
+            private void onCategoryClick(Context context,String docNme, String docID){
+                Intent intent = new Intent( itemView.getContext(), ShopProductCatActivity.class );
+                intent.putExtra( "PRODUCT_CAT_ID", docID );
+                intent.putExtra( "PRODUCT_CAT_NAME", docNme );
+                itemView.getContext().startActivity( intent );
             }
         }
 
@@ -460,19 +467,26 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                         DocumentSnapshot documentSnapshot = task.getResult();
 
                         if ( documentSnapshot.get( "p_no_of_variants" ) !=null ){
-                            String[] pImage;
+//                            String[] pImage;
 //                            long p_no_of_variants = (long) documentSnapshot.get( "p_no_of_variants" );
                             int p_no_of_variants = Integer.valueOf( String.valueOf( (long) documentSnapshot.get( "p_no_of_variants" ) ) );
                             List<ProductSubModel> productSubModelList = new ArrayList <>();
                             for (int tempI = 1; tempI <= p_no_of_variants; tempI++){
-                                int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images_"+ tempI) ) );
-                                pImage = new String[p_no_of_images];
-                                for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
-                                    pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
-                                }
+//                                int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images_"+ tempI) ) );
+//                                pImage = new String[p_no_of_images];
+//                                for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
+//                                    pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
+//                                }
 
                                 // We can use Array...
-                               /** String image[]  = (String[]) documentSnapshot.get( "image_" + tempI ); */
+//                                String[] pImage = (String[]) documentSnapshot.get( "p_image_" + tempI );
+
+                                ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
+                                int sz = Images.size();
+                                String[] pImage = new String[sz];
+                                for (int i = 0; i < sz; i++){
+                                    pImage[i] = Images.get( i );
+                                }
 
                                 // add Data...
                                 productSubModelList.add( new ProductSubModel(
@@ -502,7 +516,8 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                                     productSubModelList
                             ) );
 
-                            homeFragmentModelList.get( index ).setProductModelList( tempHorizontalList );
+                            shopHomeCategoryList.get( crrShopCatIndex ).get( index ).setProductModelList( tempHorizontalList );
+//                            homeFragmentModelList.get( index ).setProductModelList( tempHorizontalList );
                             if (recyclerView != null){
                                 horizontalItemViewAdaptor = new HorizontalItemViewAdaptor( crrShopCatIndex, index, VIEW_HORIZONTAL_LAYOUT, tempHorizontalList );
                                 recyclerView.setAdapter( horizontalItemViewAdaptor );
@@ -631,14 +646,22 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                     if (task.isSuccessful()){
                         // access the banners from database...
-                        String[] pImage;
+//                        String[] pImage;
                         long p_no_of_variants = (long) task.getResult().get( "p_no_of_variants" );
                         List<ProductSubModel> productSubModelList = new ArrayList <>();
                         for (long tempI = 1; tempI <= p_no_of_variants; tempI++){
-                            int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
-                            pImage = new String[p_no_of_images];
-                            for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
-                                pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
+//                            int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
+//                            pImage = new String[p_no_of_images];
+//                            for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
+//                                pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
+//                            }
+                            // We can use Array...
+//                            String[] pImage = (String[]) task.getResult().get( "p_image_" + tempI );
+                            ArrayList<String> Images = (ArrayList <String>) task.getResult().get( "p_image_" + tempI );
+                            int sz = Images.size();
+                            String[] pImage = new String[sz];
+                            for (int i = 0; i < sz; i++){
+                                pImage[i] = Images.get( i );
                             }
                             // add Data...
                             productSubModelList.add( new ProductSubModel(
@@ -669,7 +692,8 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                                 ) );
 
 
-                        homeFragmentModelList.get( index ).setProductModelList( tempHrGridList );
+//                        homeFragmentModelList.get( index ).setProductModelList( tempHrGridList );
+                        shopHomeCategoryList.get( crrShopCatIndex ).get( index ).setProductModelList( tempHrGridList );
                         setData(0, i, index );
 
                     }

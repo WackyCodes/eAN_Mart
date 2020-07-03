@@ -144,18 +144,7 @@ public class SignInFragment extends Fragment {
                             if (task.isSuccessful()){
                                 // write file in local memory..!
                                 currentUser = firebaseAuth.getCurrentUser();
-                                // Check first whether user Come from Request or come from launching activity...
-                                if (AuthActivity.setFragmentRequest == FRAGMENT_SIGN_IN ||
-                                        AuthActivity.setFragmentRequest == FRAGMENT_SIGN_UP){
-                                    AuthActivity.setFragmentRequest = -1;
-                                    AuthActivity.comeFromActivity = -1;
-                                    // if Come from request...
-                                    loadUserData();
-                                }else{
-                                    // if come from first activity (launching activity...)
-                                    startActivity( new Intent( getActivity(), MainActivity.class ) );
-                                    getActivity().finish();
-                                }
+                                loadUserData();
                                 dialog.dismiss();
                             }else{
                                 StaticMethods.showToast( getContext(), "Something going wrong..!!" );
@@ -168,13 +157,19 @@ public class SignInFragment extends Fragment {
     }
 
     private void loadUserData(){
-        // TODO : Load Data for Current User...
-//        if (DBquery.myCartCheckList.size() == 0){
-//            DBquery.cartListQuery( getActivity(), false, new Dialog( getActivity() ), AuthActivity.comeFromActivity );
-//        }
-
         UserDataQuery.loadUserDataQuery( null, null );
-        getActivity().finish();
+        UserDataQuery.loadCartDataQuery( null );
+        if (AuthActivity.setFragmentRequest == FRAGMENT_SIGN_IN ||
+                AuthActivity.setFragmentRequest == FRAGMENT_SIGN_UP){
+            AuthActivity.setFragmentRequest = -1;
+            AuthActivity.comeFromActivity = -1;
+            // if Come from request...
+            getActivity().finish();
+        }else{
+            // if come from first activity (launching activity...)
+            startActivity( new Intent( getActivity(), MainActivity.class ) );
+            getActivity().finish();
+        }
     }
 
     private boolean isEmailValid( EditText wReference, String password){
