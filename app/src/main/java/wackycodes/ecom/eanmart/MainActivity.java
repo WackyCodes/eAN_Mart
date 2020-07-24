@@ -25,8 +25,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -46,21 +44,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import wackycodes.ecom.eanmart.apphome.HomeFragment;
-import wackycodes.ecom.eanmart.category.ShopItemModel;
-import wackycodes.ecom.eanmart.category.ShopListAdaptor;
+import wackycodes.ecom.eanmart.apphome.mainhome.HomeFragment;
+import wackycodes.ecom.eanmart.apphome.category.ShopItemModel;
 import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
 import wackycodes.ecom.eanmart.cityareacode.SelectAreaCityAdaptor;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.apphome.shophome.search.SearchAdapter;
 import wackycodes.ecom.eanmart.userprofile.UserProfileActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 import wackycodes.ecom.eanmart.userprofile.notifications.NotificationActivity;
 import wackycodes.ecom.eanmart.userprofile.orders.OrderListActivity;
 
-import static wackycodes.ecom.eanmart.apphome.HomeFragment.homeFragment;
+import static wackycodes.ecom.eanmart.apphome.mainhome.HomeFragment.homeFragment;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Search Variables...
     private SearchView homeMainSearchView;
-    private RecyclerView homeSearchItemRecycler;
+    private static RecyclerView homeSearchItemRecycler;
     private TextView searchPlease;
     private static List <ShopItemModel> searchShopItemList = new ArrayList <>();
     private List<String> searchShopTags = new ArrayList <>();
@@ -179,6 +177,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAdaptor = new SearchAdapter( searchShopItemList );
         homeSearchItemRecycler.setAdapter( searchAdaptor );
         getShopSearchItems( );
+        // TODO:  Check : We have other Option..
+//        SearchWackyCodes.getShopSearchItems( MainActivity.this, MAIN_ACTIVITY, dialog, homeMainSearchView, searchAdaptor );
+
     }
 
     @Override
@@ -573,7 +574,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void getShopSearchItems(){
-
         // Search Methods...
         homeMainSearchView.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
             @Override
@@ -582,59 +582,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 searchShopItemList.clear();
                 searchShopTags.clear();
                 final String [] tags = query.toLowerCase().split( " " );
-                for ( final String tag : tags ){
-                    firebaseFirestore
-                            .collection( "HOME_PAGE" )
-                            .document( CURRENT_CITY_CODE.toUpperCase() )
-                            .collection( "SHOPS" )
-                            .whereArrayContainsAny( "tags", Arrays.asList( tags ) )
+//                for ( final String tag : tags ){ // Query For Every Tag.. }
+                firebaseFirestore
+                        .collection( "HOME_PAGE" )
+                        .document( CURRENT_CITY_CODE.toUpperCase() )
+                        .collection( "SHOPS" )
+                        .whereArrayContainsAny( "tags", Arrays.asList( tags ) )
 //                            .whereArrayContains( "tags", tag.trim() )
-                            .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task <QuerySnapshot> task) {
-                            if (task.isSuccessful()){
-                                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
-                                    ShopItemModel model = new ShopItemModel(
-                                            documentSnapshot.getId(),
-                                            documentSnapshot.get( "shop_name" ).toString(),
-                                            documentSnapshot.get( "shop_image" ).toString(),
-                                            documentSnapshot.get( "shop_rating" ).toString(),
-                                            documentSnapshot.get( "shop_category" ).toString(),
-                                            Integer.parseInt(
-                                                    String.valueOf((long)documentSnapshot.get( "shop_veg_type" ) )
-                                            )
-                                    );
-                                    if ( !searchShopTags.contains( model.getShopID() )){
-                                        searchShopItemList.add( model );
-                                        searchShopTags.add( model.getShopID() );
-                                    }
+                        .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+                                ShopItemModel model = new ShopItemModel(
+                                        documentSnapshot.getId(),
+                                        documentSnapshot.get( "shop_name" ).toString(),
+                                        documentSnapshot.get( "shop_logo" ).toString(),
+                                        documentSnapshot.get( "shop_rating" ).toString(),
+                                        documentSnapshot.get( "shop_category_name" ).toString(),
+                                        Integer.parseInt( documentSnapshot.get( "shop_veg_non_type" ).toString() )
+                                );
 
+                                if ( !searchShopTags.contains( model.getShopID() )){
+                                    searchShopItemList.add( model );
+                                    searchShopTags.add( model.getShopID() );
                                 }
-                                if (searchShopItemList.size()>0){
-                                    setFrameVisibility(false);
-                                }else{
-                                    setFrameVisibility(true);
-                                }
-                                if (tag.equals(tags[tags.length - 1])){
-                                    if (searchShopTags.isEmpty()){
-                                        DialogsClass.alertDialog( MainActivity.this, null, "No Shop found.!" ).show();
-                                        setFrameVisibility(true);
-                                    }else{
-                                        searchAdaptor.getFilter().filter( query );
-                                    }
-                                    dialog.dismiss();
-                                }
-                                dialog.dismiss();
-                                closeKeyboard();
+
+                            }
+                            if (searchShopItemList.size()>0){
+                                setFrameVisibility(false);
                             }else{
-                                // error...
-                                dialog.dismiss();
-                                showToast(  "Failed ! Product Not found.!" );
                                 setFrameVisibility(true);
                             }
+
+                            if (searchShopTags.isEmpty()){
+                                DialogsClass.alertDialog( MainActivity.this, null, "No Shop found.!" ).show();
+                                setFrameVisibility(true);
+                            }else{
+                                searchAdaptor.getFilter().filter( query );
+                            }
+//                            if (tag.equals(tags[tags.length - 1])){
+//                                dialog.dismiss();
+//                            }
+                            dialog.dismiss();
+                            closeKeyboard();
+                        }else{
+                            // error...
+                            dialog.dismiss();
+                            showToast(  "Failed ! Product Not found.!" );
+                            setFrameVisibility(true);
                         }
-                    } );
-                }
+                    }
+                } );
+
                 return false;
             }
 
@@ -652,7 +652,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } );
 
     }
-    private void setFrameVisibility(boolean isVisible){
+    public static void setFrameVisibility(boolean isVisible){
         if (isVisible){
             mainHomeContentFrame.setVisibility( View.VISIBLE );
             homeSearchItemRecycler.setVisibility( View.GONE );
@@ -669,28 +669,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             inputMethodManager.hideSoftInputFromWindow( view.getWindowToken(), 0 );
         }
     }
-
-    private class SearchAdapter extends ShopListAdaptor implements Filterable {
-
-        public SearchAdapter(List <ShopItemModel> shopItemModelList) {
-            super( shopItemModelList );
-        }
-        @Override
-        public Filter getFilter() {
-            return new Filter() {
-                @Override
-                protected FilterResults performFiltering(CharSequence constraint) {
-                    return null;
-                }
-
-                @Override
-                protected void publishResults(CharSequence constraint, FilterResults results) {
-                    notifyDataSetChanged();
-                }
-            };
-        }
-    }
-
 
 
 }

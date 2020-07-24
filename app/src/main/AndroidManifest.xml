@@ -18,10 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".shophome.search.ProductSearchActivity"></activity>
-        <activity android:name=".shophome.ShopProductCatActivity" />
+        <activity android:name=".apphome.shophome.search.ProductSearchActivity"></activity>
+        <activity android:name=".apphome.shophome.ShopProductCatActivity" />
         <activity android:name=".userprofile.notifications.NotificationActivity" />
-        <activity android:name=".shophome.aboutshop.AboutShopActivity" />
+        <activity android:name=".apphome.shophome.aboutshop.AboutShopActivity" />
         <activity android:name=".buyprocess.ConformOrderActivity" />
         <activity android:name=".userprofile.orders.OrderListActivity" />
         <activity android:name=".userprofile.AccountSettingActivity" />
@@ -29,7 +29,7 @@
         <activity android:name=".userprofile.addresses.AddAddressActivity" />
         <activity android:name=".userprofile.addresses.MyAddressesActivity" />
         <activity android:name=".userprofile.cart.CartActivity" />
-        <activity android:name=".shophome.ShopHomeActivity" />
+        <activity android:name=".apphome.shophome.ShopHomeActivity" />
         <activity android:name=".launching.AuthActivity" />
         <activity android:name=".launching.WelcomeActivity">
             <intent-filter>
@@ -40,7 +40,7 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".productdetails.ProductDetails" />
-        <activity android:name=".shophome.ViewAllActivity" />
+        <activity android:name=".apphome.shophome.ViewAllActivity" />
         <service
             android:name=".WackyMessagingService"
             android:exported= "false" >

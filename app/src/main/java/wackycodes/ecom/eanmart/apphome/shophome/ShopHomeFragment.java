@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 
 import android.os.Bundle;

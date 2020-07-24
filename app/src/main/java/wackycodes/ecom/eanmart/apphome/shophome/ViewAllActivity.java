@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,12 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
@@ -190,24 +188,20 @@ public class ViewAllActivity  extends AppCompatActivity {
                     long p_no_of_variants = (long) task.getResult().get( "p_no_of_variants" );
                     List<ProductSubModel> productSubModelList = new ArrayList <>();
                     for (long tempI = 1; tempI <= p_no_of_variants; tempI++){
-//                        int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
-//                        pImage = new String[p_no_of_images];
-//                        for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
-//                            pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
-//                        }
+//
                         // We can use Array...
 //                        String[] pImage = (String[]) task.getResult().get( "p_image_" + tempI );
                         ArrayList<String> Images = (ArrayList <String>) task.getResult().get( "p_image_" + tempI );
-                        int sz = Images.size();
-                        String[] pImage = new String[sz];
-                        for (int i = 0; i < sz; i++){
-                            pImage[i] = Images.get( i );
-                        }
+//                        int sz = Images.size();
+//                        String[] pImage = new String[sz];
+//                        for (int i = 0; i < sz; i++){
+//                            pImage[i] = Images.get( i );
+//                        }
 
                         // add Data...
                         productSubModelList.add( new ProductSubModel(
                                 task.getResult().get( "p_name_"+tempI).toString(),
-                                pImage,
+                                Images,
                                 task.getResult().get( "p_selling_price_"+tempI).toString(),
                                 task.getResult().get( "p_mrp_price_"+tempI).toString(),
                                 task.getResult().get( "p_weight_"+tempI).toString(),

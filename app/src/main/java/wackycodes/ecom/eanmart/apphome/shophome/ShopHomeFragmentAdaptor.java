@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -31,12 +31,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
-import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
+import wackycodes.ecom.eanmart.apphome.mainhome.CategoryTypeModel;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderAdaptor;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
-import wackycodes.ecom.eanmart.category.ShopsViewFragment;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
@@ -44,20 +42,21 @@ import wackycodes.ecom.eanmart.productdetails.ProductModel;
 import wackycodes.ecom.eanmart.productdetails.ProductSubModel;
 import wackycodes.ecom.eanmart.wcustomview.MyGridView;
 import wackycodes.ecom.eanmart.wcustomview.MyImageView;
+import wackycodes.ecom.eanmart.wcustomview.MyViewPagerImageSet;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_SLIDER_LAYOUT_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.GRID_ITEM_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.GRID_PRODUCT_LAYOUT;
-import static wackycodes.ecom.eanmart.other.StaticValues.HORIZONTAL_ITEM_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.RECYCLER_PRODUCT_LAYOUT;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
-import static wackycodes.ecom.eanmart.other.StaticValues.STRIP_AD_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_STRIP_AD_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.VIEW_HORIZONTAL_LAYOUT;
-import static wackycodes.ecom.eanmart.shophome.ViewAllActivity.gridViewModelListViewAll;
-import static wackycodes.ecom.eanmart.shophome.ViewAllActivity.horizontalItemViewModelListViewAll;
-import static wackycodes.ecom.eanmart.shophome.ViewAllActivity.totalProductsIdViewAll;
+import static wackycodes.ecom.eanmart.apphome.shophome.ViewAllActivity.gridViewModelListViewAll;
+import static wackycodes.ecom.eanmart.apphome.shophome.ViewAllActivity.horizontalItemViewModelListViewAll;
+import static wackycodes.ecom.eanmart.apphome.shophome.ViewAllActivity.totalProductsIdViewAll;
 
 public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
 
@@ -66,8 +65,9 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
 
     // Category index Info....
     private int crrShopCatIndex;
+    private ShopHomeFragmentAdaptor localShopHomeAdaptor = this;
 
-    public ShopHomeFragmentAdaptor( int crrShopCatIndex,  List <ShopHomeFragmentModel> homeFragmentModelList) {
+    public ShopHomeFragmentAdaptor( int crrShopCatIndex, List <ShopHomeFragmentModel> homeFragmentModelList ) {
         this.crrShopCatIndex = crrShopCatIndex;
         this.homeFragmentModelList = homeFragmentModelList;
         recycledViewPool = new RecyclerView.RecycledViewPool();
@@ -76,16 +76,16 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
     @Override
     public int getItemViewType(int position) {
         switch (homeFragmentModelList.get( position ).getLayoutType()) {
-            case BANNER_SLIDER_LAYOUT_CONTAINER:
-                return BANNER_SLIDER_LAYOUT_CONTAINER;
-            case STRIP_AD_LAYOUT_CONTAINER:
-                return STRIP_AD_LAYOUT_CONTAINER;
+            case SHOP_HOME_BANNER_SLIDER_CONTAINER:
+                return SHOP_HOME_BANNER_SLIDER_CONTAINER;
+            case SHOP_HOME_STRIP_AD_CONTAINER:
+                return SHOP_HOME_STRIP_AD_CONTAINER;
             case SHOP_HOME_CAT_LIST_CONTAINER:
                 return SHOP_HOME_CAT_LIST_CONTAINER;
-            case HORIZONTAL_ITEM_LAYOUT_CONTAINER:
-                return HORIZONTAL_ITEM_LAYOUT_CONTAINER;
-            case GRID_ITEM_LAYOUT_CONTAINER:
-                return GRID_ITEM_LAYOUT_CONTAINER;
+            case HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER:
+                return HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
+            case GRID_PRODUCTS_LAYOUT_CONTAINER:
+                return GRID_PRODUCTS_LAYOUT_CONTAINER;
             default:
                 return -1;
         }
@@ -101,22 +101,22 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 View bannerAdView = LayoutInflater.from( parent.getContext() ).inflate(
                         R.layout.grid_view_home_layout, parent, false );
                 return new ShopCatViewHolder( bannerAdView );
-            case BANNER_SLIDER_LAYOUT_CONTAINER:
+            case SHOP_HOME_BANNER_SLIDER_CONTAINER:
                 // TODO : banner Slider
                 View bannerView = LayoutInflater.from( parent.getContext() ).inflate(
                         R.layout.banner_slider_layout, parent, false );
                 return new BannerSliderViewHolder( bannerView );
-            case STRIP_AD_LAYOUT_CONTAINER:
+            case SHOP_HOME_STRIP_AD_CONTAINER:
                 // TODO : Strip ad Slider
                 View stripAdView = LayoutInflater.from( parent.getContext() ).inflate(
                         R.layout.strip_ad_layout, parent, false );
                 return new StripAdViewHolder( stripAdView );
-            case HORIZONTAL_ITEM_LAYOUT_CONTAINER:
+            case HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER:
                 // TODO : Horizontal viewHolder
                 View horizontalLayoutView = LayoutInflater.from( parent.getContext() ).inflate(
                         R.layout.horizontal_itemview_layout, parent, false );
                 return new HorizontalLayoutViewHolder( horizontalLayoutView );
-            case GRID_ITEM_LAYOUT_CONTAINER:
+            case GRID_PRODUCTS_LAYOUT_CONTAINER:
                 // TODO : GridLayout viewHolder
                 View gridLayoutView = LayoutInflater.from( parent.getContext() ).inflate(
                         R.layout.home_itemview_grid_layout, parent, false );
@@ -133,24 +133,24 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 List<CategoryTypeModel> categoryTypeModelList = homeFragmentModelList.get( position ).getCategoryTypeModelList();
                 ((ShopCatViewHolder)holder).setDataGridLayout( categoryTypeModelList );
                 break;
-            case BANNER_SLIDER_LAYOUT_CONTAINER:
+            case SHOP_HOME_BANNER_SLIDER_CONTAINER:
                 List <BannerSliderModel> bannerSliderModelList =
                         homeFragmentModelList.get( position ).getBannerSliderModelList();
                 ((BannerSliderViewHolder) holder).setBannerSliderViewPager( bannerSliderModelList );
                 break;
-            case STRIP_AD_LAYOUT_CONTAINER:
+            case SHOP_HOME_STRIP_AD_CONTAINER:
                 String imgLink = homeFragmentModelList.get( position ).getStripAdImage();
-                String colorCode = homeFragmentModelList.get( position ).getStripAdBackground();
-                ((StripAdViewHolder)holder).setStripAd( imgLink, colorCode );
+                String clickID = homeFragmentModelList.get( position ).getStripClickID();
+                ((StripAdViewHolder)holder).setStripAd( imgLink, clickID );
                 break;
-            case HORIZONTAL_ITEM_LAYOUT_CONTAINER:
+            case HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER:
                 List<ProductModel> horizontalItemViewModelList =
                         homeFragmentModelList.get( position ).getProductModelList();
                 List<String> hrProductIdList = homeFragmentModelList.get( position ).getHrAndGridProductIdList();
                 String layoutTitle = homeFragmentModelList.get( position ).getHorizontalLayoutTitle();
                 ((HorizontalLayoutViewHolder)holder).setHorizontalLayout( hrProductIdList ,horizontalItemViewModelList, layoutTitle, position );
                 break;
-            case GRID_ITEM_LAYOUT_CONTAINER:
+            case GRID_PRODUCTS_LAYOUT_CONTAINER:
                 List<ProductModel> gridItemViewModelList =
                         homeFragmentModelList.get( position ).getProductModelList();
                 List<String> gridProductIdList = homeFragmentModelList.get( position ).getHrAndGridProductIdList();
@@ -172,20 +172,20 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
     //============  Banner Slider View Holder ============
     public class BannerSliderViewHolder extends RecyclerView.ViewHolder {
         //------ View Pager for Banner Slider...
-        private ViewPager bannerSliderViewPager;
+        private MyViewPagerImageSet bannerSliderViewPager;
         private int BANNER_CURRENT_PAGE;
-        private final long DELAY_TIME = 3000;
-        private final long PERIOD_TIME = 3000;
+        private final long DELAY_TIME = 1500;
+        private final long PERIOD_TIME = 2000;
         private Timer timer;
         private List<BannerSliderModel> arrangedList;
-        //------ View Paager for Banner Slidder...
+        //------ View Pager for Banner Slider...
 
         public BannerSliderViewHolder(@NonNull View itemView) {
             super( itemView );
-            bannerSliderViewPager = itemView.findViewById( R.id.banner_slider_viewPager );
+            bannerSliderViewPager = itemView.findViewById( R.id.banner_slider_viewPagers );
         }
 
-        // BannerSlidder ---
+        // BannerSlider ---
         private void setBannerSliderViewPager(final List <BannerSliderModel> bannerSliderModelList) {
             BANNER_CURRENT_PAGE = 2;
             if (timer != null){
@@ -201,7 +201,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             arrangedList.add( bannerSliderModelList.get( 0 ) );
             arrangedList.add( bannerSliderModelList.get( 1 ) );
 
-            BannerSliderAdaptor bannerSliderAdaptor = new BannerSliderAdaptor( arrangedList );
+            BannerSliderAdaptor bannerSliderAdaptor = new BannerSliderAdaptor( arrangedList, -1 );
             bannerSliderViewPager.setAdapter( bannerSliderAdaptor );
             bannerSliderViewPager.setClipToPadding( false );
             bannerSliderViewPager.setPageMargin( 20 );
@@ -247,7 +247,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 }
             } );
 
-            //------ View Paager for Banner Slidder...
+            //------ View Pager for Banner Slider...
         }
 
         private void bannerSlideLooper(List <BannerSliderModel> bannerSliderModelList) {
@@ -284,7 +284,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
         private void stopBannerSliderAnim() {
             timer.cancel();
         }
-        // BannerSlidder ---
+        // BannerSlider ---
 
     }
     //============  Banner Slider View Holder ============
@@ -300,8 +300,8 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             stripAdImage = itemView.findViewById( R.id.strip_ad_image );
 
         }
-        private void setStripAd(String imgLink, String colorCode){
-//            stripAdContainer.setBackgroundColor( Color.parseColor( colorCode ) );
+        private void setStripAd(String imgLink, String clickID){
+//            stripAdContainer.setBannerOtherText( Color.parseColor( colorCode ) );
             // set Image Resouice from database..
             Glide.with( itemView.getContext() ).load( imgLink )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( stripAdImage );
@@ -456,7 +456,6 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
         }
 
         private void loadProductData(final int index, final RecyclerView recyclerView, final String productId){
-
             DBQuery.firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID_CURRENT )
                     .collection( "PRODUCTS" ).document( productId )
                     .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
@@ -482,16 +481,15 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
 //                                String[] pImage = (String[]) documentSnapshot.get( "p_image_" + tempI );
 
                                 ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
-                                int sz = Images.size();
-                                String[] pImage = new String[sz];
-                                for (int i = 0; i < sz; i++){
-                                    pImage[i] = Images.get( i );
-                                }
-
+//                                int sz = Images.size();
+//                                String[] pImage = new String[sz];
+//                                for (int i = 0; i < sz; i++){
+//                                    pImage[i] = Images.get( i );
+//                                }
                                 // add Data...
                                 productSubModelList.add( new ProductSubModel(
                                         task.getResult().get( "p_name_"+tempI).toString(),
-                                        pImage,
+                                        Images,
                                         task.getResult().get( "p_selling_price_"+tempI).toString(),
                                         task.getResult().get( "p_mrp_price_"+tempI).toString(),
                                         task.getResult().get( "p_weight_"+tempI).toString(),
@@ -545,7 +543,6 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
         private TextView gridLayoutTitle;
         private Button gridLayoutViewAllBtn;
         private int temp = 0;
-        private List<ProductModel> tempHrGridList;
         public GridLayoutViewHolder(@NonNull View itemView) {
             super( itemView );
             gridLayout = itemView.findViewById( R.id.product_grid_layout );
@@ -555,16 +552,14 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
         private void setDataGridLayout(final List<String> gridProductIdList, final List<ProductModel> gridLayoutList
                 , final String gridTitle, final int index){
             gridLayoutTitle.setText( gridTitle );
-            if (gridLayoutList.size() == 0){
-                tempHrGridList = new ArrayList <>();
-                for (int i = 0; i < 4; i++ ){
-                    loadProductData( i, index,gridProductIdList.get( i ));
+            for (int i = 0; i < 4; i++ ){
+                if (gridLayoutList.size() > i){
+                    setData( 0, i, index );
+                }else{
+                    loadProductData( index,gridProductIdList.get( i ));
                 }
             }
             for (int i = 0; i < 4; i++ ){
-                if (gridLayoutList.size() != 0){
-                    setData( 0, i, index );
-                }
                 gridLayout.getChildAt( i ).setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -620,11 +615,8 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 public void onClick(View view) {
                     gridViewModelListViewAll = new ArrayList <>();
                     totalProductsIdViewAll = new ArrayList <>();
-                    if (gridLayoutList.size() == 0){
-                        gridViewModelListViewAll = tempHrGridList;
-                    }else{
-                        gridViewModelListViewAll = gridLayoutList;
-                    }
+
+                    gridViewModelListViewAll = gridLayoutList;
 
                     totalProductsIdViewAll.addAll( gridProductIdList );
 //                    totalProductsIdViewAll = gridProductIdList;
@@ -638,7 +630,33 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 }
             } );
         }
-        private void loadProductData(final int i, final int index, final String productId){
+        private void setData(int variant, int childIndex, int index){
+            ProductModel productModel = shopHomeCategoryList.get( crrShopCatIndex ).get( index ).getProductModelList().get( childIndex );
+            // homeFragmentModelList.get( position ).getProductModelList();
+
+            ImageView img = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_image );
+            TextView name = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_name );
+            TextView price = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_price );
+            TextView cutPrice = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_cut_price );
+            TextView perOffText = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_off_percentage );
+            TextView stockText = gridLayout.getChildAt( childIndex ).findViewById( R.id.stock_text );
+            stockText.setVisibility( View.GONE );
+
+            name.setText( productModel.getProductSubModelList().get( variant ).getpName() );
+            price.setText("Rs." + productModel.getProductSubModelList().get( variant ).getpSellingPrice() +"/-" );
+            cutPrice.setText( "Rs."+ productModel.getProductSubModelList().get( variant ).getpMrpPrice() +"/-" );
+            // Set img resource
+            ArrayList<String> imageLink = productModel.getProductSubModelList().get( variant ).getpImage();
+            Glide.with( itemView.getContext() ).load( imageLink.get( 0 ) )
+                    .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( img );
+
+            int mrp =  Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpMrpPrice() );
+            int showPrice = Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpSellingPrice() );
+            perOffText.setText( "Rs."+ ( mrp - showPrice ) + " Save");
+
+        }
+
+        private void loadProductData( final int index, final String productId){
             DBQuery.firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID_CURRENT )
                     .collection( "PRODUCTS" ).document( productId )
                     .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
@@ -646,27 +664,16 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                 public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                     if (task.isSuccessful()){
                         // access the banners from database...
-//                        String[] pImage;
                         long p_no_of_variants = (long) task.getResult().get( "p_no_of_variants" );
                         List<ProductSubModel> productSubModelList = new ArrayList <>();
                         for (long tempI = 1; tempI <= p_no_of_variants; tempI++){
-//                            int p_no_of_images = Integer.parseInt( String.valueOf(  (long) task.getResult().get( "p_no_of_images" ) ) );
-//                            pImage = new String[p_no_of_images];
-//                            for (int tempJ = 0; tempJ < p_no_of_images; tempJ++){
-//                                pImage[tempJ] = task.getResult().get( "p_image_"+ tempI +"_"+tempJ ).toString();
-//                            }
                             // We can use Array...
 //                            String[] pImage = (String[]) task.getResult().get( "p_image_" + tempI );
                             ArrayList<String> Images = (ArrayList <String>) task.getResult().get( "p_image_" + tempI );
-                            int sz = Images.size();
-                            String[] pImage = new String[sz];
-                            for (int i = 0; i < sz; i++){
-                                pImage[i] = Images.get( i );
-                            }
                             // add Data...
                             productSubModelList.add( new ProductSubModel(
                                     task.getResult().get( "p_name_"+tempI).toString(),
-                                    pImage,
+                                    Images,
                                     task.getResult().get( "p_selling_price_"+tempI).toString(),
                                     task.getResult().get( "p_mrp_price_"+tempI).toString(),
                                     task.getResult().get( "p_weight_"+tempI).toString(),
@@ -681,7 +688,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                         int p_veg_non_type = Integer.valueOf( task.getResult().get( "p_veg_non_type" ).toString() );
                         Boolean p_is_cod = (Boolean) task.getResult().get( "p_is_cod" );
 
-                        tempHrGridList.add( new ProductModel(
+                        ProductModel productModel = new ProductModel(
                                 p_id,
                                 p_main_name,
                                 p_is_cod,
@@ -689,13 +696,9 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
                                 p_weight_type,
                                 p_veg_non_type,
                                 productSubModelList
-                                ) );
-
-
-//                        homeFragmentModelList.get( index ).setProductModelList( tempHrGridList );
-                        shopHomeCategoryList.get( crrShopCatIndex ).get( index ).setProductModelList( tempHrGridList );
-                        setData(0, i, index );
-
+                        );
+                        shopHomeCategoryList.get( crrShopCatIndex ).get( index ).getProductModelList().add( productModel );
+                        localShopHomeAdaptor.notifyDataSetChanged();
                     }
                     else{
                         String error = task.getException().getMessage();
@@ -707,34 +710,6 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
 
         }
 
-        private void setData(int variant, int childIndex, int index){
-            ProductModel productModel = homeFragmentModelList.get( index ).getProductModelList().get( childIndex );
-
-            ImageView img = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_image );
-            TextView name = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_name );
-            TextView price = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_price );
-            TextView cutPrice = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_cut_price );
-            TextView perOffText = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_off_percentage );
-            TextView stockText = gridLayout.getChildAt( childIndex ).findViewById( R.id.stock_text );
-
-            name.setText( productModel.getProductSubModelList().get( variant ).getpName() );
-            price.setText("Rs." + productModel.getProductSubModelList().get( variant ).getpSellingPrice() +"/-" );
-            cutPrice.setText( "Rs."+ productModel.getProductSubModelList().get( variant ).getpMrpPrice() +"/-" );
-            // Set img resource
-            String[] imageLink = productModel.getProductSubModelList().get( variant ).getpImage();
-            Glide.with( itemView.getContext() ).load( imageLink[0] )
-                    .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( img );
-
-            int mrp =  Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpMrpPrice() );
-            int showPrice = Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpSellingPrice() );
-            int perOff = (( mrp - showPrice )*100)/mrp;
-            perOffText.setText( perOff +"% Off" );
-            if (Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpStocks() ) > 0){
-                stockText.setText("In Stock");
-            }else{
-                stockText.setText( "Out Of Stock" );
-            }
-        }
 
     }
     //==============  GridProduct Grid Layout View Holder =================

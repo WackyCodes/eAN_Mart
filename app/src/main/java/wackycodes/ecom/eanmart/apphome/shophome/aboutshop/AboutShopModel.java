@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome.aboutshop;
+package wackycodes.ecom.eanmart.apphome.shophome.aboutshop;
 
 public class AboutShopModel {
 

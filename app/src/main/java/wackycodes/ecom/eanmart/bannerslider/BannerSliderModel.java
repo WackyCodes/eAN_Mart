@@ -1,12 +1,32 @@
 package wackycodes.ecom.eanmart.bannerslider;
 
 public class BannerSliderModel {
+    private int bannerClickType;
+    private String bannerClickID;
     private String bannerImage;
-    private String backgroundColor;
+    private String bannerOtherText;
 
-    public BannerSliderModel(String bannerImage, String backgroundColor) {
+    public BannerSliderModel(int bannerClickType, String bannerClickID, String bannerImage, String bannerOtherText) {
+        this.bannerClickType = bannerClickType;
+        this.bannerClickID = bannerClickID;
         this.bannerImage = bannerImage;
-        this.backgroundColor = backgroundColor;
+        this.bannerOtherText = bannerOtherText;
+    }
+
+    public int getBannerClickType() {
+        return bannerClickType;
+    }
+
+    public void setBannerClickType(int bannerClickType) {
+        this.bannerClickType = bannerClickType;
+    }
+
+    public String getBannerClickID() {
+        return bannerClickID;
+    }
+
+    public void setBannerClickID(String bannerClickID) {
+        this.bannerClickID = bannerClickID;
     }
 
     public String getBannerImage() {
@@ -17,11 +37,11 @@ public class BannerSliderModel {
         this.bannerImage = bannerImage;
     }
 
-    public String getBackgroundColor() {
-        return backgroundColor;
+    public String getBannerOtherText() {
+        return bannerOtherText;
     }
 
-    public void setBackgroundColor(String backgroundColor) {
-        this.backgroundColor = backgroundColor;
+    public void setBannerOtherText(String bannerOtherText) {
+        this.bannerOtherText = bannerOtherText;
     }
 }

@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +22,7 @@ import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
-import wackycodes.ecom.eanmart.shophome.search.ProductSearchActivity;
+import wackycodes.ecom.eanmart.apphome.shophome.search.ProductSearchActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;

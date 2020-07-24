@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome.search;
+package wackycodes.ecom.eanmart.apphome.shophome.search;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,7 +29,7 @@ import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.productdetails.ProductModel;
 import wackycodes.ecom.eanmart.productdetails.ProductSubModel;
-import wackycodes.ecom.eanmart.shophome.HorizontalItemViewAdaptor;
+import wackycodes.ecom.eanmart.apphome.shophome.HorizontalItemViewAdaptor;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
@@ -150,7 +150,7 @@ public class ProductSearchActivity extends AppCompatActivity {
                                         // add Data...
                                         productSubModelList.add( new ProductSubModel(
                                                 documentSnapshot.get( "p_name_"+tempI).toString(),
-                                                pImage,
+                                                Images,
                                                 documentSnapshot.get( "p_selling_price_"+tempI).toString(),
                                                 documentSnapshot.get( "p_mrp_price_"+tempI).toString(),
                                                 documentSnapshot.get( "p_weight_"+tempI).toString(),

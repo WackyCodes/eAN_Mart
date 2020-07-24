@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.category;
+package wackycodes.ecom.eanmart.apphome.category;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -19,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
-import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
-import wackycodes.ecom.eanmart.apphome.MainHomeFragmentAdaptor;
+import wackycodes.ecom.eanmart.apphome.mainhome.CategoryTypeModel;
+import wackycodes.ecom.eanmart.apphome.mainhome.MainHomeFragmentAdaptor;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopsViewFragmentList;
-import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
+import static wackycodes.ecom.eanmart.other.StaticValues.LIST_SHOP_VIEW_PAGE;
 
 
 public class ShopsViewFragment extends Fragment {
@@ -85,7 +85,7 @@ public class ShopsViewFragment extends Fragment {
 
 
         // Set Adaptor...
-        shopViewFragmentAdaptor = new MainHomeFragmentAdaptor( shopsViewFragmentList );
+        shopViewFragmentAdaptor = new MainHomeFragmentAdaptor( shopsViewFragmentList, LIST_SHOP_VIEW_PAGE );
         shopsViewRecycler.setAdapter( shopViewFragmentAdaptor );
         shopViewFragmentAdaptor.notifyDataSetChanged();
 

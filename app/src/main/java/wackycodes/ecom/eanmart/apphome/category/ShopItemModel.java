@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.category;
+package wackycodes.ecom.eanmart.apphome.category;
 
 public class ShopItemModel {
 

@@ -3,6 +3,8 @@ package wackycodes.ecom.eanmart.other;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -171,6 +173,11 @@ public class StaticMethods {
         }
     }
 
+    public static void gotoURL(Context context, String urlLink){
+        Uri uri = Uri.parse( urlLink );
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        context.startActivity( intent );
+    }
 
 
 }

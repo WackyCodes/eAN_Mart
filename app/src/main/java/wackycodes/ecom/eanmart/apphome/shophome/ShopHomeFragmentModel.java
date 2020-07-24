@@ -1,10 +1,9 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import java.util.List;
 
-import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
+import wackycodes.ecom.eanmart.apphome.mainhome.CategoryTypeModel;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
-import wackycodes.ecom.eanmart.category.ShopItemModel;
 import wackycodes.ecom.eanmart.productdetails.ProductModel;
 
 public class ShopHomeFragmentModel {
@@ -59,13 +58,18 @@ public class ShopHomeFragmentModel {
     //------ Layout for Banner Slider...
 
     //------ Layout for Strip ad....
+    private int stripClickType;
+    private String stripClickID;
     private String stripAdImage;
-    private String stripAdBackground;
+    private String stripExtraText;
 
-    public ShopHomeFragmentModel(int layoutType, String stripAdImage, String stripAdBackground) {
+
+    public ShopHomeFragmentModel(int layoutType, int stripClickType, String stripClickID,  String stripAdImage, String stripExtraText) {
         this.layoutType = layoutType;
+        this.stripClickType = stripClickType;
+        this.stripClickID = stripClickID;
         this.stripAdImage = stripAdImage;
-        this.stripAdBackground = stripAdBackground;
+        this.stripExtraText = stripExtraText;
     }
     public String getStripAdImage() {
         return stripAdImage;
@@ -73,12 +77,31 @@ public class ShopHomeFragmentModel {
     public void setStripAdImage(String stripAdImage) {
         this.stripAdImage = stripAdImage;
     }
-    public String getStripAdBackground() {
-        return stripAdBackground;
+
+    public int getStripClickType() {
+        return stripClickType;
     }
-    public void setStripAdBackground(String stripAdBackground) {
-        this.stripAdBackground = stripAdBackground;
+
+    public void setStripClickType(int stripClickType) {
+        this.stripClickType = stripClickType;
     }
+
+    public String getStripClickID() {
+        return stripClickID;
+    }
+
+    public void setStripClickID(String stripClickID) {
+        this.stripClickID = stripClickID;
+    }
+
+    public String getStripExtraText() {
+        return stripExtraText;
+    }
+
+    public void setStripExtraText(String stripExtraText) {
+        this.stripExtraText = stripExtraText;
+    }
+
     //------ Layout for Strip ad....
 
     // ------- Horizontal Item View ..----------------

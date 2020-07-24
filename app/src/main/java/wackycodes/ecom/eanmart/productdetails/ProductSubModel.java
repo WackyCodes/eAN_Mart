@@ -1,16 +1,18 @@
 package wackycodes.ecom.eanmart.productdetails;
 
+import java.util.ArrayList;
+
 public class ProductSubModel {
 
     private String pName;
-    private String[] pImage;
+    private ArrayList<String> pImage;
     private String pSellingPrice;
     private String pMrpPrice;
     private String pWeight;
     private String pStocks;
     private String pOffer;
 
-    public ProductSubModel(String pName, String[] pImage, String pSellingPrice, String pMrpPrice, String pWeight, String pStocks, String pOffer) {
+    public ProductSubModel(String pName, ArrayList<String> pImage, String pSellingPrice, String pMrpPrice, String pWeight, String pStocks, String pOffer) {
         this.pName = pName;
         this.pImage = pImage;
         this.pSellingPrice = pSellingPrice;
@@ -28,11 +30,11 @@ public class ProductSubModel {
         this.pName = pName;
     }
 
-    public String[] getpImage() {
+    public ArrayList<String> getpImage() {
         return pImage;
     }
 
-    public void setpImage(String[] pImage) {
+    public void setpImage(ArrayList<String> pImage) {
         this.pImage = pImage;
     }
 

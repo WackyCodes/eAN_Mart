@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.category;
+package wackycodes.ecom.eanmart.apphome.category;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,8 +17,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
-import wackycodes.ecom.eanmart.other.StaticMethods;
-import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity;
 
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NON_VEG;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NO_SHOW;

@@ -1,7 +1,6 @@
 package wackycodes.ecom.eanmart.databasequery;
 
 import android.app.Dialog;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.view.View;
 
@@ -10,9 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -30,11 +27,10 @@ import java.util.Map;
 import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
-import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.productdetails.ProductDetails;
-import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
-import wackycodes.ecom.eanmart.shophome.ShopProductCatActivity;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopProductCatActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.AddAddressActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.UserAddressDataModel;
@@ -50,9 +46,7 @@ import static wackycodes.ecom.eanmart.databasequery.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_ITEMS;
 import static wackycodes.ecom.eanmart.other.StaticValues.CART_TYPE_TOTAL_PRICE;
-import static wackycodes.ecom.eanmart.other.StaticValues.NOTIFY_SIMPLE;
 import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_ADD_ADDRESS;
-import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_REMOVE_ADDRESS;
 import static wackycodes.ecom.eanmart.other.StaticValues.QUERY_TO_UPDATE_ADDRESS;
 import static wackycodes.ecom.eanmart.other.StaticValues.USER_DATA_MODEL;
 

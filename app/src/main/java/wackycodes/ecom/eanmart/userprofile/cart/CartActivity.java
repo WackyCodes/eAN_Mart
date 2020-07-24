@@ -13,32 +13,19 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.List;
-
-import wackycodes.ecom.eanmart.MainActivity;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
-import wackycodes.ecom.eanmart.other.StaticValues;
-import wackycodes.ecom.eanmart.productdetails.ProductDetails;
-import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.userprofile.addresses.MyAddressesActivity;
-import wackycodes.ecom.eanmart.userprofile.orders.DeliveryItemModel;
-import wackycodes.ecom.eanmart.userprofile.orders.OrderItemModel;
 
-import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.cartItemModelList;
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemModelList;
 import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
-import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
 import static wackycodes.ecom.eanmart.productdetails.ProductDetails.productDetails;
-import static wackycodes.ecom.eanmart.shophome.ShopHomeActivity.shopHomeActivity;
 
 public class CartActivity extends AppCompatActivity {
 

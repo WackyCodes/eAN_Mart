@@ -1,9 +1,8 @@
-package wackycodes.ecom.eanmart.apphome;
+package wackycodes.ecom.eanmart.apphome.mainhome;
 
 
 import android.os.Bundle;
 
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,19 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
-import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
-import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
+import static wackycodes.ecom.eanmart.other.StaticValues.LIST_MAIN_HOME_PAGE;
 
 public class HomeFragment extends Fragment {
 
@@ -61,7 +55,7 @@ public class HomeFragment extends Fragment {
         homeRecyclerView.setLayoutManager( homeLinearLayoutManager );
 
         // Set Adaptor...
-        mainHomeFragmentAdaptor = new MainHomeFragmentAdaptor( homePageCategoryList );
+        mainHomeFragmentAdaptor = new MainHomeFragmentAdaptor( homePageCategoryList, LIST_MAIN_HOME_PAGE );
         homeRecyclerView.setAdapter( mainHomeFragmentAdaptor );
         mainHomeFragmentAdaptor.notifyDataSetChanged();
 

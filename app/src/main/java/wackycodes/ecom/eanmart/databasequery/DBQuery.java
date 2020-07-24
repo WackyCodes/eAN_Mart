@@ -18,39 +18,34 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import wackycodes.ecom.eanmart.MainActivity;
-import wackycodes.ecom.eanmart.apphome.CategoryTypeModel;
-import wackycodes.ecom.eanmart.apphome.HomeFragment;
-import wackycodes.ecom.eanmart.apphome.MainHomeFragmentModel;
+import wackycodes.ecom.eanmart.apphome.mainhome.CategoryTypeModel;
+import wackycodes.ecom.eanmart.apphome.mainhome.HomeFragment;
+import wackycodes.ecom.eanmart.apphome.mainhome.MainHomeFragmentModel;
 import wackycodes.ecom.eanmart.bannerslider.BannerSliderModel;
-import wackycodes.ecom.eanmart.category.ShopsViewFragment;
+import wackycodes.ecom.eanmart.apphome.category.ShopsViewFragment;
 import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.productdetails.ProductModel;
-import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentAdaptor;
-import wackycodes.ecom.eanmart.shophome.ShopHomeFragmentModel;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeFragmentAdaptor;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeFragmentModel;
 
-import static wackycodes.ecom.eanmart.other.StaticMethods.getRandomOrderID;
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
-import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_SLIDER_LAYOUT_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.GRID_ITEM_LAYOUT_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.HORIZONTAL_ITEM_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
+import static wackycodes.ecom.eanmart.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanmart.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
-import static wackycodes.ecom.eanmart.other.StaticValues.STRIP_AD_LAYOUT_CONTAINER;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_MAIN_HOME;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_BANNER_SHOPS_VIEW;
+import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_STRIP_AD_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_CATEGORY_LAYOUT;
-import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_BANNER_AD;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_BANNER_SLIDER;
+import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_ITEMS_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_HOME_SHOP_STRIP_AD;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_LIST_MAIN_HOME_CATEGORY;
 import static wackycodes.ecom.eanmart.other.StaticValues.TYPE_LIST_SHOPS_VIEW_NAME;
-import static wackycodes.ecom.eanmart.shophome.ShopHomeActivity.bannerSliderModelList;
+import static wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity.bannerSliderModelList;
 
 public class DBQuery {
 
@@ -81,6 +76,10 @@ public class DBQuery {
 
     }
 
+    public static CollectionReference getCollectionRef(String collectionName){
+        return firebaseFirestore.collection( "HOME_PAGE" ).document( CURRENT_CITY_CODE ).collection( collectionName );
+    }
+
     public static void getHomePageCategoryListQuery(@Nullable final Dialog dialog, @Nullable final SwipeRefreshLayout swipeRefreshLayout,
             String cityCode, boolean reloadRequest ){
 
@@ -95,11 +94,32 @@ public class DBQuery {
                     List <CategoryTypeModel> categoryTypeModelList;
 
                     for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_BANNER_SLIDER) {
+                        int viewType = Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "type" ) ) );
+                        if (viewType == TYPE_HOME_SHOP_BANNER_SLIDER) {
                             // TODO: Banner Slider...
+                            Boolean is_visible = documentSnapshot.getBoolean( "is_visible" );
+                            if (is_visible){
+                                // Load
+                                bannerSliderModelList = new ArrayList <>();
+//                                String layout_id = documentSnapshot.get( "layout_id" ).toString();
+                                long no_of_banners = (long)documentSnapshot.get( "no_of_banners" );
 
+                                for (long ln = 1; ln <= no_of_banners; ln++){
+                                    String banner_ = documentSnapshot.get( "banner_"+ln ).toString();
+                                    String banner_click_id_ = documentSnapshot.get( "banner_click_id_"+ln ).toString();
+                                    long banner_click_type_ = (long)documentSnapshot.get( "banner_click_type_"+ln );
+
+                                    bannerSliderModelList.add( new BannerSliderModel( Integer.parseInt( String.valueOf( banner_click_type_ ) ) ,
+                                            banner_click_id_, banner_, "new" ) );
+                                }
+
+                                homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_BANNER_SLIDER, bannerSliderModelList, -1 ) );
+
+                            }else{
+                                // None
+                            }
                         }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_CATEGORY_LAYOUT) {
+                        if (viewType == TYPE_HOME_CATEGORY_LAYOUT) {
                             // Grid List...
                             categoryTypeModelList = new ArrayList <>();
                             long no_of_cat = (long)documentSnapshot.get( "no_of_cat" );
@@ -115,24 +135,15 @@ public class DBQuery {
                             homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList ) );
 
                         }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_STRIP_AD) {
+                        if (viewType == TYPE_HOME_SHOP_STRIP_AD) {
                             // Strip Ad...
                             homePageCategoryList.add( new MainHomeFragmentModel(
                                     TYPE_HOME_SHOP_STRIP_AD,
-                                    documentSnapshot.get( "shop_id" ).toString(),
-                                    documentSnapshot.get( "shop_image" ).toString(),
-                                    documentSnapshot.get( "shop_name" ).toString(),
-                                    TYPE_BANNER_MAIN_HOME  ) );
-
-                        }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_BANNER_AD) {
-                            // Banner Ad...
-                            homePageCategoryList.add( new MainHomeFragmentModel(
-                                    TYPE_HOME_SHOP_BANNER_AD,
-                                    documentSnapshot.get( "shop_id" ).toString(),
-                                    documentSnapshot.get( "shop_image" ).toString(),
-                                    documentSnapshot.get( "shop_name" ).toString(),
-                                    TYPE_BANNER_MAIN_HOME  ) );
+                                    documentSnapshot.get( "banner_click_id" ).toString(),
+                                    documentSnapshot.get( "banner_image" ).toString(),
+                                    documentSnapshot.get( "extra_text" ).toString(),
+                                    Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "banner_click_type" )  ) )
+                            ) );
                         }
 
                         if(HomeFragment.mainHomeFragmentAdaptor != null){
@@ -177,59 +188,47 @@ public class DBQuery {
                     // data is loaded...
                     shopsViewFragmentList.clear();
                     for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_BANNER_SLIDER) {
+                        int viewType = Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "type" ) ) );
+                        if (viewType == TYPE_HOME_SHOP_BANNER_SLIDER) {
                             // TODO: Banner Slider...
+                            Boolean is_visible = documentSnapshot.getBoolean( "is_visible" );
+                            if (is_visible){
+                                // Load
+                                String layout_id = documentSnapshot.get( "layout_id" ).toString();
+                                long no_of_banners = (long)documentSnapshot.get( "no_of_banners" );
+
+                                for (long ln = 1; ln <= no_of_banners; ln++){
+                                    String banner_ = documentSnapshot.get( "banner_"+ln ).toString();
+                                    String banner_click_id_ = documentSnapshot.get( "banner_click_id_"+ln ).toString();
+                                    long banner_click_type_ = (long)documentSnapshot.get( "banner_click_type_"+ln );
+
+                                    bannerSliderModelList.add( new BannerSliderModel( Integer.parseInt( String.valueOf( banner_click_type_ ) ) ,
+                                            banner_click_id_, banner_, "new" ) );
+                                }
+
+                                homePageCategoryList.add( new MainHomeFragmentModel( TYPE_HOME_SHOP_BANNER_SLIDER, bannerSliderModelList, -1 ) );
+
+                            }else{
+                                // None
+                            }
 
                         }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_CATEGORY_LAYOUT) {
+                        if (viewType == TYPE_HOME_SHOP_ITEMS_CONTAINER) {
                             // Grid List...
                             // One More Query Needed here...
-                            firebaseFirestore.collection( "HOME_PAGE" ).document( cityName.toUpperCase() )
-                                    .collection( "SHOPS" ).whereEqualTo( "category_id", catId )
-                                    .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task <QuerySnapshot> task1) {
-                                    if (task1.isSuccessful()) {
-                                        // data is loaded...
-                                        List <CategoryTypeModel> categoryTypeModelList = new ArrayList <>();
-                                        for (QueryDocumentSnapshot documentSnapshot1 : task1.getResult()) {
-                                            categoryTypeModelList.add( new CategoryTypeModel(
-                                                    TYPE_LIST_SHOPS_VIEW_NAME,
-                                                    documentSnapshot1.get( "shop_id" ).toString(),
-                                                    documentSnapshot1.get( "shop_name" ).toString(),
-                                                    documentSnapshot1.get( "shop_image" ).toString()
-                                            ) );
-                                        }
-
-                                        shopsViewFragmentList.add( 0, new MainHomeFragmentModel( TYPE_HOME_CATEGORY_LAYOUT, categoryTypeModelList ) );
-                                        if(ShopsViewFragment.shopViewFragmentAdaptor != null){
-                                            ShopsViewFragment.shopViewFragmentAdaptor.notifyDataSetChanged();
-                                        }
-                                    }else{
-
-                                    }
-                                }
-                            } );
+                            int shopsListIndex = Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "index" ) ) );
+                            getShopsItemQuery(cityName, catId, shopsListIndex );
 
                         }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_STRIP_AD) {
+                        if (viewType == TYPE_HOME_SHOP_STRIP_AD) {
                             // Strip Ad...
-                            shopsViewFragmentList.add( new MainHomeFragmentModel(
+                            shopsViewFragmentList.add(  new MainHomeFragmentModel(
                                     TYPE_HOME_SHOP_STRIP_AD,
-                                    documentSnapshot.get( "shop_id" ).toString(),
-                                    documentSnapshot.get( "shop_image" ).toString(),
-                                    documentSnapshot.get( "shop_name" ).toString(),
-                                    TYPE_BANNER_SHOPS_VIEW  ) );
-
-                        }else
-                        if ((long) documentSnapshot.get( "type" ) == TYPE_HOME_SHOP_BANNER_AD) {
-                            // Banner Ad...
-                            shopsViewFragmentList.add( new MainHomeFragmentModel(
-                                    TYPE_HOME_SHOP_BANNER_AD,
-                                    documentSnapshot.get( "shop_id" ).toString(),
-                                    documentSnapshot.get( "shop_image" ).toString(),
-                                    documentSnapshot.get( "shop_name" ).toString(),
-                                    TYPE_BANNER_SHOPS_VIEW  ) );
+                                    documentSnapshot.get( "banner_click_id" ).toString(),
+                                    documentSnapshot.get( "banner_image" ).toString(),
+                                    documentSnapshot.get( "extra_text" ).toString(),
+                                    Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "banner_click_type" )  ) )
+                            ) );
                         }
 
                         if(ShopsViewFragment.shopViewFragmentAdaptor != null){
@@ -259,6 +258,38 @@ public class DBQuery {
 
     }
 
+    public static void getShopsItemQuery( String cityName, final String categoryID, final int index){
+        // One More Query Needed here...
+        firebaseFirestore.collection( "HOME_PAGE" ).document( cityName.toUpperCase() )
+                .collection( "SHOPS" )
+                .whereArrayContains( "shop_categories", categoryID )
+                .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <QuerySnapshot> task1) {
+                if (task1.isSuccessful()) {
+                    // data is loaded...
+                    List <CategoryTypeModel> categoryTypeModelList = new ArrayList <>();
+                    for (QueryDocumentSnapshot documentSnapshot1 : task1.getResult()) {
+                        categoryTypeModelList.add( new CategoryTypeModel(
+                                TYPE_LIST_SHOPS_VIEW_NAME,
+                                documentSnapshot1.get( "shop_id" ).toString(),
+                                documentSnapshot1.get( "shop_name" ).toString(),
+                                documentSnapshot1.get( "shop_logo" ).toString()
+                        ) );
+                    }
+
+                    shopsViewFragmentList.add( index, new MainHomeFragmentModel( TYPE_HOME_SHOP_ITEMS_CONTAINER, categoryTypeModelList ) );
+                    if(ShopsViewFragment.shopViewFragmentAdaptor != null){
+                        ShopsViewFragment.shopViewFragmentAdaptor.notifyDataSetChanged();
+                    }
+
+                }else{
+
+                }
+            }
+        } );
+    }
+
     // Query to Load Fragment Data like homepage items etc...
     public static void getShopHomeListQuery(final Context context, @Nullable final Dialog dialog
             , final String shopID, String categoryID, final int index, final RecyclerView homeLayoutContainerRecycler
@@ -286,30 +317,39 @@ public class DBQuery {
                     }
                     // add Data from snapshot...
                     for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        int viewType = Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "type" ) ) );
 //                            showToast( context, "City : " + userCityName );
-                        if ((long) documentSnapshot.get( "view_type" ) == BANNER_SLIDER_LAYOUT_CONTAINER) {
+                        if ( viewType == SHOP_HOME_BANNER_SLIDER_CONTAINER) {
                             /** add banners slider */
 //                            String layout_id = documentSnapshot.get( "layout_id" ).toString();
                             bannerSliderModelList = new ArrayList <>();
                             long no_of_banners = (long) documentSnapshot.get( "no_of_banners" );
                             for (long i = 1; i < no_of_banners + 1; i++) {
                                 // access the banners from database...
-                                bannerSliderModelList.add( new BannerSliderModel( documentSnapshot.get( "banner_" + i ).toString(),
-                                        documentSnapshot.get( "banner_" + i + "_bg" ).toString() ) );
+                                bannerSliderModelList.add( new BannerSliderModel(
+                                        Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "banner_click_type_"+i ) )),
+                                        documentSnapshot.get( "banner_click_id_" + i ).toString(),
+                                        documentSnapshot.get( "banner_" + i ).toString(),
+                                        "Extra_Text_bgColor" ));
                             }
                             // add the banners list in the home recycler list...
                             if (bannerSliderModelList.size() >= 2){
-                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( BANNER_SLIDER_LAYOUT_CONTAINER, bannerSliderModelList ) );
+                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( SHOP_HOME_BANNER_SLIDER_CONTAINER, bannerSliderModelList ) );
                             }
 
                         } else
-                        if ((long) documentSnapshot.get( "view_type" ) == STRIP_AD_LAYOUT_CONTAINER) {
+                        if ( viewType == SHOP_HOME_STRIP_AD_CONTAINER) {
                             /**  for strip and banner ad */
 //                            String layout_id = documentSnapshot.get( "layout_id" ).toString();
-                            shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( STRIP_AD_LAYOUT_CONTAINER,
-                                    documentSnapshot.get( "strip_ad" ).toString(), documentSnapshot.get( "strip_bg" ).toString() ) );
+
+                            shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( SHOP_HOME_STRIP_AD_CONTAINER,
+                                    Integer.parseInt( String.valueOf( (long) documentSnapshot.get( "banner_click_type" ) ) ),
+                                    documentSnapshot.get( "banner_click_id" ).toString(),
+                                    documentSnapshot.get( "banner_image" ).toString(),
+                                    documentSnapshot.get( "extra_text" ).toString() )
+                            );
                         } else
-                        if ((long) documentSnapshot.get( "view_type" ) == HORIZONTAL_ITEM_LAYOUT_CONTAINER) {
+                        if ( viewType == HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER) {
                             /** : for horizontal products */
 //                            String layout_id = documentSnapshot.get( "layout_id" ).toString();
                             productModelList = new ArrayList <>();
@@ -323,12 +363,12 @@ public class DBQuery {
                             // add list in home fragment model
                             //  TODO : To User
                             if (hrAndGridProductIdList.size()>=2){
-                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( HORIZONTAL_ITEM_LAYOUT_CONTAINER, hrAndGridProductIdList,
+                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER, hrAndGridProductIdList,
                                         productModelList, documentSnapshot.get( "layout_title" ).toString() ) );
                             }
 
                         } else
-                        if ((long) documentSnapshot.get( "view_type" ) == GRID_ITEM_LAYOUT_CONTAINER) {
+                        if ( viewType == GRID_PRODUCTS_LAYOUT_CONTAINER) {
                             /** for grid products */
 //                            String layout_id = documentSnapshot.get( "layout_id" ).toString();
 
@@ -342,17 +382,17 @@ public class DBQuery {
                             // add list in home fragment model
                             // TODO : To User
                             if (hrAndGridProductIdList.size()>=4){
-                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( GRID_ITEM_LAYOUT_CONTAINER, hrAndGridProductIdList,
+                                shopHomeCategoryList.get( index ).add( new ShopHomeFragmentModel( GRID_PRODUCTS_LAYOUT_CONTAINER, hrAndGridProductIdList,
                                         productModelList, documentSnapshot.get( "layout_title" ).toString() ) );
                             }
 //                            // TODO : To Admin
-//                            commonCatList.get( index ).add( new CommonCatModel( GRID_ITEM_LAYOUT_CONTAINER, layout_id
+//                            commonCatList.get( index ).add( new CommonCatModel( GRID_PRODUCTS_LAYOUT_CONTAINER, layout_id
 //                                    , documentSnapshot.get( "layout_title" ).toString()
 //                                    , hrAndGridProductIdList, hrAndGridProductList ) );
 
 
                         } else
-                        if ((long) documentSnapshot.get( "view_type" ) == SHOP_HOME_CAT_LIST_CONTAINER) {
+                        if ( viewType == SHOP_HOME_CAT_LIST_CONTAINER) {
                             // TODO : for Category
                          long no_of_cat = (long) documentSnapshot.get( "no_of_cat" );
                          List <CategoryTypeModel> categoryTypeModelList = new ArrayList <>();
@@ -397,6 +437,7 @@ public class DBQuery {
     }
 
     public static void getCityListQuery(){
+        areaCodeCityModelList.clear();
         firebaseFirestore.collection( "AREA_CODE" ).orderBy( "area_code" )
                 .get().addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
             @Override

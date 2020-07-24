@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
@@ -72,7 +73,7 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         String productId = horizontalItemViewModelList.get( position ).getpProductID();
-        String[] imgLink = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
+        ArrayList<String> imgLink = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
         String name = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
         String price = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
         String cutPrice = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
@@ -121,13 +122,13 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
 
         }
 
-        private void setHomeHrProduct(final String productId, String[] imgLink, String name, String price, String cutPrice, final int index) {
+        private void setHomeHrProduct(final String productId, ArrayList<String> imgLink, String name, String price, String cutPrice, final int index) {
 
             hrProductName.setText( name );
             hrProductPrice.setText( "Rs." + price + "/-" );
             hrProductCutPrice.setText( "Rs." + cutPrice + "/-" );
 
-            Glide.with( itemView.getContext() ).load( imgLink[0] ).apply( new RequestOptions()
+            Glide.with( itemView.getContext() ).load( imgLink.get( 0 ) ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
 
             int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
@@ -169,7 +170,7 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
             hrProductStockInfo = itemView.findViewById( R.id.hr_viewAll_product_stock_info );
         }
 
-        private void setHorizontalProducts(final String productId, String[] imgLink, String name, String price, String cutPrice, Boolean cod, String stockInfo, final int index) {
+        private void setHorizontalProducts(final String productId, ArrayList<String> imgLink, String name, String price, String cutPrice, Boolean cod, String stockInfo, final int index) {
             hrProductName.setText( name );
             hrProductPrice.setText( "Rs." + price + "/-" );
             hrProductCutPrice.setText( "Rs." + cutPrice + "/-" );
@@ -185,7 +186,7 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
                 hrProductStockInfo.setText( "Out of Stock" );
             }
 
-            Glide.with( itemView.getContext() ).load( imgLink[0] ).apply( new RequestOptions()
+            Glide.with( itemView.getContext() ).load( imgLink.get( 0 ) ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
 
             int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );

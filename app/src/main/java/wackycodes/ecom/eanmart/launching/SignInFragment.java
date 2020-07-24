@@ -70,7 +70,6 @@ public class SignInFragment extends Fragment {
         signInPassword = view.findViewById( R.id.sign_in_password );
         signInBtn = view.findViewById( R.id.sign_in_btn );
 
-
         dontHaveAccount.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {

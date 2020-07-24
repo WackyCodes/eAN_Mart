@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:id="@+id/fragment_shop_home_frame_layout"
-    tools:context=".shophome.ShopHomeFragment">
+    tools:context=".apphome.shophome.ShopHomeFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView

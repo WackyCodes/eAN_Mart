@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.apphome;
+package wackycodes.ecom.eanmart.apphome.mainhome;
 
 public class CategoryTypeModel {
 

@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -37,8 +36,8 @@ import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.productdetails.ProductModel;
 import wackycodes.ecom.eanmart.productdetails.ProductSubModel;
-import wackycodes.ecom.eanmart.shophome.aboutshop.AboutShopActivity;
-import wackycodes.ecom.eanmart.shophome.aboutshop.AboutShopModel;
+import wackycodes.ecom.eanmart.apphome.shophome.aboutshop.AboutShopActivity;
+import wackycodes.ecom.eanmart.apphome.shophome.aboutshop.AboutShopModel;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
@@ -72,6 +71,7 @@ public class ShopHomeActivity extends AppCompatActivity {
     private SearchAdapter searchAdaptor;
     private Boolean isSearchView = false;
     // Search Variables...
+    private TextView closeText;
 
     private Dialog dialog;
 
@@ -107,7 +107,7 @@ public class ShopHomeActivity extends AppCompatActivity {
 
 //        shopIDText = findViewById( R.id.shop_id );
 //        shopIDText.setText( shopID );
-
+        closeText = findViewById(R.id.shop_close_text);
         shopHomeSwipeRefreshLayout = findViewById( R.id.shop_home_swipe_refresh_layout );
         shopHomeContainerRecycler = findViewById( R.id.shop_home_layout_container_recycler );
 
@@ -303,7 +303,7 @@ public class ShopHomeActivity extends AppCompatActivity {
                                         // add Data...
                                         productSubModelList.add( new ProductSubModel(
                                                 documentSnapshot.get( "p_name_"+tempI).toString(),
-                                                pImage,
+                                                Images,
                                                 documentSnapshot.get( "p_selling_price_"+tempI).toString(),
                                                 documentSnapshot.get( "p_mrp_price_"+tempI).toString(),
                                                 documentSnapshot.get( "p_weight_"+tempI).toString(),
@@ -404,21 +404,18 @@ public class ShopHomeActivity extends AppCompatActivity {
                 if (task.isSuccessful()){
 
                     DocumentSnapshot documentSnapshot = task.getResult();
+                    Boolean isAvailableService = documentSnapshot.getBoolean( "available_service" );
 
-                    boolean isOpen = documentSnapshot.getBoolean( "is_open" );
+                    Boolean isOpen = documentSnapshot.getBoolean( "is_open" );
                     String shopName = documentSnapshot.get( "shop_name" ).toString();
                     String shopAddress = documentSnapshot.get( "shop_address" ).toString();
                     getSupportActionBar().setTitle( shopName );
                     getSupportActionBar().setSubtitle( shopAddress );
 
-                    if (isOpen){
-                        aboutShopModel.setOpen( true );
-                        aboutShopModel.setShopName( shopName );
-                        aboutShopModel.setShopAddress( shopAddress );
-                    }else{
-                        String closeMsg = documentSnapshot.get( "shop_close_msg" ).toString();
+                    if (!isAvailableService){
+                        String closeMsg = "Service not Available! Shop is temporary closed! ";
 
-                        Dialog closeDialog = DialogsClass.getMessageDialog( ShopHomeActivity.this, "Shop is Close!", closeMsg );
+                        Dialog closeDialog = DialogsClass.getMessageDialog( ShopHomeActivity.this, "Coming Soon!", closeMsg );
                         closeDialog.findViewById( R.id.dialog_ok_btn ).setOnClickListener( new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -427,6 +424,20 @@ public class ShopHomeActivity extends AppCompatActivity {
                         } );
                         closeDialog.show();
                     }
+
+                    if (isOpen){
+                        aboutShopModel.setOpen( true );
+                        aboutShopModel.setShopName( shopName );
+                        aboutShopModel.setShopAddress( shopAddress );
+                        closeText.setVisibility( View.GONE );
+                    }else{
+                        aboutShopModel.setOpen( false );
+                        String closeMsg = documentSnapshot.get( "shop_close_msg" ).toString();
+                        closeText.setVisibility( View.VISIBLE );
+                    }
+
+                    // Dialog if service is not Available...
+
 
                     // TODO : Shop Related Data...
 

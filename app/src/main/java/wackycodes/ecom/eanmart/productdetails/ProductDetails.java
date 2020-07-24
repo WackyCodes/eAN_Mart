@@ -30,7 +30,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
@@ -39,8 +38,6 @@ import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticMethods;
-import wackycodes.ecom.eanmart.other.StaticValues;
-import wackycodes.ecom.eanmart.shophome.ShopHomeActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 
@@ -54,8 +51,7 @@ import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_ID_CURRENT;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NON_VEG;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_NO_SHOW;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_TYPE_VEG;
-import static wackycodes.ecom.eanmart.other.StaticValues.isVerifiedMobile;
-import static wackycodes.ecom.eanmart.shophome.ShopHomeActivity.searchProductList;
+import static wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity.searchProductList;
 
 public class ProductDetails extends AppCompatActivity {
     public static AppCompatActivity productDetails;
@@ -455,7 +451,7 @@ public class ProductDetails extends AppCompatActivity {
         // Set ImageLayout Data
         productImageList.clear();
         ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( variantIndex );
-        productImageList.addAll( Arrays.asList( productSubModel.getpImage() ) );
+        productImageList.addAll( productSubModel.getpImage() );
         productName.setText( productSubModel.getpName() );
         productPrice.setText( "Rs." + productSubModel.getpSellingPrice() + "/-" );
         productCutPrice.setText( "Rs." + productSubModel.getpMrpPrice() + "/-" );
@@ -507,6 +503,7 @@ public class ProductDetails extends AppCompatActivity {
         } );
     }
 
+    // Cart Action ----------------------------------------------------
     private void cartAction(){
 
         // Add to Cart Click...
@@ -592,7 +589,7 @@ public class ProductDetails extends AppCompatActivity {
     private void updateCartVariant( int variantNo ){
         ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( variantNo );
         String pName = productSubModel.getpName();
-        String pImageLink[] = productSubModel.getpImage();
+        ArrayList<String> pImageLink = productSubModel.getpImage();
         String pPrice = productSubModel.getpSellingPrice();
         String pMrpPrice = productSubModel.getpMrpPrice();
         String pWeight = productSubModel.getpWeight();
@@ -600,7 +597,7 @@ public class ProductDetails extends AppCompatActivity {
             pName = pName + " ( " + pWeight + " )";
         }
         temCartItemModelList.get( cartThisIndex ).setProductName( pName );
-        temCartItemModelList.get( cartThisIndex ).setProductImage( pImageLink[0]);
+        temCartItemModelList.get( cartThisIndex ).setProductImage( pImageLink.get( 0 ));
         temCartItemModelList.get( cartThisIndex ).setProductSellingPrice( pPrice );
         temCartItemModelList.get( cartThisIndex ).setProductMrpPrice( pMrpPrice );
     }
@@ -609,7 +606,7 @@ public class ProductDetails extends AppCompatActivity {
         String cartID = StaticMethods.getRandomCartID();
         ProductSubModel productSubModel =  pProductModel.getProductSubModelList().get( currentVariant );
         String pName = productSubModel.getpName();
-        String pImageLink[] = productSubModel.getpImage();
+        ArrayList<String> pImageLink = productSubModel.getpImage();
         String pPrice = productSubModel.getpSellingPrice();
         String pMrpPrice = productSubModel.getpMrpPrice();
         String pWeight = productSubModel.getpWeight();
@@ -626,7 +623,7 @@ public class ProductDetails extends AppCompatActivity {
                 SHOP_ID_CURRENT,
                 productID,
                 pName,
-                pImageLink[0],
+                pImageLink.get( 0 ),
                 pPrice,
                 pMrpPrice,
                 pQty
@@ -663,6 +660,7 @@ public class ProductDetails extends AppCompatActivity {
         cartThisIndex = 0;
         ALREADY_ADDED_IN_CART = false;
     }
+    // Cart Action ----------------------------------------------------
 
 
 }

@@ -72,29 +72,40 @@ public class StaticValues {
     // Activity...
     public static final int MAIN_ACTIVITY = 16;
 
+    // Banner Click Type...
+    public static final int BANNER_CLICK_TYPE_WEBSITE = 1;
+    public static final int BANNER_CLICK_TYPE_SHOP = 2;
+    public static final int BANNER_CLICK_TYPE_CATEGORY = 3;
+    public static final int BANNER_CLICK_TYPE_NONE = 4;
+
     // Home Category Layout... Type...
-    public static final int TYPE_HOME_SHOP_BANNER_SLIDER = 21;
-    public static final int TYPE_HOME_CATEGORY_LAYOUT = 22;
-    public static final int TYPE_HOME_SHOP_STRIP_AD = 23;
-    public static final int TYPE_HOME_SHOP_BANNER_AD = 24;
+    public static final int TYPE_HOME_SHOP_BANNER_SLIDER = 2;
+    public static final int TYPE_HOME_CATEGORY_LAYOUT = 5;
+    public static final int TYPE_HOME_SHOP_STRIP_AD = 1; // or TYPE_HOME_SHOP_BANNER_AD
+    public static final int TYPE_HOME_SHOP_ITEMS_CONTAINER = 6;
+
+
 
     // Type of List : Home Category List or Shop Name List...
+    // Use For Local Only...
     public static final int TYPE_LIST_MAIN_HOME_CATEGORY = 25;
     public static final int TYPE_LIST_SHOPS_VIEW_NAME = 26;
     public static final int TYPE_BANNER_MAIN_HOME = 27;
     public static final int TYPE_BANNER_SHOPS_VIEW = 28;
     public static final int TYPE_BANNER_SHOP_HOME = 29;
 
+    // Use For Local...
+    public static final int LIST_MAIN_HOME_PAGE = 30;
+    public static final int LIST_SHOP_VIEW_PAGE = 31;
 
-    // Common Main Home Container...
-    public static final int BANNER_SLIDER_LAYOUT_CONTAINER = 0;
-    public static final int STRIP_AD_LAYOUT_CONTAINER = 1;
-    public static final int HORIZONTAL_ITEM_LAYOUT_CONTAINER = 2;
-    public static final int GRID_ITEM_LAYOUT_CONTAINER = 3;
-    public static final int SHOP_HOME_CAT_LIST_CONTAINER = 4;
-    public static final int CAT_ITEM_LAYOUT_CONTAINER = 5;
-    public static final int BANNER_SLIDER_CONTAINER_ITEM = 6;
-    public static final int ADD_NEW_PRODUCT_ITEM = 7;
+    // Common Main Home Container... // Any One Shop Home Page...
+    // Path = "SHOPS" > (SHOP_ID) > "HOME" > (order By.. )
+    public static final int SHOP_HOME_STRIP_AD_CONTAINER = 1;
+    public static final int SHOP_HOME_BANNER_SLIDER_CONTAINER = 2;
+    public static final int SHOP_HOME_CAT_LIST_CONTAINER = 5;
+    public static final int HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER = 3;
+    public static final int GRID_PRODUCTS_LAYOUT_CONTAINER = 4;
+
 
     public static final int VIEW_HORIZONTAL_LAYOUT = 0;
     public static final int VIEW_RECTANGLE_LAYOUT = 1;
@@ -114,9 +125,11 @@ public class StaticValues {
     public static final int CONTINUE_SHOPPING_FRAGMENT = 22;
     public static final int SHOP_PRODUCT_CAT_ACTIVITY = 23;
 
+
     public static final int SHOP_TYPE_VEG = 1;
     public static final int SHOP_TYPE_NON_VEG = 2;
-    public static final int SHOP_TYPE_NO_SHOW = 3;
+    public static final int SHOP_TYPE_VEG_NON = 3;
+    public static final int SHOP_TYPE_NO_SHOW = 4;
 
     public static String SHOP_ID_CURRENT = "1";
     public static String SHOP_ID_PREVIOUS = "1";

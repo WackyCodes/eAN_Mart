@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome;
+package wackycodes.ecom.eanmart.apphome.shophome;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
@@ -63,8 +64,8 @@ public class ItemActivityGridViewAdapter extends BaseAdapter {
         itemPrice.setText( "Rs."+ sellingPrice + "/-" );
         itemCutPrice.setText( "Rs."+ mrpPrice + "/-" );
 
-        String[] imageLinks = horizontalItemViewModel.getProductSubModelList().get( 0 ).getpImage();
-        Glide.with( view.getContext() ).load( imageLinks[0] )
+        ArrayList <String> imageLinks = horizontalItemViewModel.getProductSubModelList().get( 0 ).getpImage();
+        Glide.with( view.getContext() ).load( imageLinks.get( 0 ) )
                 .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( itemImage );
 
         int perOff = ((Integer.parseInt( mrpPrice )

@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanmart.shophome.aboutshop;
+package wackycodes.ecom.eanmart.apphome.shophome.aboutshop;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +17,7 @@ public class AboutShopActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_about_shop );
 
+        String shopID = getIntent().getStringExtra( "SHOP_ID" );
 
         continueShopping = findViewById( R.id.continue_shopping_layout );
         continueShopping.setOnClickListener( new View.OnClickListener() {
