@@ -41,6 +41,11 @@
                 android:title="Help &amp; Policy"
                 android:iconTint="@color/colorBlack"
                 android:icon="@drawable/ic_help_black_24dp" />
+            <item
+                android:id="@+id/menu_about_us"
+                android:title="About Us"
+                android:iconTint="@color/colorBlack"
+                android:icon="@drawable/ic_group_black_24dp" />
 
         </menu>
     </item>

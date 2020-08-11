@@ -62,7 +62,6 @@ import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.temCartItemMod
 import static wackycodes.ecom.eanmart.other.StaticMethods.getRandomOrderID;
 import static wackycodes.ecom.eanmart.other.StaticValues.BUY_FROM_CART;
 import static wackycodes.ecom.eanmart.other.StaticValues.BUY_FROM_VALUE;
-import static wackycodes.ecom.eanmart.other.StaticValues.CONTINUE_SHOPPING_FRAGMENT;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
@@ -106,13 +105,15 @@ public class ConformOrderFragment extends Fragment {
     private String scheduleTime = null;
     private String deliverySchedule = null;
 
+    private String RANDOM_ORDER_ID ;
+
     Dialog dialog;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate( R.layout.fragment_conform_order, container, false );
 
-        Dialog dialog = DialogsClass.getDialog( view.getContext() );
+        dialog = DialogsClass.getDialog( view.getContext() );
 
         // Assign Variable...
         orderConfirmConstLayout = view.findViewById( R.id.orderConfirmConstLayout );
@@ -178,9 +179,11 @@ public class ConformOrderFragment extends Fragment {
                     int selectedMode = payModeRadioGroup.getCheckedRadioButtonId();
                     deliverySchedule = scheduleDay + " - " + scheduleTime;
                     if (selectedMode == payCODRadioBtn.getId()){
+                        // Set Shop ID ( User Can come from cart directly)
+                        SHOP_ID_CURRENT = temCartItemModelList.get( 0 ).getProductShopID();
 
-                        DialogsClass.alertDialog( getContext(), "Sorry ! We can't proceed ahead.",
-                                "Our Service is temporary closed so we can not verify your mobile number.! Please contact app founder." );
+//                        DialogsClass.alertDialog( getContext(), "Sorry ! We can't proceed ahead.",
+//                                "Our Service is temporary closed so we can not verify your mobile number.! Please contact app founder." ).show();
                         /**
                          if (!StaticValues.USER_ACCOUNT_INFO_MODEL.isMobileVerify()){
                          if (StaticValues.USER_ACCOUNT_INFO_MODEL.getUserMobile()!=null){
@@ -198,9 +201,23 @@ public class ConformOrderFragment extends Fragment {
                          }
                          */
 
+                        if (StaticValues.USER_DATA_MODEL.getUserMobile()!=null){
+//                            checkForAreaCode(getDeliveryPin());
+//                            checkOrderId( 2 );
+
+                            // GOTO OrderQuery...
+                            callOrderQuery( RANDOM_ORDER_ID );
+
+                        }else{
+                            DialogsClass.alertDialog( getContext(), "Mobile Number not found.!",
+                                    "Your mobile no. is not exist in our record. Please update your mobile from profile section.!" ).show();
+                        }
+
                     }
                     else if (selectedMode == payPaytmRadioBtn.getId()){
-//                        showPaytmDialog();
+                        DialogsClass.alertDialog( getContext(), "Sorry ! Paytm is not accepted Now.",
+                                "Please Choose Another Payment Options.." ).show();
+
 //                    callOrderQuery( StaticValues.ONLINE_MODE );
 
                     }else{
@@ -216,6 +233,9 @@ public class ConformOrderFragment extends Fragment {
 
             }
         } );
+
+        // Random Order ID Generated..! And Check.
+        createNewOrderID();
 
         return view;
     }
@@ -275,7 +295,8 @@ public class ConformOrderFragment extends Fragment {
     // Billing Function...
     private int getTotalAmounts(){
         int totalAmounts = 0;
-        for ( int i = 0; i<temCartItemModelList.size(); i++){
+        // we have bill amount layout in the last index.. that we don't need to use here
+        for ( int i = 0; i<temCartItemModelList.size() - 1; i++){
             int sellingP = Integer.parseInt( temCartItemModelList.get( i ).getProductSellingPrice() );
             int productQty = Integer.parseInt( temCartItemModelList.get( i ).getProductQty() );
             totalAmounts = totalAmounts + ( sellingP * productQty );
@@ -284,7 +305,8 @@ public class ConformOrderFragment extends Fragment {
     }
     private int getTotalMrps(){
         int totalMrp = 0;
-        for ( int i = 0; i<temCartItemModelList.size(); i++){
+        // we have bill amount layout in the last index.. that we don't need to use here
+        for ( int i = 0; i<temCartItemModelList.size() - 1; i++){
             int productQty = Integer.parseInt( temCartItemModelList.get( i ).getProductQty() );
             int mrpP = Integer.parseInt( temCartItemModelList.get( i ).getProductMrpPrice() );
             totalMrp = totalMrp + ( mrpP * productQty );
@@ -292,79 +314,52 @@ public class ConformOrderFragment extends Fragment {
         return totalMrp;
     }
 
-    // Check For Product is exist in particular Area ..
-    private void checkForAreaCode(final String areaPin){
-        dialog.show();
-//            showToast( "Code Not found!" );
-        firebaseFirestore.collection( "AREA_CODE" )
-                .whereEqualTo( "area_city_code", CURRENT_CITY_CODE )
-                .get()
-                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
-                        if (task.isSuccessful()){
-                            int sizeOfSnap = task.getResult().size();
-                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()){
-                                if (documentSnapshot.getId().equals( areaPin )){
-                                    // Process next step...
-                                    if (!dialog.isShowing()){
-                                        dialog.show();
-                                    }
-                                    // Check For Order...
-                                    checkOrderId( getRandomOrderID(), 2 );
-                                    break;
-                                }
-                                sizeOfSnap--;
-                            }
-
-                            if (sizeOfSnap > 0){
-                                dialog.dismiss();
-                                showToast( "This Product can not delivered out of "+ CURRENT_CITY_NAME );
-                            }
-
-                        }
-                    }
-                } );
+    // Create Random Order ID and Check....
+    private boolean isFoundOrderID = false;
+    private void createNewOrderID(){
+        if (!isFoundOrderID){
+            RANDOM_ORDER_ID = getRandomOrderID();
+            checkForExistOrderID();
+        }
     }
-    private void checkOrderId(@NonNull final String orderID, final int round ){
-        final CollectionReference collectionReference =
-                firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID_CURRENT ).collection( "ORDERS" );
-
-        collectionReference.document( orderID )
+    private void checkForExistOrderID(){
+        firebaseFirestore.collection( "SHOPS" )
+                .document( SHOP_ID_CURRENT ).collection( "ORDERS" )
+                .document( RANDOM_ORDER_ID )
                 .addSnapshotListener( new EventListener <DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                        if (documentSnapshot.exists()) {
-                            String newOrderID = getRandomOrderID();
-                            if (round > 0){
-                                int newRound = round - 1;
-                                checkOrderId(newOrderID, newRound);
-                                showToast( "Please Wait. Order Request May take some time.!" );
-                            }else{
-                                dialog.dismiss();
-                                showToast( "Sorry! Order Failed.. Please Retry.!" );
-                            }
-
+                        if ( !documentSnapshot.exists()){
+                            isFoundOrderID = true;
+                            //  Create Documents...
+                            createDocumentOfOrderID();
+                            Toast.makeText( getContext(), "Founded " + RANDOM_ORDER_ID, Toast.LENGTH_SHORT ).show();
+                            return;
                         }
-                        else {
-                            // Next step..
-                            Map<String, Object> orderMap = new HashMap <>();
-                            orderMap.put( "order_id", orderID );
-                            orderMap.put( "is_success", false );
-                            collectionReference.document( orderID )
-                                    .set( orderMap )
-                                    .addOnCompleteListener( new OnCompleteListener <Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task <Void> task) {
-                                            // GOTO OrderQuery...
-                                            callOrderQuery( orderID );
-
-                                        }
-                                    } );
-                        }
+                        Toast.makeText( getContext(), "Order ID : " + RANDOM_ORDER_ID, Toast.LENGTH_SHORT ).show();
+                        createNewOrderID();
                     }
                 } );
     }
+    private void createDocumentOfOrderID(){
+        // Next step..
+        Map<String, Object> orderMap = new HashMap <>();
+        orderMap.put( "order_id", RANDOM_ORDER_ID );
+        orderMap.put( "is_success", false );
+        firebaseFirestore.collection( "SHOPS" )
+                .document( SHOP_ID_CURRENT ).collection( "ORDERS" )
+                .document( RANDOM_ORDER_ID )
+                .set( orderMap )
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task <Void> task) {
+                        // GOTO OrderQuery...
+//                        callOrderQuery( RANDOM_ORDER_ID );
+                        return;
+                    }
+                } );
+    }
+
     // Order Query call...
     private void callOrderQuery( String orderID ){
         if (!dialog.isShowing()){
@@ -393,7 +388,7 @@ public class ConformOrderFragment extends Fragment {
         // 9. deliverySchedule
 
         if (totalAmounts>=500){
-            deliveryCharge = "Free";
+            deliveryCharge = "0";
             billingAmounts = totalAmounts;
         }else{
             billingAmounts = totalAmounts + 50;
@@ -418,7 +413,6 @@ public class ConformOrderFragment extends Fragment {
             getActivity().getParent().getActionBar().setDisplayShowTitleEnabled( true );
             getActivity().getParent().getActionBar().setDisplayHomeAsUpEnabled( false );
         }catch (NullPointerException e){ }
-        ConformOrderActivity.currentFrameLayout = CONTINUE_SHOPPING_FRAGMENT;
         orderConfirmConstLayout.setVisibility( View.GONE );
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations( R.anim.slide_from_right, R.anim.slide_out_from_left );
@@ -549,7 +543,7 @@ public class ConformOrderFragment extends Fragment {
 
 */
    private void showToast(String s){
-       Toast.makeText( getActivity(), s , Toast.LENGTH_SHORT ).show();
+       Toast.makeText( getContext(), s , Toast.LENGTH_SHORT ).show();
    }
     ///////////// Scheduling Adopter....
     private class ScheduleAdapter extends BaseAdapter {
@@ -603,8 +597,6 @@ public class ConformOrderFragment extends Fragment {
         }
 
     }
-
-
 
 
 }

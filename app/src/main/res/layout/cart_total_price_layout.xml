@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_marginTop="12dp"
+    android:layout_marginTop="6dp"
+    android:paddingBottom="18dp"
     android:background="@color/colorWhite"
     android:layout_height="wrap_content">
 
@@ -25,7 +26,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:padding="16dp"
-            android:text="Amount Details"
+            android:text="Billing Details"
             android:textColor="@color/colorSecondary"
             android:textSize="18dp"
             android:textStyle="bold"
@@ -58,6 +59,12 @@
                 android:layout_height="wrap_content"
                 android:padding="2dp"
                 android:text="(3)"
+                android:textColor="#000000" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="Amounts"
                 android:textColor="#000000" />
         </LinearLayout>
 
@@ -96,7 +103,7 @@
             android:layout_marginLeft="12dp"
             android:layout_marginTop="4dp"
             android:padding="2dp"
-            android:text="Delivery "
+            android:text="Shipping charge "
             android:textColor="#000000"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider4" />
@@ -135,7 +142,7 @@
             android:layout_marginTop="4dp"
             android:padding="2dp"
             android:textStyle="bold"
-            android:text="Total Amount "
+            android:text="Total Pay Amounts"
             android:textColor="#000000"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider7" />
@@ -174,12 +181,13 @@
             android:layout_marginLeft="12dp"
             android:layout_marginTop="4dp"
             android:padding="2dp"
-            android:text="You have save $4,999/- on this shopping..."
+            android:text="You have save $4,999/- on this shopping...!"
             android:textColor="@color/colorGreen"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider5" />
 
         <View
+            android:visibility="gone"
             android:id="@+id/divider6"
             android:layout_width="0dp"
             android:layout_height="1dp"

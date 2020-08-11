@@ -9,9 +9,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 
 public class OrderListAdaptor extends RecyclerView.Adapter<OrderListAdaptor.ViewHolder> {
@@ -29,15 +36,8 @@ public class OrderListAdaptor extends RecyclerView.Adapter<OrderListAdaptor.View
 
     @Override
     public void onBindViewHolder(@NonNull OrderListAdaptor.ViewHolder holder, int position) {
-        OrderItemModel orderItemModel = orderItemModelList.get( position );
-        String pImageLink = orderItemModel.getCartOrderSubItemModelList().get( 0 ).getProductImage();
-        String orderId = orderItemModel.getOrderID();
-        String pName = orderItemModel.getCartOrderSubItemModelList().get( 0 ).getProductName();
-        String billingAmount = orderItemModel.getBillingAmounts();
-        String shopId = orderItemModel.getShopID();
-        String dStatus = orderItemModel.getOrderStatus();
-        int qtyText = orderItemModel.getCartOrderSubItemModelList().size();
-        holder.setData( pImageLink, orderId, pName, billingAmount, shopId, dStatus, qtyText );
+
+        holder.setData( position );
     }
 
     @Override
@@ -64,8 +64,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter<OrderListAdaptor.View
             qtyText = itemView.findViewById( R.id.product_qty );
         }
 
-        private void setData(String pImageLink, String orderId, String pName,
-                             String billingAmount, String shopId, String dStatus, int qtyText){
+        private void setData(int position){
             // TODO : Set Data
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
@@ -73,7 +72,60 @@ public class OrderListAdaptor extends RecyclerView.Adapter<OrderListAdaptor.View
                     StaticMethods.showToast( itemView.getContext(), "Code Not Found!" );
                 }
             } );
+
+            if (orderItemModelList.get( position ).getCartOrderSubItemModelList().size()!=0){
+//                getListData(position);
+            }else{
+                setOrderItemData(position);
+            }
+
         }
+
+        private void setOrderItemData(int position){
+//            OrderItemModel orderItemModel = orderItemModelList.get( position );
+//            String pImageLink = orderItemModel.getCartOrderSubItemModelList().get( 0 ).getProductImage();
+//            String orderId = orderItemModel.getOrderID();
+//            String pName = orderItemModel.getCartOrderSubItemModelList().get( 0 ).getProductName();
+//            String billingAmount = orderItemModel.getBillingAmounts();
+//            String shopId = orderItemModel.getShopID();
+//            String dStatus = orderItemModel.getOrderStatus();
+//            int qtyText = orderItemModel.getCartOrderSubItemModelList().size();
+
+
+        }
+
+        private void getListData(final int index){
+            UserDataQuery.getCollection( "ORDERS" )
+                    .orderBy( "index", Query.Direction.DESCENDING ) //order_time. order_date
+                    .get()
+                    .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                            if (task.isSuccessful()){
+                                if (task.getResult().size()>0){
+                                    OrderItemModel orderItemModel;
+//                                    showToast( context, "Order Founded.!" );
+                                    for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+                                        orderItemModel = new OrderItemModel(  );
+                                        orderItemModel.setOrderID( documentSnapshot.get( "order_id" ).toString() );
+                                        orderItemModel.setShopID( documentSnapshot.get( "shop_id" ).toString() );
+
+
+
+
+                                        orderItemModelList.add( orderItemModel );
+                                    }
+
+                                }else{
+//                                    showToast( context, "No Order Founded.!" );
+                                }
+                            }else{
+
+                            }
+                        }
+                    } );
+        }
+
     }
 
 }

@@ -77,6 +77,7 @@ public class StaticValues {
     public static final int BANNER_CLICK_TYPE_SHOP = 2;
     public static final int BANNER_CLICK_TYPE_CATEGORY = 3;
     public static final int BANNER_CLICK_TYPE_NONE = 4;
+    public static final int BANNER_CLICK_TYPE_PRODUCT = 5;
 
     // Home Category Layout... Type...
     public static final int TYPE_HOME_SHOP_BANNER_SLIDER = 2;
@@ -152,6 +153,11 @@ public class StaticValues {
     index 7 - product Quantity
 
      */
+
+
+    // Communicate Fragment Code..
+    public static final int FRAGMENT_HELP = 20;
+    public static final int FRAGMENT_ABOUT_US = 21;
 
 
 }

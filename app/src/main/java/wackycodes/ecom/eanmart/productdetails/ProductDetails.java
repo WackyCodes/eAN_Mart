@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.apphome.shophome.search.ProductSearchActivity;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
@@ -106,7 +107,7 @@ public class ProductDetails extends AppCompatActivity {
     private int cartThisQty = 0;
     private int cartThisIndex = 0;
     private String cartShopID;
-
+    private boolean isReloaded = false;
     private int currentVariant = 0;
 
     private ProductModel pProductModel;
@@ -125,14 +126,27 @@ public class ProductDetails extends AppCompatActivity {
         layoutIndex = getIntent().getIntExtra( "LAYOUT_INDEX", -1 );
         productIndex = getIntent().getIntExtra( "PRODUCT_INDEX", -1 );
 
-        if (crrShopCatIndex != -1 && layoutIndex != -1){
+        if (productIndex != -1){
             // This is for layout product click...
-            pProductModel = shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).getProductModelList().get( productIndex );
+            isReloaded = false;
+            if (crrShopCatIndex != -1 && layoutIndex != -1 ){
+                // This is for layout product click...
+                pProductModel = shopHomeCategoryList.get( crrShopCatIndex ).get( layoutIndex ).getProductModelList().get( productIndex );
+
+            }else
+                // This is for search activity...
+                if (searchProductList.size() > 0)
+                    pProductModel = searchProductList.get( productIndex );
+                else{
+                    showToast( "Product Not found!" );
+                    finish();
+                }
+
         }else{
-            // This is for search activity...
-            if (searchProductList.size() > 0)
-                pProductModel = searchProductList.get( productIndex );
-            else{
+            // Come From Banner...: Reload The Product Details...
+            if (productID != null){
+                isReloaded = false;
+            }else{
                 showToast( "Product Not found!" );
                 finish();
             }
@@ -213,7 +227,17 @@ public class ProductDetails extends AppCompatActivity {
         // Retrieve details from database...----------------
         getProductDetails();
         // SetData...
-        setProductData( 0 );
+        if (pProductModel != null){
+            setProductData( 0 );
+            setOtherDetails();
+        }
+        // Cart Action...
+        cartAction();
+
+    }
+    // onCreate method End.. ----------------------------------
+
+    private void setOtherDetails(){
         // set Product VegNon Veg...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             setVegNonData();
@@ -234,8 +258,6 @@ public class ProductDetails extends AppCompatActivity {
             setCartLayoutVisibility(true, null);
         }
 
-        // Cart Action...
-        cartAction();
         // Add Weight Data in List...
         if (pProductModel.getProductSubModelList().get( currentVariant ).getpWeight()!=null){
             for (int pWIndex = 0; pWIndex < pProductModel.getProductSubModelList().size(); pWIndex++ ) {
@@ -247,11 +269,11 @@ public class ProductDetails extends AppCompatActivity {
         }
         //  Set Weight Spinner...
         if(productVariantList.size() > 0){
-           setWeightSpinner();
-       }
+            setWeightSpinner();
+        }
 
     }
-    // onCreate method End.. ----------------------------------
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -358,34 +380,53 @@ public class ProductDetails extends AppCompatActivity {
                 public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                     if (task.isSuccessful()){
                         DocumentSnapshot documentSnapshot = task.getResult();
-                        /** // --- add Product Images...
-                         for (long x = 1; x < (long)documentSnapshot.get( "product_image_num" )+1; x++){
-                         productImageList.add( documentSnapshot.get( "product_image_"+x ).toString() );
-                         }
-                         // set adapter with viewpager...
-                         ProductDetailsImagesAdapter productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
-                         productImagesViewPager.setAdapter( productDetailsImagesAdapter );
-                         // Set other Details of  Product Details Image Layout.
-                         // Product Name...
-                         productName.setText( documentSnapshot.get( "product_full_name" ).toString() );
-                         // Product Price...
-                         productPrice.setText( "Rs. " + documentSnapshot.get( "product_price" ).toString() +"/-" );
-                         // Product Cut Price...
-                         productCutPrice.setText( "Rs. " + documentSnapshot.get( "product_cut_price" ).toString() +"/-" );
+                        if (!isReloaded){
+                            /** Reload Model Data...*/
+                            if ( documentSnapshot.get( "p_no_of_variants" ) !=null ){
+                                // Refresh Our other Details...
+                                long p_no_of_variants = (long) documentSnapshot.get( "p_no_of_variants" );
+                                List<ProductSubModel> productSubModelList = new ArrayList <>();
+                                for (long tempI = 1; tempI <= p_no_of_variants; tempI++){
+                                    // We can use Array...
+                                    ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
+                                    int sz = Images.size();
+                                    String[] pImage = new String[sz];
+                                    for (int i = 0; i < sz; i++){
+                                        pImage[i] = Images.get( i );
+                                    }
+                                    // add Data...
+                                    productSubModelList.add( new ProductSubModel(
+                                            documentSnapshot.get( "p_name_"+tempI).toString(),
+                                            Images,
+                                            documentSnapshot.get( "p_selling_price_"+tempI).toString(),
+                                            documentSnapshot.get( "p_mrp_price_"+tempI).toString(),
+                                            documentSnapshot.get( "p_weight_"+tempI).toString(),
+                                            documentSnapshot.get( "p_stocks_"+tempI).toString(),
+                                            documentSnapshot.get( "p_offer_"+tempI).toString()
+                                    ) );
+                                }
+                                String p_id = documentSnapshot.get( "p_id").toString();
 
-                         if ((boolean)documentSnapshot.get( "product_cod" )){
-                         productCODText.setVisibility( View.VISIBLE );
-                         productCODSubText.setVisibility( View.VISIBLE );
-                         }else{
-                         productCODText.setVisibility( View.INVISIBLE );
-                         productCODSubText.setVisibility( View.INVISIBLE );
-                         }
-                         if ((long)documentSnapshot.get( "product_stocks" ) > 0){
-                         productStock.setText( "In Stock" );
-                         }else{
-                         productStock.setText( "Out of Stock" );
-                         }
-                         */
+                                String p_main_name = documentSnapshot.get( "p_main_name" ).toString();
+//                        String p_main_image = task.getResult().get( "p_main_image" ).toString();
+                                String p_weight_type = documentSnapshot.get( "p_weight_type" ).toString();
+                                int p_veg_non_type = Integer.valueOf( documentSnapshot.get( "p_veg_non_type" ).toString() );
+                                Boolean p_is_cod = (Boolean) documentSnapshot.get( "p_is_cod" );
+                                ProductModel model = new ProductModel(
+                                        p_id,
+                                        p_main_name,
+                                        p_is_cod,
+                                        String.valueOf(p_no_of_variants),
+                                        p_weight_type,
+                                        p_veg_non_type,
+                                        productSubModelList
+                                );
+
+                                // Set Product Data...
+                                setProductData( 0 );
+                                setOtherDetails();
+                            }
+                        }
                         // Set other Details of  Product Details Image Layout.
                         if ((boolean)documentSnapshot.get( "use_tab_layout" )){
                             // use tab layout...
@@ -465,6 +506,7 @@ public class ProductDetails extends AppCompatActivity {
         }
 
     }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void setVegNonData(){
         // Set veg Non Image...

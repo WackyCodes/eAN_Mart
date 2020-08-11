@@ -58,10 +58,10 @@ public class StaticMethods {
         int rand_int1 = 0;
         String randNum = "";
         do {
-            rand_int1 = random.nextInt(10000);
+            rand_int1 = random.nextInt(1000000);
         }while ( rand_int1 < 0 );
 
-        if (rand_int1 < 9999){
+        if (rand_int1 < 999999){
             rand_int1 = rand_int1*100;
             randNum = String.valueOf( rand_int1 ) + String.valueOf( rand_int1 );
             randNum = randNum.substring( 0, 6 );
@@ -79,7 +79,7 @@ public class StaticMethods {
     public static String getCurrentDate(){
     //        Calendar calendar = Calendar.getInstance();
         Date date =  Calendar.getInstance().getTime();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
         //You can change "yyyyMMdd_HHmmss as per your requirement
     //        String crrDate = simpleDateFormat.format(new Date()) ;
         String crrDateDay = simpleDateFormat.format(new Date());

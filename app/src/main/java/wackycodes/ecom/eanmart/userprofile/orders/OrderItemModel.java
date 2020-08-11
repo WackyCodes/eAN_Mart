@@ -22,6 +22,9 @@ public class OrderItemModel {
     // Delivery Details...
     private List<DeliveryItemModel> deliveryItemModelList;
 
+    public OrderItemModel() {
+    }
+
     public OrderItemModel(String orderID, String shopID, String deliveryID, String totalAmounts, String deliveryCharge, String billingAmounts, String savingAmounts, String orderStatus, List <CartOrderSubItemModel> cartOrderSubItemModelList) {
         this.orderID = orderID;
         this.shopID = shopID;

@@ -22,10 +22,12 @@ import java.util.List;
 import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.other.StaticMethods;
 import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity;
+import wackycodes.ecom.eanmart.productdetails.ProductDetails;
 
 import static wackycodes.ecom.eanmart.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_CATEGORY;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_NONE;
+import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_PRODUCT;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_SHOP;
 import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_WEBSITE;
 import static wackycodes.ecom.eanmart.other.StaticValues.LIST_MAIN_HOME_PAGE;
@@ -95,7 +97,6 @@ public class BannerSliderAdaptor extends PagerAdapter {
                             // RESTART SHOP VIEW... Using New Object...
 
                         }
-
                         // 1
                         // GO TO SHOP VIEW...
 //                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_HOME;
@@ -111,6 +112,14 @@ public class BannerSliderAdaptor extends PagerAdapter {
 //                            MainActivity.wPreviousFragment = FRAGMENT_MAIN_SHOPS_VIEW;
 //                            MainActivity.wCurrentFragment = FRAGMENT_SHOP_HOME;
 //                            setFromShopViewFragment( shopHomeFragment );
+                        break;
+                    case BANNER_CLICK_TYPE_PRODUCT:
+                        Intent productDetailIntent = new Intent( v.getContext(), ProductDetails.class );
+                        productDetailIntent.putExtra( "PRODUCT_ID", bannerSliderModelList.get( position ).getBannerClickID() );
+//                            productDetailIntent.putExtra( "HOME_CAT_INDEX", crrShopCatIndex );
+//                            productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+//                            productDetailIntent.putExtra( "PRODUCT_INDEX", productIndex );
+                        v.getContext().startActivity( productDetailIntent );
                         break;
                     default:
                         showToast(v.getContext(), "Code Not Found.!");

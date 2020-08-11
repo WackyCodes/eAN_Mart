@@ -18,7 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".apphome.shophome.search.ProductSearchActivity"></activity>
+        <activity android:name=".communicate.CommunicateActivity"></activity>
+        <activity android:name=".apphome.shophome.search.ProductSearchActivity" />
         <activity android:name=".apphome.shophome.ShopProductCatActivity" />
         <activity android:name=".userprofile.notifications.NotificationActivity" />
         <activity android:name=".apphome.shophome.aboutshop.AboutShopActivity" />
@@ -41,11 +42,12 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".productdetails.ProductDetails" />
         <activity android:name=".apphome.shophome.ViewAllActivity" />
+
         <service
             android:name=".WackyMessagingService"
-            android:exported= "false" >
+            android:exported="false">
             <intent-filter>
-                <action android:name= "com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
     </application>

@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -17,15 +18,15 @@ import wackycodes.ecom.eanmart.R;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
+import wackycodes.ecom.eanmart.productdetails.ProductDetails;
+import wackycodes.ecom.eanmart.userprofile.cart.CartActivity;
 
 import static wackycodes.ecom.eanmart.other.StaticValues.CONFORM_ORDER_ACTIVITY;
-import static wackycodes.ecom.eanmart.other.StaticValues.CONTINUE_SHOPPING_FRAGMENT;
 import static wackycodes.ecom.eanmart.other.StaticValues.USER_DATA_MODEL;
 
 public class ConformOrderActivity extends AppCompatActivity {
 
     public static AppCompatActivity conFormOrderActivity;
-    DialogsClass dialogsClass =  new DialogsClass(  );
     public static int index;
 
     private FrameLayout confirmOrderFrameLayout;
@@ -44,7 +45,7 @@ public class ConformOrderActivity extends AppCompatActivity {
         currentFrameLayout = CONFORM_ORDER_ACTIVITY;
         Toolbar toolbar = findViewById( R.id.x_ToolBar );
         setSupportActionBar( toolbar );
-        // Set Title on Action Menu
+        // Set Title on Action Menu...
         try{
             getSupportActionBar().setTitle( "Conform Order" );
             getSupportActionBar().setDisplayShowTitleEnabled( true );
@@ -64,40 +65,19 @@ public class ConformOrderActivity extends AppCompatActivity {
 
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //initOrderId();
-//        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-    }
     @Override
     public void onBackPressed() {
-//        if (currentFrameLayout == CONTINUE_SHOPPING_FRAGMENT){
-//            MainActivity.mainActivity.finish();
-//            MainActivity.wCurrentFragment = 0;
-//            finishAffinity();
-//            startActivity( new Intent( ConformOrderActivity.this, MainActivity.class ) );
-//            finish();
-//        }else{
-//            super.onBackPressed();
-//        }
-        super.onBackPressed();
+        if (currentFrameLayout == CONFORM_ORDER_ACTIVITY){
+            super.onBackPressed();
+        }else{
+            finishPrevious();
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if ((item.getItemId() == android.R.id.home)){
-            finish();
-//            if (currentFrameLayout == CONTINUE_SHOPPING_FRAGMENT){
-//                MainActivity.mainActivity.finish();
-//                MainActivity.wCurrentFragment = 0;
-//                finishAffinity();
-//                startActivity( new Intent( ConformOrderActivity.this, MainActivity.class ) );
-//                finish();
-//            }else{
-//                finish();
-//            }
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected( item );
@@ -113,6 +93,35 @@ public class ConformOrderActivity extends AppCompatActivity {
 
     private void showToast(String s){
         Toast.makeText( ConformOrderActivity.this, s , Toast.LENGTH_SHORT ).show();
+    }
+
+    // Finishing All Previous Activity...
+    private void finishPrevious(){
+        // Finish Cart Activity....
+        if (CartActivity.cartActivty != null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (!CartActivity.cartActivty.isDestroyed()){
+                    CartActivity.cartActivty.finish();
+                }
+            }else{
+                CartActivity.cartActivty.finish();
+            }
+        }
+
+        // Finish ProductDetails Activity....
+        if (ProductDetails.productDetails != null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (!ProductDetails.productDetails.isDestroyed()){
+                    ProductDetails.productDetails.finish();
+                }
+            }else{
+                ProductDetails.productDetails.finish();
+            }
+        }
+
+        // Finish this Activity..
+        this.finish();
+
     }
 
     // -----------------------------------------------------------------------

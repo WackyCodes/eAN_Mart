@@ -45,6 +45,8 @@ import wackycodes.ecom.eanmart.wcustomview.MyImageView;
 import wackycodes.ecom.eanmart.wcustomview.MyViewPagerImageSet;
 
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.shopHomeCategoryList;
+import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_CATEGORY;
+import static wackycodes.ecom.eanmart.other.StaticValues.BANNER_CLICK_TYPE_PRODUCT;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
 import static wackycodes.ecom.eanmart.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
@@ -141,7 +143,8 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             case SHOP_HOME_STRIP_AD_CONTAINER:
                 String imgLink = homeFragmentModelList.get( position ).getStripAdImage();
                 String clickID = homeFragmentModelList.get( position ).getStripClickID();
-                ((StripAdViewHolder)holder).setStripAd( imgLink, clickID );
+                int clickType = homeFragmentModelList.get( position ).getStripClickType();
+                ((StripAdViewHolder)holder).setStripAd( imgLink, clickID, clickType, position );
                 break;
             case HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER:
                 List<ProductModel> horizontalItemViewModelList =
@@ -196,15 +199,19 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             for(int i =0; i < bannerSliderModelList.size(); i++){
                 arrangedList.add( i, bannerSliderModelList.get( i ) );
             }
-            arrangedList.add( 2, bannerSliderModelList.get( bannerSliderModelList.size() - 2 ) );
-            arrangedList.add( 1, bannerSliderModelList.get( bannerSliderModelList.size() - 1 ) );
-            arrangedList.add( bannerSliderModelList.get( 0 ) );
-            arrangedList.add( bannerSliderModelList.get( 1 ) );
+            // Wacky Codes...
+            if (bannerSliderModelList.size()>1){
+                arrangedList.add( 0, bannerSliderModelList.get( bannerSliderModelList.size() - 1 ) ); // Add Last Index in 0
+                arrangedList.add( bannerSliderModelList.get( 0 ) ); // Add 0 index in last...
+            }else{
+                arrangedList.add( bannerSliderModelList.get( 0 ) );
+            }
+            // Wacky Codes...
 
             BannerSliderAdaptor bannerSliderAdaptor = new BannerSliderAdaptor( arrangedList, -1 );
             bannerSliderViewPager.setAdapter( bannerSliderAdaptor );
             bannerSliderViewPager.setClipToPadding( false );
-            bannerSliderViewPager.setPageMargin( 20 );
+//            bannerSliderViewPager.setPageMargin( 20 );
             bannerSliderViewPager.setCurrentItem( BANNER_CURRENT_PAGE );
 
             ViewPager.OnPageChangeListener viewPagerOnPageChange = new ViewPager.OnPageChangeListener() {
@@ -251,12 +258,13 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
         }
 
         private void bannerSlideLooper(List <BannerSliderModel> bannerSliderModelList) {
-            if (BANNER_CURRENT_PAGE == bannerSliderModelList.size() - 2) {
-                BANNER_CURRENT_PAGE = 2;
+            // Wacky Codes...
+            if (BANNER_CURRENT_PAGE == bannerSliderModelList.size() - 1) {
+                BANNER_CURRENT_PAGE = 1;
                 bannerSliderViewPager.setCurrentItem( BANNER_CURRENT_PAGE, false );
             }
-            if (BANNER_CURRENT_PAGE == 1) {
-                BANNER_CURRENT_PAGE = bannerSliderModelList.size() - 3;
+            if (BANNER_CURRENT_PAGE == 0) {
+                BANNER_CURRENT_PAGE = bannerSliderModelList.size() - 2;
                 bannerSliderViewPager.setCurrentItem( BANNER_CURRENT_PAGE, false );
             }
         }
@@ -300,7 +308,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             stripAdImage = itemView.findViewById( R.id.strip_ad_image );
 
         }
-        private void setStripAd(String imgLink, String clickID){
+        private void setStripAd(String imgLink, final String clickID, final int clickType, int layoutIndex){
 //            stripAdContainer.setBannerOtherText( Color.parseColor( colorCode ) );
             // set Image Resouice from database..
             Glide.with( itemView.getContext() ).load( imgLink )
@@ -308,10 +316,26 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    StaticMethods.showToast( itemView.getContext(), "Code not found!" );
+//                    Click Type
+                    switch ( clickType ){
+                        case BANNER_CLICK_TYPE_PRODUCT:
+                            Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
+                            productDetailIntent.putExtra( "PRODUCT_ID", clickID );
+//                            productDetailIntent.putExtra( "HOME_CAT_INDEX", crrShopCatIndex );
+//                            productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+//                            productDetailIntent.putExtra( "PRODUCT_INDEX", productIndex );
+                            itemView.getContext().startActivity( productDetailIntent );
+                            break;
+                        case BANNER_CLICK_TYPE_CATEGORY:
+                            StaticMethods.showToast( itemView.getContext(), "Code not found!" );
+                        default:
+                            break;
+                    }
+
                 }
             } );
         }
+
     }
     //============  Strip ad  View Holder ============
 
@@ -640,7 +664,7 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             TextView cutPrice = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_product_cut_price );
             TextView perOffText = gridLayout.getChildAt( childIndex ).findViewById( R.id.hr_off_percentage );
             TextView stockText = gridLayout.getChildAt( childIndex ).findViewById( R.id.stock_text );
-            stockText.setVisibility( View.GONE );
+
 
             name.setText( productModel.getProductSubModelList().get( variant ).getpName() );
             price.setText("Rs." + productModel.getProductSubModelList().get( variant ).getpSellingPrice() +"/-" );
@@ -649,6 +673,15 @@ public class ShopHomeFragmentAdaptor extends RecyclerView.Adapter  {
             ArrayList<String> imageLink = productModel.getProductSubModelList().get( variant ).getpImage();
             Glide.with( itemView.getContext() ).load( imageLink.get( 0 ) )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( img );
+
+            if( Integer.parseInt(productModel.getProductSubModelList().get( variant ).getpStocks()) > 0){
+                stockText.setVisibility( View.GONE );
+            }else{
+                stockText.setVisibility( View.VISIBLE );
+                stockText.setText( "Out of Stock" );
+                gridLayout.getChildAt( childIndex ).setEnabled( false );
+                gridLayout.getChildAt( childIndex ).setClickable( false );
+            }
 
             int mrp =  Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpMrpPrice() );
             int showPrice = Integer.parseInt( productModel.getProductSubModelList().get( variant ).getpSellingPrice() );

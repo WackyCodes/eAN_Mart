@@ -178,14 +178,15 @@ public class MyCartAdaptor extends RecyclerView.Adapter {
                     if (qty > 0){
                         updateCartThisQty(String.valueOf( qty ), index );
                     }else{
-                        removeOneCartBtn.setEnabled( false );
-                        if (CheckInternetConnection.isInternetConnected( itemView.getContext() )){
-                            dialog.show();
-                            //  REMOVE FROM CART...
-                            removeFromCart(dialog, index );
-                        }else{
-                            removeOneCartBtn.setEnabled( true );
-                        }
+                        // Already Given Remove Btn To remove from cart...
+//                        removeOneCartBtn.setEnabled( false );
+//                        if (CheckInternetConnection.isInternetConnected( itemView.getContext() )){
+//                            dialog.show();
+//                            //  REMOVE FROM CART...
+//                            removeFromCart(dialog, index );
+//                        }else{
+//                            removeOneCartBtn.setEnabled( true );
+//                        }
                     }
                 }
             } );

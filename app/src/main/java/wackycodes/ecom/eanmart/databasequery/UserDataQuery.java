@@ -39,6 +39,7 @@ import wackycodes.ecom.eanmart.userprofile.cart.CartOrderSubItemModel;
 import wackycodes.ecom.eanmart.userprofile.notifications.NotificationActivity;
 import wackycodes.ecom.eanmart.userprofile.notifications.NotificationModel;
 import wackycodes.ecom.eanmart.userprofile.orders.OrderItemModel;
+import wackycodes.ecom.eanmart.userprofile.orders.OrderListActivity;
 
 import static wackycodes.ecom.eanmart.MainActivity.badgeNotifyCount;
 import static wackycodes.ecom.eanmart.databasequery.DBQuery.currentUser;
@@ -57,6 +58,7 @@ public class UserDataQuery {
 
     // List Variables.....
     public static List <CartOrderSubItemModel> cartItemModelList = new ArrayList <>();
+    // we have bill amount layout in the last index...
     public static List <CartOrderSubItemModel> temCartItemModelList = new ArrayList <>();
 
     // Order List...
@@ -293,8 +295,7 @@ public class UserDataQuery {
     }
 
     // Order data query...
-    public static void loadOrderDataQuery(final Context context){
-
+    public static void loadOrderDataQuery(final Context context,@Nullable final Dialog dialog ){
         getCollection( "ORDERS" )
                 .orderBy( "index", Query.Direction.DESCENDING ) //order_time. order_date
                 .get()
@@ -303,19 +304,29 @@ public class UserDataQuery {
                     public void onComplete(@NonNull Task <QuerySnapshot> task) {
                         if (task.isSuccessful()){
                             if (task.getResult().size()>0){
-
+                                OrderItemModel orderItemModel;
                                 showToast( context, "Order Founded.!" );
+                                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+                                    orderItemModel = new OrderItemModel(  );
+                                    orderItemModel.setOrderID( documentSnapshot.get( "order_id" ).toString() );
+                                    orderItemModel.setShopID( documentSnapshot.get( "shop_id" ).toString() );
+                                    orderItemModelList.add( orderItemModel );
+                                    OrderListActivity.orderListAdaptor.notifyDataSetChanged();
+                                }
+
+                                if (dialog != null)
+                                    dialog.dismiss();
 
                             }else{
+                                if (dialog != null)
+                                    dialog.dismiss();
                                 showToast( context, "No Order Founded.!" );
                             }
                         }else{
 
                         }
-
                     }
                 } );
-
 
     }
 
@@ -482,11 +493,6 @@ public class UserDataQuery {
         }
 
     }
-
-
-
-
-
 
 
 }

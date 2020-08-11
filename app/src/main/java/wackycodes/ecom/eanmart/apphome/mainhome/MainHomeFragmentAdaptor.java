@@ -181,7 +181,9 @@ public class MainHomeFragmentAdaptor extends RecyclerView.Adapter {
             // Wacky Codes...
             if (bannerSliderModelList.size()>1){
                 arrangedList.add( 0, bannerSliderModelList.get( bannerSliderModelList.size() - 1 ) ); // Add Last Index in 0
-                arrangedList.add( bannerSliderModelList.get( 1 ) ); // Add 0 index in last...
+                arrangedList.add( bannerSliderModelList.get( 0 ) ); // Add 0 index in last...
+            }else{
+                arrangedList.add( bannerSliderModelList.get( 0 ) );
             }
             // Wacky Codes...
 
@@ -191,7 +193,6 @@ public class MainHomeFragmentAdaptor extends RecyclerView.Adapter {
 //            bannerSliderViewPager.setPageMargin( 10 );
             bannerSliderViewPager.setCurrentItem( BANNER_CURRENT_PAGE );
             sliderIndicator.setupWithViewPager( bannerSliderViewPager, true );
-
             // if Size greater than 2...
             if (bannerSliderModelList.size()>1){
                 ViewPager.OnPageChangeListener viewPagerOnPageChange = new ViewPager.OnPageChangeListener() {

@@ -158,6 +158,12 @@ public class SignInFragment extends Fragment {
     private void loadUserData(){
         UserDataQuery.loadUserDataQuery( null, null );
         UserDataQuery.loadCartDataQuery( null );
+        if (MainActivity.mainActivity != null){
+            UserDataQuery.loadNotificationsQuery( MainActivity.mainActivity );
+        }else{
+            UserDataQuery.loadNotificationsQuery( null );
+        }
+
         if (AuthActivity.setFragmentRequest == FRAGMENT_SIGN_IN ||
                 AuthActivity.setFragmentRequest == FRAGMENT_SIGN_UP){
             AuthActivity.setFragmentRequest = -1;

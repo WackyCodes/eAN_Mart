@@ -44,11 +44,21 @@ public class OrderQuery {
      *          delivery Status :
      *          (1) WAITING : when order is not accepted by admin...
      *          (2) ACCEPTED : when order has been accepted...
-     *          (3) PROCESS : When order is in process to delivery...
+     *          (3) PROCESS : When order is in process to delivery... OUT_FOR_DELIVERY
      *          (4) CANCELLED : When Order has been cancelled by user...
      *          (5) SUCCESS : when order has been delivered successfully...
      *          (6) FAILED : when PayMode Online and payment has been failed...
      *          (7) PENDING : when Payment is Pending
+     *          (8) PACKED - ( Waiting for Delivery ) READY_TO_DELIVERY
+     *
+     *          1. WAITING - ( For Accept )
+     *          2. ACCEPTED - ( Preparing )
+     *          3. PACKED - ( Waiting for Delivery ) READY_TO_DELIVERY
+     *          4. PROCESS  - ( On Delivery ) OUT_FOR_DELIVERY
+     *          5. SUCCESS - Success Full Delivered..!
+     *          6. CANCELLED -  When Order has been cancelled by user...
+     *          7. FAILED -  when PayMode Online and payment has been failed...
+     *          8. PENDING - when Payment is Pending...
      *
      * step 15 : if delivery status : CANCELLED then Query to get payment Return...
      * step 16 : Update Order history..!!
@@ -81,6 +91,7 @@ public class OrderQuery {
         Map <String, Object> orderDetailMap = new HashMap <>();
 
         orderDetailMap.put( "order_id",  orderID );
+        orderDetailMap.put( "index", StaticMethods.getRandomIndex() );
 
         orderDetailMap.put( "delivery_status", "WAITING" );
         orderDetailMap.put( "pay_mode", "COD" );
@@ -105,9 +116,9 @@ public class OrderQuery {
         orderDetailMap.put( "delivery_schedule_time", deliverySchedule );
 
         // Get No_of_Product =
-        orderDetailMap.put( "no_of_products", temCartItemModelList.size() );
+        orderDetailMap.put( "no_of_products", temCartItemModelList.size()-1 );
 
-        for (int x = 0; x < temCartItemModelList.size(); x++){
+        for (int x = 0; x < temCartItemModelList.size() - 1; x++){
             orderDetailMap.put( "product_id_" + x, temCartItemModelList.get( x ).getProductID() );
             orderDetailMap.put( "product_image_" + x, temCartItemModelList.get( x ).getProductImage() );
             orderDetailMap.put( "product_name_" + x, temCartItemModelList.get( x ).getProductName() );
@@ -183,8 +194,8 @@ public class OrderQuery {
 
     private static void updateCartAndNotify(){
         // TODO : Variant Change...
-        for (int i = 0; i<temCartItemModelList.size(); i++){
-            UserDataQuery.deleteFromCartQuery(null, temCartItemModelList.get( 0 ).getCartID() );
+        for (int i = 0; i<temCartItemModelList.size() - 1; i++){
+            UserDataQuery.deleteFromCartQuery(null, temCartItemModelList.get( i ).getCartID() );
             updateProductStockQuery(temCartItemModelList.get( i ).getProductID(), 1, temCartItemModelList.get( i ).getProductName()
                     ,Integer.parseInt( temCartItemModelList.get( i ).getProductQty() ) );
         }

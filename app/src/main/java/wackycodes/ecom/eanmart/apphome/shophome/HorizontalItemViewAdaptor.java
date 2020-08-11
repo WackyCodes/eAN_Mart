@@ -77,14 +77,14 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
         String name = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
         String price = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
         String cutPrice = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
+        String stockInfo = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpStocks();
         switch (viewType) {
             case VIEW_HORIZONTAL_LAYOUT:
             case VIEW_GRID_LAYOUT:
-                ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, position );
+                ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, stockInfo, position );
                 break;
             case VIEW_RECTANGLE_LAYOUT:
                 Boolean codInfo = horizontalItemViewModelList.get( position ).getpIsCOD();
-                String stockInfo = horizontalItemViewModelList.get( position ).getProductSubModelList().get( 0 ).getpStocks();
                 ((ViewAllHorizontalViewHolder) holder).setHorizontalProducts( productId, imgLink, name, price, cutPrice, codInfo, stockInfo, position );
                 break;
             default:
@@ -110,6 +110,7 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
         TextView hrProductPrice;
         TextView hrProductCutPrice;
         TextView hrProductOffPercentage;
+        TextView stockText;
 
         public HomeHorizontalViewHolder(@NonNull View itemView) {
             super( itemView );
@@ -119,10 +120,11 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
             hrProductPrice = itemView.findViewById( R.id.hr_product_price );
             hrProductCutPrice = itemView.findViewById( R.id.hr_product_cut_price );
             hrProductOffPercentage = itemView.findViewById( R.id.hr_off_percentage );
+            stockText = itemView.findViewById( R.id.stock_text );
 
         }
 
-        private void setHomeHrProduct(final String productId, ArrayList<String> imgLink, String name, String price, String cutPrice, final int index) {
+        private void setHomeHrProduct(final String productId, ArrayList<String> imgLink, String name, String price, String cutPrice, String stockInfo, final int index) {
 
             hrProductName.setText( name );
             hrProductPrice.setText( "Rs." + price + "/-" );
@@ -131,8 +133,18 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
             Glide.with( itemView.getContext() ).load( imgLink.get( 0 ) ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
 
-            int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
-            hrProductOffPercentage.setText( perOff + "% Off" );
+            if (Integer.parseInt( stockInfo ) > 0) {
+//                hrProductStockInfo.setText( "in Stock" );
+                stockText.setVisibility( View.GONE );
+            } else {
+                stockText.setVisibility( View.VISIBLE );
+                stockText.setText( "Out of Stock" );
+                itemView.setEnabled( false );
+                itemView.setClickable( false );
+            }
+
+//            int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
+            hrProductOffPercentage.setText( "Rs." + ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) + " save" ));
 
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
@@ -181,16 +193,20 @@ public class HorizontalItemViewAdaptor extends RecyclerView.Adapter <RecyclerVie
                 hrProductCodText.setVisibility( View.INVISIBLE );
             }
             if (Integer.parseInt( stockInfo ) > 0) {
-                hrProductStockInfo.setText( "in Stock" );
+//                hrProductStockInfo.setText( "in Stock" );
+                hrProductStockInfo.setVisibility( View.GONE );
             } else {
+                hrProductStockInfo.setVisibility( View.VISIBLE );
                 hrProductStockInfo.setText( "Out of Stock" );
+                itemView.setEnabled( false );
+                itemView.setClickable( false );
             }
 
             Glide.with( itemView.getContext() ).load( imgLink.get( 0 ) ).apply( new RequestOptions()
                     .placeholder( R.drawable.ic_photo_black_24dp ) ).into( hrProductImage );
 
-            int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
-            hrProductOffPercentage.setText( perOff + "% Off" );
+//            int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
+            hrProductOffPercentage.setText( "Rs." + ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) + " save" ));
 
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override

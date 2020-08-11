@@ -17,7 +17,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import wackycodes.ecom.eanmart.R;
+import wackycodes.ecom.eanmart.apphome.shophome.ShopHomeActivity;
+import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
 import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
@@ -28,7 +34,7 @@ import static wackycodes.ecom.eanmart.other.StaticValues.SELECT_ADDRESS;
 import static wackycodes.ecom.eanmart.productdetails.ProductDetails.productDetails;
 
 public class CartActivity extends AppCompatActivity {
-
+    public static AppCompatActivity cartActivty;
     // my cart...
     public static ConstraintLayout myCartConstLayout;
 
@@ -50,6 +56,8 @@ public class CartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_cart );
+        cartActivty = this;
+
         dialog = DialogsClass.getDialog( this );
 
         Toolbar toolbar = findViewById( R.id.x_ToolBar );
@@ -95,9 +103,7 @@ public class CartActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 //                showConditionDialog();
-                Intent myAddressIntent = new Intent( CartActivity.this, MyAddressesActivity.class );
-                myAddressIntent.putExtra( "MODE", SELECT_ADDRESS );
-                startActivity( myAddressIntent );
+                setMyCartContinueBtn();
             }
         } );
 
@@ -164,6 +170,12 @@ public class CartActivity extends AppCompatActivity {
         myCartAdaptor.notifyDataSetChanged();
         setMyCartConstLayout();
         dialog.dismiss();
+    }
+
+    private void setMyCartContinueBtn(){
+        Intent myAddressIntent = new Intent( CartActivity.this, MyAddressesActivity.class );
+        myAddressIntent.putExtra( "MODE", SELECT_ADDRESS );
+        startActivity( myAddressIntent );
     }
 
 }

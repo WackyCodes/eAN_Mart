@@ -48,8 +48,10 @@ import wackycodes.ecom.eanmart.apphome.mainhome.HomeFragment;
 import wackycodes.ecom.eanmart.apphome.category.ShopItemModel;
 import wackycodes.ecom.eanmart.cityareacode.AreaCodeCityModel;
 import wackycodes.ecom.eanmart.cityareacode.SelectAreaCityAdaptor;
+import wackycodes.ecom.eanmart.communicate.CommunicateActivity;
 import wackycodes.ecom.eanmart.databasequery.DBQuery;
 import wackycodes.ecom.eanmart.databasequery.UserDataQuery;
+import wackycodes.ecom.eanmart.other.CheckInternetConnection;
 import wackycodes.ecom.eanmart.other.DialogsClass;
 import wackycodes.ecom.eanmart.other.StaticValues;
 import wackycodes.ecom.eanmart.apphome.shophome.search.SearchAdapter;
@@ -66,6 +68,7 @@ import static wackycodes.ecom.eanmart.databasequery.DBQuery.homePageCategoryList
 import static wackycodes.ecom.eanmart.databasequery.UserDataQuery.loadCartDataQuery;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanmart.other.StaticValues.CURRENT_CITY_NAME;
+import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_ABOUT_US;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_HOME;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_MAIN_SHOPS_VIEW;
 import static wackycodes.ecom.eanmart.other.StaticValues.FRAGMENT_NULL;
@@ -177,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAdaptor = new SearchAdapter( searchShopItemList );
         homeSearchItemRecycler.setAdapter( searchAdaptor );
         getShopSearchItems( );
-        // TODO:  Check : We have other Option..
+        // TODO:  Check : We have other Option...
 //        SearchWackyCodes.getShopSearchItems( MainActivity.this, MAIN_ACTIVITY, dialog, homeMainSearchView, searchAdaptor );
 
     }
@@ -191,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if ( currentUser != null && StaticValues.USER_DATA_MODEL.isLoadData()){
             Glide.with( this ).load( StaticValues.USER_DATA_MODEL.getUserProfilePhoto() ).
-                    apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp) ).into( drawerImage );
+                    apply( new RequestOptions().placeholder( R.mipmap.logo_round ) ).into( drawerImage );
             drawerName.setText( StaticValues.USER_DATA_MODEL.getUserFullName() );
             drawerEmail.setText( StaticValues.USER_DATA_MODEL.getUserEmail() );
         }
@@ -291,6 +294,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (UserDataQuery.cartItemModelList.size() > 0){
                 badgeCartCount.setVisibility( View.VISIBLE );
                 badgeCartCount.setText( String.valueOf( UserDataQuery.cartItemModelList.size() ) );
+            }else{
+                badgeCartCount.setVisibility( View.GONE );
             }
             cartItem.getActionView().setOnClickListener( new View.OnClickListener() {
                 @Override
@@ -401,61 +406,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if ( mainNavItemId == R.id.menu_log_out ){
                 // index - 5
                 if (currentUser != null){
-                    // TODO : Show Dialog to logOut..!
-                    // Sign Out Dialog...
-                    final Dialog signOut = new Dialog( MainActivity.this );
-                    signOut.requestWindowFeature( Window.FEATURE_NO_TITLE );
-                    signOut.setContentView( R.layout.dialig_sign_out );
-                    signOut.getWindow().setLayout( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
-                    signOut.setCancelable( false );
-                    ImageView imageView = signOut.findViewById( R.id.sign_out_image );
-                    Glide.with( this ).load( "sample" ).apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp ) ).into( imageView );
-                    final Button signOutOkBtn = signOut.findViewById( R.id.sign_out_ok_btn );
-                    Button signOutCancelBtn = signOut.findViewById( R.id.sign_out_cancel_btn );
-                    signOut.show();
-
-                    signOutOkBtn.setOnClickListener( new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            signOutOkBtn.setEnabled( false );
-                            firebaseAuth.signOut();
-                            currentUser = null;
-                            wCurrentFragment = 0;
-                            navigationView.getMenu().getItem( 0 ).setChecked( true );
-                            navigationView.getMenu().getItem( 5 ).setEnabled( false );
-//                            if(isFragmentIsMyCart){
-//                                isFragmentIsMyCart = false;
-//                                Intent finishIntent = new Intent(MainActivity.mainActivityForCart, RegisterActivity.class );
-//                                startActivity( finishIntent );
-//                                Toast.makeText( MainActivity.mainActivityForCart,"Sign Out successfully..!",Toast.LENGTH_SHORT).show();
-//                                MainActivity.mainActivityForCart.finish();
-//                            }else {
-//                                Intent finishIntent = new Intent(MainActivity.mainActivity, RegisterActivity.class );
-//                                startActivity( finishIntent );
-//                                Toast.makeText( MainActivity.mainActivity,"Sign Out successfully..!",Toast.LENGTH_SHORT).show();
-//                            }
-//                            RegisterActivity.setFragmentRequest = -1;
-//                            RegisterActivity.comeFromActivity = -1;
-//                            MainActivity.mainActivity.finish();
-                            signOut.dismiss();
-                        }
-                    } );
-                    signOutCancelBtn.setOnClickListener( new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            signOut.dismiss();
-                            // TODO : Sign Out
-                        }
-                    } );
-
-                    return false;
+                    logOutBtnClick();
                 }
+                return false;
             }else
             if ( mainNavItemId == R.id.menu_help ){
                 // index - 6
 //            Intent comIntent =  new Intent(MainActivity.this, CommunicateActivity.class);
 //            comIntent.putExtra( "MENU_TYPE", "HELP" );
 //            startActivity( comIntent );
+
+                return false;
+            }else
+            if ( mainNavItemId == R.id.menu_about_us ){
+                // index - 6
+            Intent comIntent =  new Intent(MainActivity.this, CommunicateActivity.class);
+            comIntent.putExtra( "FRAGMENT_CODE", FRAGMENT_ABOUT_US );
+            startActivity( comIntent );
 
                 return false;
             }
@@ -668,6 +635,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             InputMethodManager inputMethodManager = (InputMethodManager)getSystemService( Context.INPUT_METHOD_SERVICE );
             inputMethodManager.hideSoftInputFromWindow( view.getWindowToken(), 0 );
         }
+    }
+
+    private void logOutBtnClick(){
+            // TODO : Show Dialog to logOut..!
+            // Sign Out Dialog...
+            final Dialog signOut = new Dialog( MainActivity.this );
+            signOut.requestWindowFeature( Window.FEATURE_NO_TITLE );
+            signOut.setContentView( R.layout.dialig_sign_out );
+            signOut.getWindow().setLayout( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+            signOut.setCancelable( false );
+            ImageView imageView = signOut.findViewById( R.id.sign_out_image );
+            Glide.with( this ).load( "sample" ).apply( new RequestOptions().placeholder( R.drawable.ic_account_circle_gray_24dp ) ).into( imageView );
+            final Button signOutOkBtn = signOut.findViewById( R.id.sign_out_ok_btn );
+            Button signOutCancelBtn = signOut.findViewById( R.id.sign_out_cancel_btn );
+            signOut.show();
+
+            signOutOkBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (CheckInternetConnection.isInternetConnected( MainActivity.this )){
+
+                        signOutOkBtn.setEnabled( false );
+                        firebaseAuth.signOut();
+                        currentUser = null;
+                        wCurrentFragment = 0;
+                        navigationView.getMenu().getItem( 0 ).setChecked( true );
+                        navigationView.getMenu().getItem( 5 ).setEnabled( false );
+
+                        UserDataQuery.notificationModelList.clear(); //
+                        badgeCartCount.setVisibility( View.GONE );
+                        badgeNotifyCount.setVisibility( View.GONE );
+                        invalidateOptionsMenu();
+
+                        if (wCurrentFragment == FRAGMENT_MAIN_SHOPS_VIEW){
+                            wPreviousFragment = FRAGMENT_NULL;
+                            if (homeFragment==null){
+                                homeFragment = new HomeFragment();
+                            }
+                            setBckFragment( homeFragment );
+                        }
+
+                        signOut.dismiss();
+                    }
+                }
+            } );
+            signOutCancelBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    signOut.dismiss();
+                    // TODO : Sign Out
+                }
+            } );
+
     }
 
 
